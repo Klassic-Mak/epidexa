@@ -21,22 +21,16 @@ webServer:
 
 
 database:
-  host: db.hklbaolpqmddlgjptity.supabase.co
-  port: 8090
+  host: aws-1-eu-west-1.pooler.supabase.com
+  port: 6543
   name: postgres
-  user: postgres
-  password: epidexa#app
+  user: postgres.hklbaolpqmddlgjptity
+  password: CybcJ1oU2CwXby3a
+  requireSsl: true
 
-
-maxRequestSize: 524288 # The maximum size of requests allowed in bytes
 
 sessionLogs:
   persistentEnabled: true
   consoleEnabled: true
   consoleLogFormat: text # Defaults to "json", options are "text" or "json"
 
-# futureCallExecutionEnabled: true # Defaults to true
-
-#futureCall:
-#  concurrencyLimit: 1 # Defaults to 1, a negative or null value removes the limit
-#  scanInterval: 5000 # Unit in milliseconds, defaults to 5000
