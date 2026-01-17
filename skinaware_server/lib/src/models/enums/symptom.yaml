@@ -1,0 +1,11 @@
+enum: Symptom
+values:
+  - ACNE
+  - RASH
+  - DRYNESS
+  - ITCHING
+  - PIGMENTATION
+  - BLEEDING
+  - BURNING
+  - INFECTION
+  - OTHER

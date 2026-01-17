@@ -1,0 +1,17 @@
+class: User
+table: app_user
+
+fields:
+  id: UuidValue, defaultModel=random_v7
+  email: String
+  phone: String
+  age: int
+  gender: Gender
+  passwordHash: String
+  name: String
+  role: Role
+  skinType: SkinType
+  profilePhoto: String?
+  encryptionKey: String
+  descriptionKey: String
+  createdAt: DateTime

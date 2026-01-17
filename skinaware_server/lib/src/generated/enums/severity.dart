@@ -11,17 +11,31 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i2;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i3;
 
-class Endpoints extends _i1.EndpointDispatch {
-  @override
-  void initializeEndpoints(_i1.Server server) {
-    modules['serverpod_auth_idp'] = _i2.Endpoints()
-      ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i3.Endpoints()
-      ..initializeEndpoints(server);
+enum Severity implements _i1.SerializableModel {
+  LOW,
+  MEDIUM,
+  HIGH,
+  EMERGENCY;
+
+  static Severity fromJson(String name) {
+    switch (name) {
+      case 'LOW':
+        return Severity.LOW;
+      case 'MEDIUM':
+        return Severity.MEDIUM;
+      case 'HIGH':
+        return Severity.HIGH;
+      case 'EMERGENCY':
+        return Severity.EMERGENCY;
+      default:
+        throw ArgumentError('Value "$name" cannot be converted to "Severity"');
+    }
   }
+
+  @override
+  String toJson() => name;
+
+  @override
+  String toString() => name;
 }

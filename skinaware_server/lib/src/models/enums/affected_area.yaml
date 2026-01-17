@@ -1,0 +1,10 @@
+enum: AffectedArea
+values:
+  - FACE
+  - HANDS
+  - ARMS
+  - LEGS
+  - BACK
+  - NECK
+  - CHEST
+  - OTHER

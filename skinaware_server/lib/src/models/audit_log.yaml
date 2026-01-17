@@ -1,0 +1,12 @@
+class: AuditLog
+table: audit_log
+
+fields:
+  id: UuidValue, defaultModel=random_v7
+  userId: UuidValue, relation(parent=app_user)
+  action: String
+  ip: String
+  encryptionKey: String
+  descriptionKey: String
+  createdAt: DateTime
+  updatedAt: DateTime

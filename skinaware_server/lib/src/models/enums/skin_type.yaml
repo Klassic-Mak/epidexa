@@ -1,0 +1,7 @@
+enum: SkinType
+values:
+  - NORMAL
+  - OILY
+  - DRY
+  - SENSITIVE
+  - COMBINATION

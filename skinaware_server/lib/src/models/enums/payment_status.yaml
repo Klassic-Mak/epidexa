@@ -1,0 +1,7 @@
+enum: PaymentStatus
+values:
+  - PENDING
+  - PAID
+  - FAILED
+  - REFUNDED
+  - CANCELLED

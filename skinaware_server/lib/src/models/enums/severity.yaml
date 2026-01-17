@@ -1,0 +1,6 @@
+enum: Severity
+values:
+  - LOW
+  - MEDIUM
+  - HIGH
+  - EMERGENCY

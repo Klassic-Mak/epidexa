@@ -1,0 +1,11 @@
+class: Consent
+table: consent
+
+fields:
+  id: UuidValue, defaultModel=random_v7
+  userId: UuidValue, relation(parent=app_user)
+  type: String
+  accepted: bool
+  encryptionKey: String
+  descriptionKey: String
+  createdAt: DateTime

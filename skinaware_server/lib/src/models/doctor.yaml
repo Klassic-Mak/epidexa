@@ -1,0 +1,15 @@
+class: Doctor
+table: doctor
+
+fields:
+  id: UuidValue, defaultModel=random_v7
+  userId: UuidValue, relation(parent=app_user)
+  name: String
+  credentialsKey: String
+  encryptionKey: String
+  licenseNumber: String
+  verified: bool
+  rating: double
+  availability: bool
+  fee: double
+  createdAt: DateTime

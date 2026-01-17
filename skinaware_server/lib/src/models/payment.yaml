@@ -1,0 +1,13 @@
+class: Payment
+table: payment
+
+fields:
+  id: UuidValue, defaultModel=random_v7
+  userId: UuidValue, relation(parent=app_user)
+  consultationId: UuidValue, relation(parent=consultation)
+  amount: double
+  status: PaymentStatus
+  provider: String
+  transactionId: String
+  createdAt: DateTime
+  updatedAt: DateTime

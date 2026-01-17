@@ -1,0 +1,11 @@
+class: Message
+table: message
+
+fields:
+  id: UuidValue, defaultModel=random_v7
+  consultationId: UuidValue, relation(parent=consultation)
+  senderId: UuidValue, relation(parent=app_user)
+  senderType: SenderType
+  messageKey: String
+  encryptionKey: String
+  createdAt: DateTime
