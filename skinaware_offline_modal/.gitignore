@@ -18,6 +18,7 @@ models/*.pb
 models/*.safetensors
 models/huggingface_model/
 !models/.gitkeep
+models
 
 # Dataset
 dataset/

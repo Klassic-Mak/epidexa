@@ -11,7 +11,9 @@ from PIL import Image
 import torch
 
 MODEL_NAME = "WahajRaza/finetuned-dermnet"
-OUTPUT_DIR = "../models/huggingface_model"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(SCRIPT_DIR)
+OUTPUT_DIR = os.path.join(PROJECT_DIR, "models", "huggingface_model")
 
 def download_model():
     print("=" * 60)

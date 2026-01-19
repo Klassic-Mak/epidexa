@@ -11,8 +11,10 @@ from transformers import AutoImageProcessor, AutoModelForImageClassification
 from PIL import Image
 import numpy as np
 
-MODEL_DIR = "../models/huggingface_model"
-OUTPUT_DIR = "../models"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(SCRIPT_DIR)
+MODEL_DIR = os.path.join(PROJECT_DIR, "models", "huggingface_model")
+OUTPUT_DIR = os.path.join(PROJECT_DIR, "models")
 TFLITE_MODEL_PATH = os.path.join(OUTPUT_DIR, "skin_disease_model.tflite")
 LABELS_PATH = os.path.join(OUTPUT_DIR, "labels.txt")
 

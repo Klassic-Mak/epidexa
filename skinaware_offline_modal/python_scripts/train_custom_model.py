@@ -13,9 +13,11 @@ from transformers import AutoImageProcessor, AutoModelForImageClassification, Tr
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-DATASET_DIR = "../dataset"
-MODEL_DIR = "../models/huggingface_model"
-OUTPUT_DIR = "../models/custom_trained_model"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(SCRIPT_DIR)
+DATASET_DIR = os.path.join(PROJECT_DIR, "dataset")
+MODEL_DIR = os.path.join(PROJECT_DIR, "models", "huggingface_model")
+OUTPUT_DIR = os.path.join(PROJECT_DIR, "models", "custom_trained_model")
 BATCH_SIZE = 16
 EPOCHS = 10
 LEARNING_RATE = 2e-5
