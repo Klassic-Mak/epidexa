@@ -76,13 +76,19 @@ def train_model():
     
     image_paths, labels, label_names = load_dataset(DATASET_DIR)
     
-    train_paths, val_paths, train_labels, val_labels = train_test_split(
-        image_paths, labels, test_size=0.2, random_state=42, stratify=labels
+    # Split into train (70%), validation (15%), test (15%)
+    train_paths, temp_paths, train_labels, temp_labels = train_test_split(
+        image_paths, labels, test_size=0.3, random_state=42, stratify=labels
+    )
+    
+    val_paths, test_paths, val_labels, test_labels = train_test_split(
+        temp_paths, temp_labels, test_size=0.5, random_state=42, stratify=temp_labels
     )
     
     print(f"\nDataset split:")
-    print(f"- Training samples: {len(train_paths)}")
-    print(f"- Validation samples: {len(val_paths)}")
+    print(f"- Training samples: {len(train_paths)} (70%)")
+    print(f"- Validation samples: {len(val_paths)} (15%)")
+    print(f"- Test samples: {len(test_paths)} (15%)")
     
     processor = AutoImageProcessor.from_pretrained(MODEL_DIR)
     model = AutoModelForImageClassification.from_pretrained(
@@ -96,6 +102,7 @@ def train_model():
     
     train_dataset = SkinDiseaseDataset(train_paths, train_labels, processor, augment=True)
     val_dataset = SkinDiseaseDataset(val_paths, val_labels, processor, augment=False)
+    test_dataset = SkinDiseaseDataset(test_paths, test_labels, processor, augment=False)
     
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
@@ -140,10 +147,28 @@ def train_model():
     
     print(f"✓ Training completed! Model saved to {OUTPUT_DIR}")
     
-    results = trainer.evaluate()
-    print("\nFinal evaluation results:")
-    for key, value in results.items():
+    print("\n" + "=" * 60)
+    print("Validation Set Evaluation")
+    print("=" * 60)
+    val_results = trainer.evaluate()
+    print("\nValidation results:")
+    for key, value in val_results.items():
         print(f"- {key}: {value:.4f}")
+    
+    print("\n" + "=" * 60)
+    print("Test Set Evaluation")
+    print("=" * 60)
+    test_results = trainer.evaluate(test_dataset)
+    print("\nTest results:")
+    for key, value in test_results.items():
+        print(f"- {key}: {value:.4f}")
+    
+    print("\n" + "=" * 60)
+    print("Summary")
+    print("=" * 60)
+    print(f"Validation Accuracy: {val_results.get('eval_accuracy', 0):.4f}")
+    print(f"Test Accuracy: {test_results.get('eval_accuracy', 0):.4f}")
+    print(f"Model saved to: {OUTPUT_DIR}")
 
 if __name__ == "__main__":
     train_model()

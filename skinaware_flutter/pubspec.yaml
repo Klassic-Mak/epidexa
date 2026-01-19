@@ -27,6 +27,9 @@ dependencies:
   serverpod_flutter: 3.1.1
   shimmer: ^3.0.0
   wave_blob: ^1.0.5
+  pytorch_lite: ^1.0.0
+  image_picker: ^1.0.7
+  image: ^4.0.17
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'
@@ -44,6 +47,7 @@ flutter:
     - assets/animations/
     - assets/illustrations/
     - assets/icons/
+    - assets/models/
 
 
   fonts:
