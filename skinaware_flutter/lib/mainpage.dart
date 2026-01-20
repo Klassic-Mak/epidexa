@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:skinaware_flutter/constants.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/screens/homeScreen/home_screen.dart';
@@ -47,7 +48,8 @@ class _MainpageState extends ConsumerState<Mainpage> {
   }
 
   Widget _buildProfileIcon(BuildContext context, {bool isActive = false}) {
-    final imageUrl = "https://randomuser.me/api/portraits/women/2.jpg";
+    final imageUrl =
+        "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
       child: Container(
@@ -97,16 +99,29 @@ class _MainpageState extends ConsumerState<Mainpage> {
                 snap: true,
                 elevation: 0,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                title: SvgPicture.asset(
-                  "assets/icons/logo_black.svg",
-                  height: 35,
+                leading: GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, profilePageRoute);
+                  },
+                  child: _buildProfileIcon(context),
                 ),
+                title: Text(
+                  'Hello, Sarah Minpole👋',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1F2937),
+                    height: 1.2,
+                  ),
+                ),
+                centerTitle: true,
                 actions: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, profilePageRoute);
-                    },
-                    child: _buildProfileIcon(context),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      LucideIcons.bell,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
                   ),
                 ],
               ),
@@ -154,39 +169,37 @@ class _MainpageState extends ConsumerState<Mainpage> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.home_rounded,
+              LucideIcons.home,
               color: const Color.fromARGB(255, 209, 210, 214),
             ),
-            activeIcon: Icon(Icons.home_rounded, color: primaryColor),
+            activeIcon: Icon(LucideIcons.home, color: primaryColor),
 
             label: "Home",
           ),
 
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.history_rounded,
+              LucideIcons.pieChart,
               color: const Color.fromARGB(255, 209, 210, 214),
             ),
-            activeIcon: Icon(Icons.history_rounded, color: primaryColor),
-            label: "History",
+            activeIcon: Icon(LucideIcons.pieChart, color: primaryColor),
+            label: "Reports",
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.bookmark_rounded,
+              LucideIcons.scanFace,
               color: const Color.fromARGB(255, 209, 210, 214),
             ),
-            activeIcon: Icon(
-              Icons.bookmark_rounded,
-              color: primaryColor,
-            ),
-            label: "Saved",
+            activeIcon: Icon(LucideIcons.scanFace, color: primaryColor),
+            label: "Scan",
           ),
+
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.settings_rounded,
+              LucideIcons.settings,
               color: const Color.fromARGB(255, 209, 210, 214),
             ),
-            activeIcon: Icon(Icons.settings_rounded, color: primaryColor),
+            activeIcon: Icon(LucideIcons.settings, color: primaryColor),
             label: "Settings",
           ),
         ],

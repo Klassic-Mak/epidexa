@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "498245313775",
+    "project_id": "epidexa-a89bd",
+    "storage_bucket": "epidexa-a89bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498245313775:android:e5bc030bb4b5a03ff7271a",
+        "android_client_info": {
+          "package_name": "com.example.skinaware_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKvAbb1ktgYn91fshn-TDKUdVlcULipLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

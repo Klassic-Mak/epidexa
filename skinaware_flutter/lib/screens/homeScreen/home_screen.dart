@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:skinaware_flutter/constants.dart';
 import 'package:skinaware_flutter/screens/homeScreen/components/external_widgets.dart';
+import 'package:skinaware_flutter/screens/homeScreen/components/skin_score_widget.dart';
 import 'package:skinaware_flutter/screens/homeScreen/components/voice_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,10 +19,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F5EF),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -29,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Good Morning,\nSarah!',
+                      "Let's take care of \nyour skin",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
@@ -37,26 +38,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'How can I help you around the house today?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
+                    const SizedBox(height: 20),
+                    SkinScoreWidget(),
                     const SizedBox(height: 20),
 
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFFFDE8C8),
-                            const Color(0xFFEFEFEF),
-                          ],
-                        ),
+                        color: Colors.white,
+                        border: Border.all(color: greyColor, width: 0.1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -86,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  'Try saying "What\'s for dinner tonight?" and I\'ll suggest recipes based on what you have!',
+                                  'Skipping moisturizer can make your skin produce even more oil. Choose a moisturizer instead.',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF374151),
@@ -101,71 +99,124 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
 
-              VoiceWidget(
-                requestController: _requestController,
-                requestFormKey: _requestFormKey,
-                onCall: () {},
-              ),
-              const SizedBox(height: 16),
               TitleWtihNavText(
-                leftTitle: "Quick Actions",
-                rightTitle: "See All",
+                leftTitle: 'Activities',
+                rightTitle: 'See all',
                 onTap: () {},
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.01,
-                  children: const [
-                    _ActionCard(
-                      icon: Icons.restaurant,
-                      iconBg: Color(0xFFFFEDD5),
-                      iconColor: Color(0xFFF59E0B),
-                      title: 'Cooking Help',
-                      subtitle: 'Recipe ideas & steps',
-                    ),
-                    _ActionCard(
-                      icon: Icons.cleaning_services,
-                      iconBg: Color(0xFFE0E7FF),
-                      iconColor: Color(0xFF3B82F6),
-                      title: 'Clean House',
-                      subtitle: 'Step-by-step guide',
-                    ),
-                    _ActionCard(
-                      icon: Icons.calendar_today,
-                      iconBg: Color(0xFFF3E8FF),
-                      iconColor: Color(0xFF8B5CF6),
-                      title: 'Daily Plan',
-                      subtitle: 'Organize your day',
-                    ),
-                    _ActionCard(
-                      icon: Icons.checklist,
-                      iconBg: Color(0xFFDCFCE7),
-                      iconColor: Color(0xFF22C55E),
-                      title: 'Task List',
-                      subtitle: 'Create & manage',
-                    ),
-                  ],
+                padding: const EdgeInsets.only(
+                  left: 12.0,
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      ActivityCardWidget(
+                        onTap: () {},
+                        title: 'Face analysis',
+                        subtitle:
+                            'Take your photo of your face to analyze face features',
+                        iconData: Icons.face_retouching_natural,
+                        iconBgColor: Colors.orange,
+                      ),
+                      SizedBox(
+                        width: 16,
+                      ),
+                      ActivityCardWidget(
+                        onTap: () {},
+                        title: 'Lifestyle & Habits',
+                        subtitle:
+                            'Answer a few questions about your lifestyle & habits',
+                        iconData: Icons.self_improvement,
+                        iconBgColor: Colors.blue,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(
                 height: 16,
               ),
-              TitleWtihNavText(
-                leftTitle: "Recents",
-                rightTitle: "View All",
-                onTap: () {},
-              ),
-              AssistantSuggestionsWidget(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class ActivityCardWidget extends StatelessWidget {
+  final VoidCallback? onTap;
+  final String title;
+  final String subtitle;
+  final IconData iconData;
+  final Color iconBgColor;
+  const ActivityCardWidget({
+    super.key,
+    required this.onTap,
+    required this.title,
+    required this.subtitle,
+    required this.iconData,
+    required this.iconBgColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () {
+        onTap?.call();
+      },
+      child: Container(
+        height: 80,
+        width: 290,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconBgColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                iconData,
+                color: iconBgColor,
+                size: 24,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -198,7 +249,7 @@ class TitleWtihNavText extends StatelessWidget {
           Text(
             leftTitle,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontSize: 15,
+              fontSize: 19,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
@@ -208,9 +259,9 @@ class TitleWtihNavText extends StatelessWidget {
             child: Text(
               rightTitle,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: darkBlueColor,
+                color: primaryColor,
                 letterSpacing: 0.5,
               ),
             ),

@@ -48,46 +48,124 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       body: ListView(
         children: [
-          ProfileCard(
-            isShowHi: widget.isShowHi,
-            name: widget.name,
-            email: widget.email,
-            imageSrc: widget.imagesrc,
-            proLableText: "Seller",
-            //
-            isPro: widget.isShowSeller,
-            press: () {},
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: defaultPadding,
-              vertical: defaultPadding * 1.5,
+              vertical: defaultPadding / 2,
             ),
-            child: GestureDetector(
-              onTap: () {
-                // handle tap if needed
-              },
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(13)),
-                  child: CachedNetworkImage(
-                    imageUrl: "https://files.catbox.moe/a9f89a.jpg",
-                    placeholder: (context, url) => ShimmerWidget(
-                      borderRadius: BorderRadius.all(Radius.circular(13)),
-                      margin: EdgeInsets.all(0),
-                      height: 300,
-                      width: 200,
-                    ),
-                    errorWidget: (context, url, error) =>
-                        Center(child: Icon(Icons.error)),
-                    fit: BoxFit.cover,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   ),
+                ],
+                border: Border.all(color: Colors.grey.shade200, width: 0.5),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(defaultBorderRadious),
                 ),
+              ),
+              child: Column(
+                children: [
+                  ProfileCard(
+                    isShowHi: widget.isShowHi,
+                    name: widget.name,
+                    email: widget.email,
+                    imageSrc: widget.imagesrc,
+                    proLableText: "Seller",
+                    //
+                    isPro: widget.isShowSeller,
+                    press: () {},
+                  ),
+                  SizedBox(height: defaultPadding),
+                  Divider(
+                    height: 1,
+                    indent: 12,
+                    endIndent: 12,
+                    color: blackColor10,
+                  ),
+                  SizedBox(height: defaultPadding),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              "Checks",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: blackColor60,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "34",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: blackColor80,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              "Consultations",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: blackColor60,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "12",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: blackColor80,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              "Reviews",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: blackColor60,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "8",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: blackColor80,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: defaultPadding),
+                ],
               ),
             ),
           ),
-
           const SizedBox(height: defaultPadding),
           Padding(
             padding: const EdgeInsets.symmetric(

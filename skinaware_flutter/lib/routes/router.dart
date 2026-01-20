@@ -13,6 +13,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case profilePageRoute:
       return _RightSlide(ProfileScreen());
 
+    case onBoardingRoute:
+      return MaterialPageRoute(
+        builder: (context) => const Scaffold(
+          body: Center(child: Text('Onboarding Screen 1')),
+        ),
+      );
+
     default:
       return MaterialPageRoute(
         builder: (context) => const Scaffold(

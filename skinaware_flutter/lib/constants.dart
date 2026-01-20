@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 const fashnectlogoURL = "https://files.catbox.moe/l98aod.png";
 
-const Color primaryColor = Color.fromRGBO(242, 180, 65, 1);
+const Color primaryColor = Colors.blue;
 const Color primaryColor2 = Color.fromRGBO(123, 97, 255, 1);
 
 const darkBlueColor = Color.fromRGBO(81, 133, 166, 1);
@@ -37,7 +37,7 @@ const Color purpleColor = Color(0xFF7B61FF);
 const Color successColor = Color(0xFF2ED573);
 const Color warningColor = Color(0xFFFFBE21);
 const Color errorColor = Color(0xFFEA5B5B);
-const Color backgroundColor = Color(0xFFF9F5EF);
+const Color backgroundColor = Colors.white;
 
 const double defaultPadding = 16.0;
 const double defaultBorderRadious = 12.0;
