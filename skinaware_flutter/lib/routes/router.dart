@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:skinaware_flutter/mainpage.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/screens/profileScreen/profile_screen.dart';
+import 'package:skinaware_flutter/screens/model_test_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   print("Routing to: ${settings.name}");
@@ -19,6 +20,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           body: Center(child: Text('Onboarding Screen 1')),
         ),
       );
+    case modelTestRoute:
+      return _RightSlide(const ModelTestScreen());
 
     default:
       return MaterialPageRoute(

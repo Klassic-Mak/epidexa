@@ -23,14 +23,17 @@ dependencies:
   http: ^1.6.0
   lottie: ^3.3.2
   lucide_icons: ^0.257.0
-  serverpod_auth_idp_flutter: 3.1.1
-  serverpod_flutter: 3.1.1
+  serverpod_auth_idp_flutter: 3.2.2
+  serverpod_flutter: 3.2.2
   shimmer: ^3.0.0
   wave_blob: ^1.0.5
   firebase_auth: ^6.1.3
   firebase_core: ^4.3.0
   shared_preferences: ^2.5.4
   google_sign_in: ^7.2.0
+  pytorch_lite: ^1.0.0
+  image_picker: ^1.0.7
+  image: ^4.0.17
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'
@@ -48,6 +51,7 @@ flutter:
     - assets/animations/
     - assets/illustrations/
     - assets/icons/
+    - assets/models/
 
 
   fonts:

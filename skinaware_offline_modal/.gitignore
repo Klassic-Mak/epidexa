@@ -1,0 +1,46 @@
+# Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+.env
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Model files
+models/*.tflite
+models/*.h5
+models/*.pb
+models/*.safetensors
+models/huggingface_model/
+!models/.gitkeep
+models
+
+# Dataset
+dataset/
+data/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+config/api_keys.json
+
+# Python (if using Python for training)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+*.so
+.Python
