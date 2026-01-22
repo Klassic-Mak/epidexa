@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:skinaware_flutter/mainpage.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/screens/profileScreen/profile_screen.dart';
+import 'package:skinaware_flutter/screens/scan_screen.dart' show ScanScreen;
+import 'package:skinaware_flutter/screens/settings_screen.dart';
 import 'package:skinaware_flutter/screens/model_test_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -12,7 +14,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _RightSlide(Mainpage());
 
     case profilePageRoute:
-      return _RightSlide(ProfileScreen());
+      return _RightSlide(SettingsScreen());
+
+    case settingsRoute:
+      return _RightSlide(const SettingsScreen());
+
+    case scanRoute:
+      return _RightSlide(const ScanScreen());
 
     case onBoardingRoute:
       return MaterialPageRoute(

@@ -170,7 +170,7 @@ class ActivityCardWidget extends StatelessWidget {
         onTap?.call();
       },
       child: Container(
-        height: 80,
+        height: 95,
         width: 290,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -197,6 +197,7 @@ class ActivityCardWidget extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     title,
@@ -204,6 +205,8 @@ class ActivityCardWidget extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -212,6 +215,8 @@ class ActivityCardWidget extends StatelessWidget {
                       fontSize: 11,
                       color: Colors.grey.shade600,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

@@ -10,6 +10,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:skinaware_flutter/constants.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/screens/homeScreen/home_screen.dart';
+import 'package:skinaware_flutter/screens/scan_screen.dart';
+import 'package:skinaware_flutter/screens/settings_screen.dart';
 
 class Mainpage extends ConsumerStatefulWidget {
   const Mainpage({
@@ -24,12 +26,11 @@ class _MainpageState extends ConsumerState<Mainpage> {
   int _currentIndex = 0;
 
   List<Widget> _getPages() {
-    final isSeller = true;
     return [
       HomeScreen(),
-      HomeScreen(),
-      HomeScreen(),
-      HomeScreen(),
+      HomeScreen(), // TODO: Replace with Reports screen
+      const ScanScreen(),
+      const SettingsScreen(),
     ];
   }
 
@@ -152,11 +153,9 @@ class _MainpageState extends ConsumerState<Mainpage> {
       child: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          if (index != _currentIndex) {
-            setState(() {
-              _currentIndex = index;
-            });
-          }
+          setState(() {
+            _currentIndex = index;
+          });
         },
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
