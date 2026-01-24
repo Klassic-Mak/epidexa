@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:skinaware_flutter/constants.dart';
 
 class SkinCameraScreen extends StatefulWidget {
   const SkinCameraScreen({
@@ -19,8 +20,6 @@ class SkinCameraScreen extends StatefulWidget {
 }
 
 class _SkinCameraScreenState extends State<SkinCameraScreen> {
-  static const primaryColor = Color(0xFF0284C7);
-
   final ImagePicker _picker = ImagePicker();
 
   List<CameraDescription> _cameras = [];

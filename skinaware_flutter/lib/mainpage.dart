@@ -119,9 +119,11 @@ class _MainpageState extends ConsumerState<Mainpage> {
                 centerTitle: true,
                 actions: [
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, chatRoute);
+                    },
                     icon: Icon(
-                      LucideIcons.bell,
+                      LucideIcons.messagesSquare,
                       color: Theme.of(context).iconTheme.color,
                     ),
                   ),

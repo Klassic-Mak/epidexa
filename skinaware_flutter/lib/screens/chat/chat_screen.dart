@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:skinaware_flutter/services/ai/ollama_service.dart';
 import '../../providers/chat_provider.dart';
-import '../../services/ai/ollama_service.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -13,15 +14,17 @@ class ChatScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
-  final TextEditingController _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final ImagePicker _imagePicker = ImagePicker();
+  static const primaryColor = Color(0xFF0284C7);
+
+  final _messageController = TextEditingController();
+  final _scrollController = ScrollController();
+  final _picker = ImagePicker();
+
   String? _selectedImagePath;
 
   @override
   void initState() {
     super.initState();
-    // Initialize chat when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(chatProvider.notifier).initialize();
     });
@@ -34,341 +37,505 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.dispose();
   }
 
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+  void _scrollToBottom({bool animated = true}) {
+    if (!_scrollController.hasClients) return;
+    final target = _scrollController.position.maxScrollExtent;
+    if (!animated) {
+      _scrollController.jumpTo(target);
+      return;
     }
+    _scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+    );
   }
 
-  Future<void> _pickImage() async {
-    final XFile? image = await _imagePicker.pickImage(
+  Future<void> _pickFromGallery() async {
+    final XFile? image = await _picker.pickImage(
       source: ImageSource.gallery,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
+      maxWidth: 1280,
+      maxHeight: 1280,
+      imageQuality: 90,
     );
-
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-      });
-    }
+    if (image == null) return;
+    setState(() => _selectedImagePath = image.path);
   }
 
   Future<void> _takePhoto() async {
-    final XFile? image = await _imagePicker.pickImage(
+    final XFile? image = await _picker.pickImage(
       source: ImageSource.camera,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
+      maxWidth: 1280,
+      maxHeight: 1280,
+      imageQuality: 90,
     );
-
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-      });
-    }
+    if (image == null) return;
+    setState(() => _selectedImagePath = image.path);
   }
 
-  void _clearSelectedImage() {
-    setState(() {
-      _selectedImagePath = null;
-    });
+  void _clearAttachment() {
+    setState(() => _selectedImagePath = null);
   }
 
-  Future<void> _sendMessage() async {
-    final message = _messageController.text.trim();
-    if (message.isEmpty && _selectedImagePath == null) return;
-
+  Future<void> _send() async {
+    final text = _messageController.text.trim();
     final imagePath = _selectedImagePath;
+
+    if (text.isEmpty && imagePath == null) return;
+
     _messageController.clear();
-    _clearSelectedImage();
+    _clearAttachment();
 
     if (imagePath != null) {
       await ref
           .read(chatProvider.notifier)
           .sendMessageWithImage(
-            message.isEmpty ? 'Analyze this image' : message,
+            text.isEmpty ? 'Analyze this image' : text,
             imagePath,
           );
     } else {
-      await ref.read(chatProvider.notifier).sendMessage(message);
+      await ref.read(chatProvider.notifier).sendMessage(text);
     }
 
-    _scrollToBottom();
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
   }
 
   @override
   Widget build(BuildContext context) {
-    final chatState = ref.watch(chatProvider);
+    final state = ref.watch(chatProvider);
 
-    // Scroll to bottom when new messages arrive
-    ref.listen(chatProvider, (previous, next) {
-      if (previous?.messages.length != next.messages.length) {
+    ref.listen(chatProvider, (prev, next) {
+      final a = prev?.messages.length ?? 0;
+      if (a != next.messages.length) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
       }
     });
 
+    final messages = state.messages;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F4F8),
+      backgroundColor: const Color(0xFFFFFFFF),
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF2C7A9B)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Row(
+        surfaceTintColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Column(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF2C7A9B), Color(0xFF7DD3C0)],
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(
-                Icons.medical_services,
-                color: Colors.white,
-                size: 22,
+            const Text(
+              'Dr. Epi',
+              style: TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Dr. Epi',
-                  style: TextStyle(
-                    color: Color(0xFF2C7A9B),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  chatState.isInitialized ? 'Online' : 'Đang kết nối...',
-                  style: TextStyle(
-                    color: chatState.isInitialized
-                        ? Colors.green
-                        : Colors.orange,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 2),
+            Text(
+              state.isInitialized ? 'Online' : 'Connecting…',
+              style: TextStyle(
+                color: state.isInitialized
+                    ? const Color(0xFF16A34A)
+                    : const Color(0xFFF59E0B),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0F172A),
+            size: 20,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF2C7A9B)),
             onPressed: () => ref.read(chatProvider.notifier).clearChat(),
-            tooltip: 'Cuộc trò chuyện mới',
+            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF0F172A)),
           ),
         ],
       ),
       body: Column(
         children: [
-          // Error banner
-          if (chatState.error != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              color: Colors.red.shade100,
-              child: Row(
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      chatState.error!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red),
-                    onPressed: () =>
-                        ref.read(chatProvider.notifier).clearError(),
-                  ),
-                ],
-              ),
+          if (state.error != null)
+            _Banner(
+              text: state.error!,
+              onClose: () => ref.read(chatProvider.notifier).clearError(),
             ),
-
-          // Chat messages
           Expanded(
-            child: chatState.messages.isEmpty
-                ? _buildWelcomeMessage()
+            child: messages.isEmpty
+                ? _EmptyState(
+                    onTap: (t) {
+                      _messageController.text = t;
+                      _send();
+                    },
+                  )
                 : ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: chatState.messages.length,
-                    itemBuilder: (context, index) {
-                      final message = chatState.messages[index];
-                      return _buildMessageBubble(message);
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                    itemCount: messages.length + (state.isLoading ? 1 : 0),
+                    itemBuilder: (context, i) {
+                      if (i == messages.length && state.isLoading) {
+                        return const _AssistantTypingBubble();
+                      }
+                      final m = messages[i];
+                      return _Bubble(message: m);
                     },
                   ),
           ),
-
-          // Loading indicator
-          if (chatState.isLoading)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: const Color(0xFF2C7A9B),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Dr. Epi is analyzing...',
-                    style: TextStyle(
-                      color: Color(0xFF2C7A9B),
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // Selected image preview
           if (_selectedImagePath != null)
-            Container(
-              padding: const EdgeInsets.all(8),
-              color: Colors.white,
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      File(_selectedImagePath!),
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Hình ảnh đã chọn',
-                      style: TextStyle(color: Color(0xFF2C7A9B)),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red),
-                    onPressed: _clearSelectedImage,
-                  ),
-                ],
-              ),
+            _AttachmentBar(
+              path: _selectedImagePath!,
+              onRemove: _clearAttachment,
             ),
-
-          // Input area
-          _buildInputArea(),
+          _Composer(
+            controller: _messageController,
+            onSend: _send,
+            onCamera: _takePhoto,
+            onGallery: _pickFromGallery,
+            enabled: state.isInitialized,
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildWelcomeMessage() {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+class _Banner extends StatelessWidget {
+  final String text;
+  final VoidCallback onClose;
+
+  const _Banner({required this.text, required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF2F2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFECACA)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline_rounded, color: Color(0xFFDC2626)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Color(0xFF991B1B),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: onClose,
+            borderRadius: BorderRadius.circular(12),
+            child: const Padding(
+              padding: EdgeInsets.all(6),
+              child: Icon(Icons.close_rounded, color: Color(0xFF991B1B)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final void Function(String) onTap;
+
+  const _EmptyState({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      'Help me build a simple skincare routine.',
+      'What should I use for acne-prone oily skin?',
+      'How can I safely fade dark spots?',
+      'What are early warning signs to watch for?',
+    ];
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(18, 28, 18, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'How can I help?',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Ask a question or attach a photo.',
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: items
+                .map(
+                  (t) => InkWell(
+                    onTap: () => onTap(t),
+                    borderRadius: BorderRadius.circular(18),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Text(
+                        t,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttachmentBar extends StatelessWidget {
+  final String path;
+  final VoidCallback onRemove;
+
+  const _AttachmentBar({required this.path, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
           children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF2C7A9B), Color(0xFF7DD3C0)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.file(
+                File(path),
+                width: 54,
+                height: 54,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Attachment',
+                style: TextStyle(
+                  color: Color(0xFF0F172A),
+                  fontWeight: FontWeight.w800,
                 ),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: const Icon(
-                Icons.medical_services,
-                color: Colors.white,
-                size: 50,
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'Hello! I am Dr. Epi',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2C7A9B),
+            InkWell(
+              onTap: onRemove,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFFECACA)),
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Color(0xFFDC2626),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Your AI Dermatology Assistant from Epidexa',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            _buildSuggestionChip(
-              'What ingredients should I use for acne-prone oily skin?',
-            ),
-            const SizedBox(height: 8),
-            _buildSuggestionChip(
-              'How do I build a complete morning and evening skincare routine?',
-            ),
-            const SizedBox(height: 8),
-            _buildSuggestionChip(
-              'What are the warning signs of melanoma I should watch for?',
-            ),
-            const SizedBox(height: 8),
-            _buildSuggestionChip(
-              'How can I fade dark spots and hyperpigmentation safely?',
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildSuggestionChip(String text) {
-    return InkWell(
-      onTap: () {
-        _messageController.text = text;
-        _sendMessage();
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF2C7A9B).withOpacity(0.3)),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Color(0xFF2C7A9B),
-            fontSize: 14,
-          ),
+class _Composer extends StatelessWidget {
+  final TextEditingController controller;
+  final VoidCallback onSend;
+  final VoidCallback onCamera;
+  final VoidCallback onGallery;
+  final bool enabled;
+
+  const _Composer({
+    required this.controller,
+    required this.onSend,
+    required this.onCamera,
+    required this.onGallery,
+    required this.enabled,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            _MiniIcon(
+              icon: Icons.camera_alt_rounded,
+              onTap: enabled ? onCamera : null,
+            ),
+            const SizedBox(width: 8),
+            _MiniIcon(
+              icon: Icons.photo_library_rounded,
+              onTap: enabled ? onGallery : null,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: TextField(
+                  controller: controller,
+                  enabled: enabled,
+                  minLines: 1,
+                  maxLines: 6,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => onSend(),
+                  decoration: InputDecoration(
+                    hintText: enabled ? 'Message…' : 'Connecting…',
+                    hintStyle: const TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            _SendIcon(
+              enabled: enabled,
+              onTap: enabled ? onSend : null,
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildMessageBubble(ChatMessage message) {
+class _MiniIcon extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _MiniIcon({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = onTap == null;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: disabled
+              ? const Color(0xFFF1F5F9)
+              : _ChatScreenState.primaryColor.withOpacity(0.10),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: disabled
+                ? const Color(0xFFE2E8F0)
+                : _ChatScreenState.primaryColor.withOpacity(0.18),
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: disabled
+              ? const Color(0xFF94A3B8)
+              : _ChatScreenState.primaryColor,
+          size: 22,
+        ),
+      ),
+    );
+  }
+}
+
+class _SendIcon extends StatelessWidget {
+  final bool enabled;
+  final VoidCallback? onTap;
+
+  const _SendIcon({required this.enabled, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: enabled
+              ? _ChatScreenState.primaryColor
+              : _ChatScreenState.primaryColor.withOpacity(0.35),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: const Icon(
+          Icons.arrow_upward_rounded,
+          color: Colors.white,
+          size: 22,
+        ),
+      ),
+    );
+  }
+}
+
+class _Bubble extends StatelessWidget {
+  final ChatMessage message;
+
+  const _Bubble({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
     final isUser = message.role == 'user';
 
     return Padding(
@@ -381,18 +548,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           if (!isUser) ...[
             Container(
-              width: 36,
-              height: 36,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF2C7A9B), Color(0xFF7DD3C0)],
-                ),
-                borderRadius: BorderRadius.circular(18),
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: const Icon(
-                Icons.medical_services,
-                color: Colors.white,
-                size: 18,
+                Icons.medical_services_rounded,
+                color: Color(0xFF0F172A),
+                size: 15,
               ),
             ),
             const SizedBox(width: 8),
@@ -401,39 +567,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isUser ? const Color(0xFF2C7A9B) : Colors.white,
+                color: isUser
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: Radius.circular(isUser ? 16 : 4),
-                  bottomRight: Radius.circular(isUser ? 4 : 16),
+                  topLeft: const Radius.circular(18),
+                  topRight: const Radius.circular(18),
+                  bottomLeft: Radius.circular(isUser ? 18 : 6),
+                  bottomRight: Radius.circular(isUser ? 6 : 18),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(
+                  color: isUser
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFFE2E8F0),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (message.imageBase64 != null && isUser)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.only(bottom: 10),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(14),
                         child: Image.file(
                           File(message.imageBase64!),
-                          width: 150,
-                          height: 150,
+                          width: 190,
+                          height: 190,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            width: 150,
-                            height: 150,
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.image),
+                            width: 190,
+                            height: 190,
+                            color: const Color(0xFFF1F5F9),
+                            child: const Icon(
+                              Icons.image_rounded,
+                              color: Color(0xFF94A3B8),
+                            ),
                           ),
                         ),
                       ),
@@ -441,9 +610,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   SelectableText(
                     message.content,
                     style: TextStyle(
-                      color: isUser ? Colors.white : const Color(0xFF333333),
-                      fontSize: 15,
-                      height: 1.5,
+                      color: isUser ? Colors.white : const Color(0xFF0F172A),
+                      fontSize: 14.8,
+                      height: 1.45,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -453,16 +623,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           if (isUser) ...[
             const SizedBox(width: 8),
             Container(
-              width: 36,
-              height: 36,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(18),
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: const Icon(
-                Icons.person,
-                color: Colors.white,
-                size: 20,
+                Icons.person_rounded,
+                color: Color(0xFF64748B),
+                size: 16,
               ),
             ),
           ],
@@ -470,77 +641,96 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
     );
   }
+}
 
-  Widget _buildInputArea() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+class _AssistantTypingBubble extends StatelessWidget {
+  const _AssistantTypingBubble();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: const Icon(
+              Icons.medical_services_rounded,
+              color: Color(0xFF0F172A),
+              size: 15,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: const _DotLoader(),
           ),
         ],
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            // Camera button
-            IconButton(
-              icon: const Icon(Icons.camera_alt_outlined),
-              color: const Color(0xFF2C7A9B),
-              onPressed: _takePhoto,
-              tooltip: 'Take Photo',
-            ),
-            // Gallery button
-            IconButton(
-              icon: const Icon(Icons.photo_library_outlined),
-              color: const Color(0xFF2C7A9B),
-              onPressed: _pickImage,
-              tooltip: 'Choose from Library',
-            ),
-            // Text input
-            Expanded(
-              child: TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  hintText: 'Type your question...',
-                  hintStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: const Color(0xFFF5F5F5),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                ),
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _sendMessage(),
-                maxLines: null,
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Send button
-            Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF2C7A9B), Color(0xFF7DD3C0)],
-                ),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white),
-                onPressed: _sendMessage,
-              ),
-            ),
-          ],
+    );
+  }
+}
+
+class _DotLoader extends StatefulWidget {
+  const _DotLoader();
+
+  @override
+  State<_DotLoader> createState() => _DotLoaderState();
+}
+
+class _DotLoaderState extends State<_DotLoader> {
+  int _active = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 350), (_) {
+      if (!mounted) return;
+      setState(() => _active = (_active + 1) % 3);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget dot(bool on) {
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        width: 6.5,
+        height: 6.5,
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        decoration: BoxDecoration(
+          color: on ? _ChatScreenState.primaryColor : const Color(0xFFCBD5E1),
+          borderRadius: BorderRadius.circular(99),
         ),
-      ),
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        dot(_active == 0),
+        dot(_active == 1),
+        dot(_active == 2),
+      ],
     );
   }
 }
