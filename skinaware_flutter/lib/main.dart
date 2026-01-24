@@ -7,6 +7,8 @@ import 'package:skinaware_flutter/routes/router.dart';
 import 'package:skinaware_flutter/theme/theme.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
+import 'package:skinaware_flutter/providers/auth_provider.dart';
+import 'package:skinaware_flutter/providers/auth_route_provider.dart';
 
 import 'config/app_config.dart';
 
@@ -42,6 +44,17 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final authNotifier = ProviderContainer().read(authProvider.notifier);
+        authNotifier.initialize();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(

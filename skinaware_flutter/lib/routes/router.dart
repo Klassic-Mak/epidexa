@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:skinaware_flutter/mainpage.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
+import 'package:skinaware_flutter/screens/auths/login_screen.dart';
+import 'package:skinaware_flutter/screens/auths/signup_screen.dart';
 import 'package:skinaware_flutter/screens/check_symtopms_screen/check_sys_screen.dart';
 import 'package:skinaware_flutter/screens/profileScreen/profile_screen.dart';
 import 'package:skinaware_flutter/screens/scan_screen.dart' show ScanScreen;
@@ -12,8 +14,6 @@ import 'package:skinaware_flutter/screens/analysis/analysis_result_screen.dart';
 import 'package:skinaware_flutter/services/ai/ollama_service.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  debugPrint("Routing to: ${settings.name}");
-
   switch (settings.name) {
     case mainPageRoute:
       return _RightSlide(Mainpage());
@@ -29,6 +29,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case checkSymRoute:
       return _RightSlide(const CheckSkinScreen());
+
+    case loginRoute:
+      return MaterialPageRoute(builder: (context) => LoginScreen());
+
+    case signupRoute:
+      return _RightSlide(SignupScreen());
 
     case camerScanRoute:
       return _RightSlide(const SkinCameraScreen());

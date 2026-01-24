@@ -1,47 +1,65 @@
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:skinaware_client/skinaware_client.dart';
 
-// import 'package:shared_preferences/shared_preferences.dart';
+/// StateNotifier holds a single logged-in user (or null if logged out)
+class UserNotifier extends StateNotifier<User?> {
+  UserNotifier() : super(null);
 
-// class UserNotifier extends StateNotifier<User?> {
-//   final Ref ref;
-//   UserNotifier(this.ref) : super(null);
+  bool get isLoggedIn => state != null;
 
-//   /// Login user and update state
-//   Future<void> loginUser(User user) async {
-//     try {
-//       final prefs = await SharedPreferences.getInstance();
-//       await prefs.setBool('is_logged_in', true);
-//       state = user;
-//     } catch (e) {
-//       print(" Error logging in (notifier): $e");
-//     }
-//   }
+  /// Save user after login/register
+  Future<void> loginUser(User user) async {
+    state = user;
+  }
 
-//   Future<void> logoutUser() async {
-//     try {
-//       final prefs = await SharedPreferences.getInstance();
-//       await prefs.setBool('is_logged_in', false);
-//       state = null;
-//     } catch (e) {
-//       print(" Error logging out (notifier): $e");
-//     }
-//   }
+  /// Optional: when you want to update user object in memory
+  void updateUser(User user) {
+    state = user;
+  }
 
-//   Future<void> refreshProvider(User user) async {
-//     try {
-//       state = user;
-//     } catch (e) {
-//       print(" Error updating user (notifier): $e");
-//     }
-//   }
+  /// Clear user on logout
+  void logout() {
+    state = null;
+  }
 
-//   Future<bool> checkLoginStatus() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     return prefs.getBool('is_logged_in') ?? false;
-//   }
-// }
+  /// Update only a few fields (useful after updateProfile)
+  void updateProfile({
+    String? name,
+    String? phone,
+    int? age,
+    Gender? gender,
+    Role? role,
+    SkinType? skinType,
+    String? profilePhoto,
+  }) {
+    final current = state;
+    if (current == null) return;
 
-// final userProvider = StateNotifierProvider<UserNotifier, User?>(
-//   (ref) => UserNotifier(ref),
-// );
+    state = current.copyWith(
+      name: name ?? current.name,
+      phone: phone ?? current.phone,
+      age: age ?? current.age,
+      gender: gender ?? current.gender,
+      role: role ?? current.role,
+      skinType: skinType ?? current.skinType,
+      profilePhoto: profilePhoto ?? current.profilePhoto,
+    );
+  }
+
+  /// Helper if your endpoint returns Map<String, dynamic> with user json
+  /// e.g. res['user']
+  void setUserFromResponse(Map<String, dynamic> res) {
+    final userJson = res['user'];
+    if (userJson == null) return;
+
+    // NOTE: If your generated code doesn't have fromJson,
+    // change this line to the correct method in your generated User model.
+    state = User.fromJson(userJson);
+  }
+}
+
+/// Riverpod provider
+final userProvider = StateNotifierProvider<UserNotifier, User?>((ref) {
+  return UserNotifier();
+});

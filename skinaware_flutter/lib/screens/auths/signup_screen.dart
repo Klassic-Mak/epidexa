@@ -2,20 +2,22 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'package:skinaware_client/skinaware_client.dart';
 
 import 'package:skinaware_flutter/constants.dart';
 import 'package:skinaware_flutter/services/auth_services/auth_services.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   String name = '';
   String email = "";
@@ -121,7 +123,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "First Name",
+                              "Full Name",
                               style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(
                                     fontSize: 15,
@@ -227,110 +229,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             SizedBox(
                               height: 15,
                             ),
-                            Text(
-                              "Last Name",
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(
-                                    fontSize: 15,
-                                    fontFamily: 'Raleway',
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: 0.5,
-                                  ),
-                            ),
-                            SizedBox(
-                              height: 8,
-                            ),
-                            TextFormField(
-                              cursorColor:
-                                  Theme.of(context).brightness ==
-                                      Brightness.light
-                                  ? primaryColor
-                                  : Colors.white,
-                              controller: lastnameController,
-                              textInputAction: TextInputAction.next,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? darktextfieldboxColor
-                                    : textfieldboxColor,
-                                hintText: "xxxxxxx",
-                                hintStyle: TextStyle(
-                                  fontSize: 14,
-                                  color: const Color.fromARGB(
-                                    220,
-                                    192,
-                                    192,
-                                    192,
-                                  ),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(defaultBorderRadious),
-                                  ),
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? darktextfieldboxColor
-                                        : textfieldboxColor,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(defaultBorderRadious),
-                                  ),
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? darktextfieldboxColor
-                                        : textfieldboxColor,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(defaultBorderRadious),
-                                  ),
-                                  borderSide: BorderSide(
-                                    width: 0,
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? darktextfieldboxColor
-                                        : textfieldboxColor,
-                                  ),
-                                ),
-                                prefixIcon: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                  ),
-                                  child: SvgPicture.asset(
-                                    "assets/icons/Profile.svg",
-                                    height: 24,
-                                    color: Theme.of(
-                                      context,
-                                    ).iconTheme.color!.withOpacity(0.3),
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your name';
-                                }
-                                final nameRegex = RegExp(r'^[a-zA-Z0-9 ]+$');
-                                if (!nameRegex.hasMatch(value)) {
-                                  return 'Name can only contain letters, numbers, and spaces';
-                                }
-                                return null;
-                              },
-                              onSaved: (value) => name = value!,
-                            ),
+
                             SizedBox(
                               height: 15,
                             ),
@@ -717,6 +616,50 @@ class _SignupScreenState extends State<SignupScreen> {
                       SizedBox(
                         height: 25,
                       ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Checkbox(
+                            value: true,
+                            onChanged: (value) {
+                              // You can add logic to handle agreement state here
+                            },
+                            activeColor: primaryColor,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                text:
+                                    "By continuing, you confirm that you agree with our ",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: blackColor40,
+                                  fontFamily: 'Raleway',
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: "Terms and Conditions",
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        // TODO: Navigate to Terms and Conditions page
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
                       GestureDetector(
                         onTap: () async {
                           if (_formKey.currentState!.validate()) {
@@ -725,6 +668,13 @@ class _SignupScreenState extends State<SignupScreen> {
                               email: emailController.text.trim(),
                               password: passwordController.text.trim(),
                               context: context,
+                              fullName: firstnameController.text.trim(),
+                              phone: '0000000000',
+                              age: 18,
+                              gender: Gender.MALE,
+                              role: Role.USER,
+                              skinType: SkinType.NORMAL,
+                              ref: ref,
 
                               // firstnameController.text.trim(),
                               // lastnameController.text.trim(),
@@ -737,7 +687,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             borderRadius: BorderRadius.circular(
                               defaultBorderRadious,
                             ),
-                            color: primaryColor2,
+                            color: primaryColor,
                           ),
                           child: Center(
                             child: Center(
@@ -758,90 +708,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       SizedBox(
                         height: 25,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          GestureDetector(
-                            onTap: () async {},
-                            child: Container(
-                              height: 55,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  defaultBorderRadious,
-                                ),
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? darkfadeboxcolor
-                                    : fadeboxcolor,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SvgPicture.asset(
-                                    "assets/icons/googlelogo.svg",
-                                  ),
-                                  SizedBox(
-                                    width: 7,
-                                  ),
-                                  Text(
-                                    "Goggle",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'Raleway',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {},
-                            child: Container(
-                              height: 55,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  defaultBorderRadious,
-                                ),
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? darkfadeboxcolor
-                                    : fadeboxcolor,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SvgPicture.asset(
-                                    height: 35,
-                                    "assets/icons/facebook-logo.svg",
-                                    color: const Color.fromARGB(
-                                      255,
-                                      2,
-                                      90,
-                                      222,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 7,
-                                  ),
-                                  Text(
-                                    "Facebook",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'Raleway',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
