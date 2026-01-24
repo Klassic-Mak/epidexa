@@ -23,11 +23,11 @@ webServer:
 database:
   host: skinaware-klassicmak-1668.h.aivencloud.com
   port: 23192
-  name: defaultdb
+  name: epidexa
   password: AVNS_yufajU5z0j0F0LVsTQT
   user: avnadmin
   requireSsl: true
-  maxConnections: 10
+  maxConnections: 2
 
 
 sessionLogs:
