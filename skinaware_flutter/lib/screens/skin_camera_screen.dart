@@ -339,107 +339,68 @@ class _SkinCameraScreenState extends State<SkinCameraScreen> {
           if (!_permissionsDenied &&
               controller != null &&
               controller.value.isInitialized)
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: MediaQuery.of(context).padding.bottom + 110,
-              child: _GlassCard(
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.zoom_in_rounded,
-                      color: Color(0xFFE5E7EB),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Slider(
-                        value: _currentZoom.clamp(_minZoom, _maxZoom),
-                        min: _minZoom,
-                        max: _maxZoom,
-                        onChanged: (v) async {
-                          setState(() => _currentZoom = v);
-                          try {
-                            await controller.setZoomLevel(v);
-                          } catch (_) {}
-                        },
-                        activeColor: primaryColor,
-                        inactiveColor: Colors.white.withOpacity(0.18),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${_currentZoom.toStringAsFixed(1)}x',
-                      style: const TextStyle(
-                        color: Color(0xFFE5E7EB),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!_permissionsDenied)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!_permissionsDenied)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _miniHint(
+                              icon: Icons.wb_sunny_rounded,
+                              text: "Light",
+                            ),
+                            const SizedBox(width: 10),
+                            _miniHint(
+                              icon: Icons.front_hand_rounded,
+                              text: "Steady",
+                            ),
+                            const SizedBox(width: 10),
+                            _miniHint(
+                              icon: Icons.straighten_rounded,
+                              text: "6–12 in",
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: 14),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _miniHint(
-                            icon: Icons.wb_sunny_rounded,
-                            text: "Light",
+                          _roundAction(
+                            icon: Icons.photo_library_rounded,
+                            onTap:
+                                (_permissionsDenied || _initializing || _busy)
+                                ? null
+                                : _pickFromGallery,
                           ),
-                          const SizedBox(width: 10),
-                          _miniHint(
-                            icon: Icons.front_hand_rounded,
-                            text: "Steady",
+                          const Spacer(),
+                          _shutterButton(
+                            onTap:
+                                (_permissionsDenied || _initializing || _busy)
+                                ? null
+                                : _capture,
+                            busy: _busy,
                           ),
-                          const SizedBox(width: 10),
-                          _miniHint(
-                            icon: Icons.straighten_rounded,
-                            text: "6–12 in",
+                          const Spacer(),
+                          _roundAction(
+                            icon: Icons.cameraswitch_rounded,
+                            onTap:
+                                (_permissionsDenied || _initializing || _busy)
+                                ? null
+                                : _switchCamera,
                           ),
                         ],
                       ),
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        _roundAction(
-                          icon: Icons.photo_library_rounded,
-                          onTap: (_permissionsDenied || _initializing || _busy)
-                              ? null
-                              : _pickFromGallery,
-                        ),
-                        const Spacer(),
-                        _shutterButton(
-                          onTap: (_permissionsDenied || _initializing || _busy)
-                              ? null
-                              : _capture,
-                          busy: _busy,
-                        ),
-                        const Spacer(),
-                        _roundAction(
-                          icon: Icons.cameraswitch_rounded,
-                          onTap: (_permissionsDenied || _initializing || _busy)
-                              ? null
-                              : _switchCamera,
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -869,10 +830,7 @@ class _GuideLabels extends StatelessWidget {
       right: (size.width - cutoutW) / 2,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _labelPill('Keep centered'),
-          _labelPill('No blur'),
-        ],
+        children: [],
       ),
     );
   }
