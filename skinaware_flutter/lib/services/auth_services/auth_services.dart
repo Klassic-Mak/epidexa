@@ -3,136 +3,94 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:google_sign_in/google_sign_in.dart';
-
 import 'package:http/http.dart' as http;
+import 'package:skinaware_client/skinaware_client.dart';
+
 import 'package:skinaware_flutter/general_components/loading_dialog.dart';
 import 'package:skinaware_flutter/general_components/pop.dart';
+import 'package:skinaware_flutter/providers/serverpod_provider.dart';
 import 'package:skinaware_flutter/providers/userProvider.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 
 class AuthServices {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  // final UserServices _userServices = UserServices();
-
+  /// REGISTER (serverpod)
   Future<void> signUpWithEmailPassword({
     required String email,
     required String password,
-
+    required String fullName,
+    required String phone,
+    required int age,
+    required Gender gender,
+    required Role role,
+    required SkinType skinType,
+    String? profilePhoto,
     required BuildContext context,
+    required WidgetRef ref,
   }) async {
     try {
-      // Show loading dialog
       LoadingDialog.show(context);
 
-      // Create user with Firebase
-      final result = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password)
-          .timeout(const Duration(seconds: 20));
+      final client = ref.read(serverpodClientProvider);
 
-      final firebaseUser = result.user;
+      final res = await client.user
+          .register(
+            email: email,
+            password: password,
+            phone: phone,
+            age: age,
+            gender: gender,
+            name: fullName,
+            role: role,
+            skinType: skinType,
+            profilePhoto: profilePhoto,
+          )
+          .timeout(const Duration(seconds: 25));
 
-      // Firebase user null check
-      if (firebaseUser == null) {
-        Navigator.of(context).pop();
+      Navigator.of(context).pop(); // close loader
+
+      if (res['success'] != true) {
         showTopToast(
           context,
-          "Sign up failed. Please try again.",
+          (res['error'] ?? 'Registration failed').toString(),
           isSuccess: false,
         );
         return;
       }
 
-      // Send email verification
-      await firebaseUser.sendEmailVerification();
+      // If you want auto-login after register:
+      final userJson = res['user'];
+      if (userJson != null) {
+        final user = User.fromJson(userJson);
+        await ref.read(userProvider.notifier).loginUser(user);
+      }
 
-      Navigator.of(context).pop();
       showTopToast(
         context,
-        "Account created! Please verify your email.",
+        (res['message'] ?? 'Account created successfully').toString(),
         isSuccess: true,
       );
 
-      // Navigate back or to verification screen
       if (context.mounted) {
-        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, mainPageRoute);
       }
-    } on FirebaseAuthException catch (e) {
-      Navigator.of(context).pop();
-
-      switch (e.code) {
-        case 'invalid-email':
-          showTopToast(context, "Invalid email format.", isSuccess: false);
-          break;
-        case 'email-already-in-use':
-          showTopToast(
-            context,
-            "Email already in use. Please try another.",
-            isSuccess: false,
-          );
-          break;
-        case 'weak-password':
-          showTopToast(
-            context,
-            "Password is too weak. Use a stronger password.",
-            isSuccess: false,
-          );
-          break;
-        case 'operation-not-allowed':
-          showTopToast(
-            context,
-            "Operation not allowed. Contact support.",
-            isSuccess: false,
-          );
-          break;
-        case 'too-many-requests':
-          showTopToast(
-            context,
-            "Too many attempts. Please try again later.",
-            isSuccess: false,
-          );
-          break;
-        case 'network-request-failed':
-          showTopToast(
-            context,
-            "Network error. Check your internet.",
-            isSuccess: false,
-          );
-          break;
-        default:
-          showTopToast(
-            context,
-            "Sign up failed: ${e.message}",
-            isSuccess: false,
-          );
-          break;
-      }
-
-      return;
     } on SocketException {
-      Navigator.of(context).pop();
+      _closeLoaderSafely(context);
       showTopToast(context, "No internet connection.", isSuccess: false);
-      return;
     } on TimeoutException {
-      Navigator.of(context).pop();
+      _closeLoaderSafely(context);
       showTopToast(context, "Request timed out. Try again.", isSuccess: false);
-      return;
+    } on http.ClientException catch (e) {
+      _closeLoaderSafely(context);
+      showTopToast(context, "Network error: ${e.message}", isSuccess: false);
     } catch (e) {
-      Navigator.of(context).pop();
-      showTopToast(
-        context,
-        "Unexpected error: ${e.toString()}",
-        isSuccess: false,
-      );
-      return;
+      _closeLoaderSafely(context);
+      showTopToast(context, "Unexpected error: $e", isSuccess: false);
     }
   }
 
+  /// LOGIN (serverpod)
   Future<void> signInWithEmailPassword({
     required String email,
     required String password,
@@ -140,366 +98,190 @@ class AuthServices {
     required WidgetRef ref,
   }) async {
     try {
-      // Show loading dialog
       LoadingDialog.show(context);
 
-      // Sign in with Firebase
-      final result = await _auth
-          .signInWithEmailAndPassword(email: email, password: password)
-          .timeout(const Duration(seconds: 20));
+      final client = ref.read(serverpodClientProvider);
 
-      final firebaseUser = result.user;
+      final res = await client.user
+          .login(
+            email: email,
+            password: password,
+          )
+          .timeout(const Duration(seconds: 25));
 
-      // Firebase user null check
-      if (firebaseUser == null) {
-        Navigator.of(context).pop();
+      Navigator.of(context).pop(); // close loader
+
+      if (res['success'] != true) {
         showTopToast(
           context,
-          "Login failed. Please try again.",
+          (res['error'] ?? 'Invalid email or password').toString(),
           isSuccess: false,
         );
-        return null;
+        return;
       }
 
-      // Email verification check
-      if (!firebaseUser.emailVerified) {
-        Navigator.of(context).pop();
-        showTopToast(
-          context,
-          "Please verify your email to continue.",
-          isSuccess: false,
-        );
-        return null;
+      final userJson = res['user'];
+      if (userJson == null) {
+        showTopToast(context, "Login failed: user missing.", isSuccess: false);
+        return;
       }
 
-      // // Fetch user from backend
-      // final userAPI = await _userServices.getUserByFirebaseUid();
-      // if (userAPI == null) {
-      //   Navigator.of(context).pop();
-      //   showTopToast(context, "User not found in system.", isSuccess: false);
-      //   return null;
-      // }
+      final user = User.fromJson(userJson);
 
-      // // Login successful
-      // await ref.read(userProvider.notifier).loginUser(userAPI);
-      Navigator.of(context).pop();
+      await ref.read(userProvider.notifier).loginUser(user);
+
       showTopToast(context, "Login Successful", isSuccess: true);
 
-      // Navigate to main page
       if (context.mounted) {
-        Navigator.pushNamed(context, mainPageRoute);
+        Navigator.pushReplacementNamed(context, mainPageRoute);
       }
-
-      // return userAPI;
-    } on FirebaseAuthException catch (e) {
-      Navigator.of(context).pop();
-
-      switch (e.code) {
-        case 'invalid-email':
-          showTopToast(context, "Invalid email format.", isSuccess: false);
-          break;
-        case 'user-not-found':
-          showTopToast(
-            context,
-            "No user found with that email.",
-            isSuccess: false,
-          );
-          break;
-        case 'wrong-password':
-          showTopToast(
-            context,
-            "Incorrect password entered.",
-            isSuccess: false,
-          );
-          break;
-        case 'user-disabled':
-          showTopToast(
-            context,
-            "This user account is disabled.",
-            isSuccess: false,
-          );
-          break;
-        case 'too-many-requests':
-          showTopToast(
-            context,
-            "Too many attempts. Please try again later.",
-            isSuccess: false,
-          );
-          break;
-        case 'network-request-failed':
-          showTopToast(
-            context,
-            "Network error. Check your internet.",
-            isSuccess: false,
-          );
-          break;
-        case 'invalid-credential':
-          showTopToast(context, "Wrong email or password.", isSuccess: false);
-          break;
-        case 'operation-not-allowed':
-          showTopToast(
-            context,
-            "Operation not allowed. Contact support.",
-            isSuccess: false,
-          );
-          break;
-        default:
-          showTopToast(context, "Login failed: ${e.message}", isSuccess: false);
-          break;
-      }
-
-      return null;
     } on SocketException {
-      Navigator.of(context).pop();
+      _closeLoaderSafely(context);
       showTopToast(context, "No internet connection.", isSuccess: false);
-      return null;
     } on TimeoutException {
-      Navigator.of(context).pop();
+      _closeLoaderSafely(context);
       showTopToast(context, "Request timed out. Try again.", isSuccess: false);
-      return null;
+    } on http.ClientException catch (e) {
+      _closeLoaderSafely(context);
+      showTopToast(context, "Network error: ${e.message}", isSuccess: false);
     } catch (e) {
-      Navigator.of(context).pop();
-      showTopToast(
-        context,
-        "Unexpected error: ${e.toString()}",
-        isSuccess: false,
-      );
-      return null;
+      _closeLoaderSafely(context);
+      showTopToast(context, "Unexpected error: $e", isSuccess: false);
     }
   }
 
-  Future<UserCredential?> signInWithGoogle(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  /// CHANGE PASSWORD (serverpod)
+  Future<void> changePassword({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
     try {
       LoadingDialog.show(context);
-      UserCredential userCredential;
 
-      GoogleAuthProvider googleProvider = GoogleAuthProvider();
-      googleProvider
-        ..setCustomParameters({'prompt': 'select_account'})
-        ..addScope('email');
+      final client = ref.read(serverpodClientProvider);
+      final user = ref.read(userProvider);
 
-      userCredential = await FirebaseAuth.instance.signInWithPopup(
-        googleProvider,
-      );
-
-      final firebaseUser = userCredential.user;
-
-      if (firebaseUser == null) {
+      if (user == null) {
         Navigator.of(context).pop();
-        showTopToast(context, "Google sign-in failed.", isSuccess: false);
-        return null;
+        showTopToast(context, "You are not logged in.", isSuccess: false);
+        return;
       }
 
-      // var userAPI = await _userServices.getUserByFirebaseUid();
+      final res = await client.user
+          .changePassword(
+            userId: user.id!,
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          )
+          .timeout(const Duration(seconds: 25));
 
-      // // If not, create the user in your backend
-      // if (userAPI == null) {
-      //   Navigator.of(context).pop();
-      //   showTopToast(context, "User not found in system.", isSuccess: false);
-      //   return null;
-      // }
-
-      // // ✅ Set user in provider
-      // await ref.read(userProvider.notifier).loginUser(userAPI);
       Navigator.of(context).pop();
-      showTopToast(context, "Login Successful", isSuccess: true);
+
+      if (res['success'] != true) {
+        showTopToast(
+          context,
+          (res['error'] ?? 'Failed').toString(),
+          isSuccess: false,
+        );
+        return;
+      }
+
+      showTopToast(
+        context,
+        (res['message'] ?? 'Password updated').toString(),
+        isSuccess: true,
+      );
+    } catch (e) {
+      _closeLoaderSafely(context);
+      showTopToast(context, "Error: $e", isSuccess: false);
+    }
+  }
+
+  // /// SIGN OUT (local only, serverpod has no session here)
+  // Future<void> signOut(BuildContext context, WidgetRef ref) async {
+  //   showLogoutDialog(context, () async {
+  //     try {
+  //       LoadingDialog.show(context);
+
+  //       // Clear local user state
+  //       ref.read(userProvider.notifier).logout();
+
+  //       Navigator.of(context).pop(); // close loader
+  //       Navigator.pushReplacementNamed(context, onBoarding1Route);
+  //     } on TimeoutException {
+  //       _closeLoaderSafely(context);
+  //       showTopToast(
+  //         context,
+  //         "Sign out timed out. Please try again.",
+  //         isSuccess: false,
+  //       );
+  //     } catch (e) {
+  //       _closeLoaderSafely(context);
+  //       showTopToast(context, "Error signing out.", isSuccess: false);
+  //     }
+  //   });
+  // }
+
+  /// DELETE ACCOUNT (serverpod)
+  Future<void> deleteAccount({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String password,
+  }) async {
+    try {
+      LoadingDialog.show(context);
+
+      final client = ref.read(serverpodClientProvider);
+      final user = ref.read(userProvider);
+
+      if (user == null) {
+        Navigator.of(context).pop();
+        showTopToast(context, "You are not logged in.", isSuccess: false);
+        return;
+      }
+
+      final res = await client.user
+          .deleteAccount(
+            userId: user.id!,
+            password: password,
+          )
+          .timeout(const Duration(seconds: 25));
+
+      Navigator.of(context).pop();
+
+      if (res['success'] != true) {
+        showTopToast(
+          context,
+          (res['error'] ?? 'Delete failed').toString(),
+          isSuccess: false,
+        );
+        return;
+      }
+
+      // Clear local state and route out
+      ref.read(userProvider.notifier).logout();
+
+      showTopToast(
+        context,
+        (res['message'] ?? 'Account deleted').toString(),
+        isSuccess: true,
+      );
 
       if (context.mounted) {
-        Navigator.pushNamed(context, mainPageRoute);
-      }
-
-      return userCredential;
-    } on FirebaseAuthException catch (e) {
-      Navigator.of(context).pop();
-      showTopToast(
-        context,
-        "Google sign-in failed: ${e.message}",
-        isSuccess: false,
-      );
-      return null;
-    } catch (e, stackTrace) {
-      Navigator.of(context).pop();
-      showTopToast(context, "Google sign-in failed: $e", isSuccess: false);
-      return null;
-    }
-  }
-
-  Future<void> resetPassword(BuildContext context, String email) async {
-    try {
-      LoadingDialog.show(context);
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      Navigator.of(context).pop();
-      showTopToast(context, 'Password reset email sent!');
-    } on FirebaseAuthException catch (e) {
-      Navigator.of(context).pop();
-      switch (e.code) {
-        case 'invalid-email':
-          showTopToast(
-            context,
-            'The email address is invalid.',
-            isSuccess: false,
-          );
-          break;
-        case 'user-not-found':
-          showTopToast(
-            context,
-            'No user found with this email.',
-            isSuccess: false,
-          );
-          break;
-        case 'missing-email':
-          showTopToast(
-            context,
-            'Please provide an email address.',
-            isSuccess: false,
-          );
-          break;
-        default:
-          showTopToast(context, 'Error: ${e.message}', isSuccess: false);
-          break;
+        Navigator.pushReplacementNamed(context, onBoarding1Route);
       }
     } catch (e) {
-      showTopToast(
-        context,
-        'Something went wrong. Please try again.',
-        isSuccess: false,
-      );
-      print('Unexpected error: $e');
+      _closeLoaderSafely(context);
+      showTopToast(context, "Error: $e", isSuccess: false);
     }
-  }
-
-  Future<void> signOut(BuildContext context, WidgetRef ref) async {
-    showLogoutDialog(context, () async {
-      try {
-        LoadingDialog.show(context);
-        await _auth.signOut().timeout(Duration(seconds: 30));
-        // await ref.read(userProvider.notifier).logoutUser();
-        Navigator.of(context).pop();
-        Navigator.pushReplacementNamed(context, onBoarding1Route);
-      } on TimeoutException {
-        Navigator.of(context).pop();
-        showTopToast(
-          context,
-          "Sign out timed out. Please try again.",
-          isSuccess: false,
-        );
-      } on FirebaseAuthException catch (e) {
-        Navigator.of(context).pop();
-        showTopToast(
-          context,
-          "Error signing out: ${e.message}",
-          isSuccess: false,
-        );
-      } on http.ClientException catch (e) {
-        Navigator.of(context).pop();
-        showTopToast(
-          context,
-          "Network error during sign out: ${e.message}",
-          isSuccess: false,
-        );
-      } catch (e) {
-        Navigator.of(context).pop();
-        showTopToast(context, "Error signing out.", isSuccess: false);
-      }
-    });
   }
 }
 
-void showLogoutDialog(BuildContext context, void Function() onLogout) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Container(
-          width: double.infinity,
-          margin: EdgeInsets.all(20),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Icon with soft background
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.logout_rounded,
-                    color: Colors.red,
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Title
-                const Text(
-                  "Logout",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-
-                // Subtitle
-                const Text(
-                  "Are you sure want to Logout?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.black54),
-                ),
-                const SizedBox(height: 24),
-
-                // Buttons Row
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.black26),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(color: Colors.black87),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          onLogout();
-                        },
-                        child: const Text(
-                          "Yes, Logout",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
+/// helper: safely close loader
+void _closeLoaderSafely(BuildContext context) {
+  if (Navigator.of(context).canPop()) {
+    Navigator.of(context).pop();
+  }
 }

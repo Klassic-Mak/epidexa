@@ -7,6 +7,8 @@ import 'package:skinaware_flutter/routes/router.dart';
 import 'package:skinaware_flutter/theme/theme.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
+import 'package:skinaware_flutter/providers/auth_provider.dart';
+import 'package:skinaware_flutter/providers/auth_route_provider.dart';
 
 import 'config/app_config.dart';
 
@@ -34,8 +36,24 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final authNotifier = ProviderContainer().read(authProvider.notifier);
+        authNotifier.initialize();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +62,33 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       child: ProviderScope(
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Epidexa',
-          theme: lightmode,
-          initialRoute: mainPageRoute,
-          onGenerateRoute: generateRoute,
+        child: Consumer(
+          builder: (context, ref, _) {
+            final authRoute = ref.watch(authRouteProvider);
+
+            String initialRoute;
+            switch (authRoute) {
+              case AuthRoute.mainPage:
+                initialRoute = mainPageRoute;
+                break;
+              case AuthRoute.login:
+                initialRoute = loginRoute;
+                break;
+              case AuthRoute.register:
+                initialRoute = signupRoute;
+                break;
+              case AuthRoute.unknown:
+                initialRoute = mainPageRoute;
+            }
+
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Epidexa',
+              theme: lightmode,
+              initialRoute: initialRoute,
+              onGenerateRoute: generateRoute,
+            );
+          },
         ),
       ),
     );

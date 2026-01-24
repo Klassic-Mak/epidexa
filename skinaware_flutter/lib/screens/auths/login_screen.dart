@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:skinaware_flutter/constants.dart';
+import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/services/auth_services/auth_services.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -378,7 +379,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 borderRadius: BorderRadius.circular(
                                   defaultBorderRadious,
                                 ),
-                                color: primaryColor2,
+                                color: primaryColor,
                               ),
                               child: Center(
                                 child: Center(
@@ -401,53 +402,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           SizedBox(
                             height: 25,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              GestureDetector(
-                                onTap: () async {
-                                  await authService.signInWithGoogle(
-                                    context,
-
-                                    ref,
-                                  );
-                                },
-                                child: Container(
-                                  height: 55,
-                                  width: 150,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                      defaultBorderRadious,
-                                    ),
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? darkfadeboxcolor
-                                        : fadeboxcolor,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        "assets/icons/googlelogo.svg",
-                                      ),
-                                      SizedBox(
-                                        width: 7,
-                                      ),
-                                      Text(
-                                        "Google",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          fontFamily: 'Raleway',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
@@ -483,7 +437,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            //  Navigator.pushNamed(context, signupRoute);
+                            Navigator.pushNamed(context, signupRoute);
                           },
                       ),
                     ],
