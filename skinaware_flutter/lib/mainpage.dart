@@ -10,6 +10,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:skinaware_flutter/constants.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/screens/homeScreen/home_screen.dart';
+import 'package:skinaware_flutter/screens/reportScreen/reportScreenTest.dart';
 import 'package:skinaware_flutter/screens/scan_screen.dart';
 import 'package:skinaware_flutter/screens/settings_screen.dart';
 
@@ -28,7 +29,7 @@ class _MainpageState extends ConsumerState<Mainpage> {
   List<Widget> _getPages() {
     return [
       HomeScreen(),
-      HomeScreen(), // TODO: Replace with Reports screen
+      ReportSkinTestScreen(),
       const ScanScreen(),
       const SettingsScreen(),
     ];

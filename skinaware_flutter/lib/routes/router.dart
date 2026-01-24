@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:skinaware_flutter/mainpage.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
+import 'package:skinaware_flutter/screens/check_symtopms_screen/check_sys_screen.dart';
 import 'package:skinaware_flutter/screens/profileScreen/profile_screen.dart';
 import 'package:skinaware_flutter/screens/scan_screen.dart' show ScanScreen;
 import 'package:skinaware_flutter/screens/settings_screen.dart';
 import 'package:skinaware_flutter/screens/model_test_screen.dart';
+import 'package:skinaware_flutter/screens/skin_camera_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   print("Routing to: ${settings.name}");
@@ -22,6 +24,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case scanRoute:
       return _RightSlide(const ScanScreen());
 
+    case checkSymRoute:
+      return _RightSlide(const CheckSkinScreen());
+
+    case camerScanRoute:
+      return _RightSlide(const SkinCameraScreen());
     case onBoardingRoute:
       return MaterialPageRoute(
         builder: (context) => const Scaffold(

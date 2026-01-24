@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skinaware_flutter/routes/route_constants.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({Key? key}) : super(key: key);
@@ -8,187 +9,94 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  List<String> selectedImages = [];
+  static const primaryColor = Color(0xFF0284C7);
+
+  final List<String> selectedImages = [];
 
   @override
   Widget build(BuildContext context) {
+    final hasImages = selectedImages.isNotEmpty;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F4F8),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Skin Analysis',
-          style: TextStyle(
-            color: Color(0xFF2C7A9B),
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          if (selectedImages.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Color(0xFF2C7A9B)),
-              onPressed: () {
-                setState(() {
-                  selectedImages.clear();
-                });
-              },
-            ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header Section
-            _buildHeaderSection(),
-
-            // Camera/Upload Options
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _buildCameraOption(),
-                  const SizedBox(height: 12),
-                  _buildUploadOption(),
-                ],
+      bottomNavigationBar: hasImages ? _buildBottomAnalyzeBar() : null,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 30,
               ),
-            ),
+              _buildHeaderSection(),
+              const SizedBox(height: 14),
 
-            // Selected Images Preview
-            if (selectedImages.isNotEmpty) _buildSelectedImagesSection(),
+              _buildActionGrid(),
+              const SizedBox(height: 14),
 
-            // Tips Section
-            _buildTipsSection(),
+              if (hasImages) ...[
+                _buildSelectedImagesSection(),
+                const SizedBox(height: 14),
+              ],
 
-            // Analyze Button
-            if (selectedImages.isNotEmpty) _buildAnalyzeButton(),
+              _buildTipsSection(),
 
-            const SizedBox(height: 20),
-          ],
+              SizedBox(height: hasImages ? 96 : 18),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildHeaderSection() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2C7A9B), Color(0xFF7DD3C0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2C7A9B).withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.camera_alt,
-              size: 48,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Capture or Upload',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Take a clear photo of the affected area\nor upload from your gallery',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white.withOpacity(0.9),
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCameraOption() {
     return InkWell(
+      borderRadius: BorderRadius.circular(20),
       onTap: () {
-        // TODO: Open camera
-        _showComingSoonDialog('Camera');
+        Navigator.pushNamed(context, camerScanRoute);
       },
-      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
-                color: const Color(0xFF2C7A9B).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: primaryColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(
-                Icons.camera_alt,
-                color: Color(0xFF2C7A9B),
-                size: 32,
-              ),
+              child: const Icon(Icons.camera_alt_rounded, color: primaryColor),
             ),
-            const SizedBox(width: 16),
-            Expanded(
+            const SizedBox(width: 14),
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Take Photo',
+                  Text(
+                    'Capture or upload',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2C7A9B),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 6),
                   Text(
-                    'Use your camera to capture',
+                    'Take a clear photo of the affected area or select from your gallery.',
                     style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                      fontSize: 13,
+                      height: 1.35,
+                      color: Color(0xFF64748B),
                     ),
                   ),
                 ],
               ),
-            ),
-            const Icon(
-              Icons.chevron_right,
-              color: Color(0xFF2C7A9B),
             ),
           ],
         ),
@@ -196,67 +104,74 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  Widget _buildUploadOption() {
+  Widget _buildActionGrid() {
+    return Row(
+      children: [
+        Expanded(
+          child: _actionCard(
+            icon: Icons.camera_alt_rounded,
+            title: 'Take photo',
+            subtitle: 'Open camera',
+            onTap: () => _showComingSoonDialog('Camera'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _actionCard(
+            icon: Icons.photo_library_rounded,
+            title: 'Upload',
+            subtitle: 'From gallery',
+            onTap: () => _showComingSoonDialog('Gallery Upload'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _actionCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
-      onTap: () {
-        // TODO: Open gallery
-        _showComingSoonDialog('Gallery Upload');
-      },
-      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFF7DD3C0).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
+                color: primaryColor.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(
-                Icons.photo_library,
-                color: Color(0xFF2C7A9B),
-                size: 32,
+              child: Icon(icon, color: primaryColor),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Upload from Gallery',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2C7A9B),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Select one or multiple photos',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF64748B),
               ),
-            ),
-            const Icon(
-              Icons.chevron_right,
-              color: Color(0xFF2C7A9B),
             ),
           ],
         ),
@@ -266,90 +181,83 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Widget _buildSelectedImagesSection() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Selected Images (${selectedImages.length})',
+                'Selected photos',
                 style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C7A9B),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
                 ),
               ),
+              const SizedBox(width: 8),
+              _countPill(selectedImages.length),
+              const Spacer(),
               TextButton(
-                onPressed: () {
-                  setState(() {
-                    selectedImages.clear();
-                  });
-                },
-                child: const Text('Clear All'),
+                onPressed: () => setState(selectedImages.clear),
+                style: TextButton.styleFrom(
+                  foregroundColor: primaryColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                ),
+                child: const Text(
+                  'Clear',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
+            itemCount: selectedImages.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
             ),
-            itemCount: selectedImages.length,
             itemBuilder: (context, index) {
               return Stack(
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8F4F8),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFF2C7A9B).withOpacity(0.3),
-                        width: 2,
-                      ),
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
                     ),
                     child: const Center(
                       child: Icon(
-                        Icons.image,
-                        color: Color(0xFF2C7A9B),
-                        size: 40,
+                        Icons.image_rounded,
+                        color: Color(0xFF94A3B8),
+                        size: 34,
                       ),
                     ),
                   ),
                   Positioned(
-                    top: 4,
-                    right: 4,
+                    top: 6,
+                    right: 6,
                     child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedImages.removeAt(index);
-                        });
-                      },
+                      onTap: () =>
+                          setState(() => selectedImages.removeAt(index)),
                       child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.65),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
-                          Icons.close,
+                          Icons.close_rounded,
                           color: Colors.white,
                           size: 16,
                         ),
@@ -365,20 +273,32 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
+  Widget _countPill(int count) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: primaryColor.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: primaryColor.withOpacity(0.25)),
+      ),
+      child: Text(
+        '$count',
+        style: const TextStyle(
+          fontWeight: FontWeight.w800,
+          color: primaryColor,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
   Widget _buildTipsSection() {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,77 +306,72 @@ class _ScanScreenState extends State<ScanScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF9DD9F3).withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12),
+                  color: primaryColor.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
-                  Icons.lightbulb_outline,
-                  color: Color(0xFF2C7A9B),
-                  size: 24,
-                ),
+                child: const Icon(Icons.lightbulb_rounded, color: primaryColor),
               ),
               const SizedBox(width: 12),
               const Text(
-                'Photo Tips',
+                'Photo tips',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C7A9B),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _buildTipItem(
-            Icons.wb_sunny_outlined,
-            'Good Lighting',
-            'Use natural light or bright indoor lighting',
-            const Color(0xFFFFA07A),
+          const SizedBox(height: 14),
+
+          _tipRow(
+            icon: Icons.wb_sunny_rounded,
+            title: 'Good lighting',
+            subtitle: 'Prefer natural light or bright indoor lighting.',
           ),
           const SizedBox(height: 12),
-          _buildTipItem(
-            Icons.center_focus_strong,
-            'Clear Focus',
-            'Keep the camera steady and focused on the area',
-            const Color(0xFF7DD3C0),
+          _tipRow(
+            icon: Icons.center_focus_strong_rounded,
+            title: 'Keep it sharp',
+            subtitle: 'Hold steady and focus on the affected area.',
           ),
           const SizedBox(height: 12),
-          _buildTipItem(
-            Icons.straighten,
-            'Close Distance',
-            'Take the photo 6-12 inches away from skin',
-            const Color(0xFF9DD9F3),
+          _tipRow(
+            icon: Icons.straighten_rounded,
+            title: 'Distance',
+            subtitle: 'Take the photo about 6–12 inches away.',
           ),
           const SizedBox(height: 12),
-          _buildTipItem(
-            Icons.crop_free,
-            'Fill the Frame',
-            'Make sure the affected area fills most of the photo',
-            const Color(0xFF87CEEB),
+          _tipRow(
+            icon: Icons.crop_free_rounded,
+            title: 'Fill the frame',
+            subtitle: 'Let the affected area take most of the photo.',
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTipItem(
-    IconData icon,
-    String title,
-    String description,
-    Color iconColor,
-  ) {
+  Widget _tipRow({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
           ),
-          child: Icon(icon, size: 20, color: const Color(0xFF2C7A9B)),
+          child: Icon(icon, color: primaryColor, size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -466,18 +381,18 @@ class _ScanScreenState extends State<ScanScreen> {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C7A9B),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 3),
               Text(
-                description,
-                style: TextStyle(
+                subtitle,
+                style: const TextStyle(
                   fontSize: 13,
-                  color: Colors.grey[600],
-                  height: 1.4,
+                  height: 1.35,
+                  color: Color(0xFF64748B),
                 ),
               ),
             ],
@@ -487,37 +402,45 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  Widget _buildAnalyzeButton() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          // TODO: Analyze images
-          _showComingSoonDialog('Analysis');
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2C7A9B),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
+  Widget _buildBottomAnalyzeBar() {
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: const Color(0xFFE5E7EB))),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.analytics_outlined, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(
-              'Analyze ${selectedImages.length} ${selectedImages.length == 1 ? 'Image' : 'Images'}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+        child: SizedBox(
+          height: 52,
+          child: ElevatedButton(
+            onPressed: () => _showComingSoonDialog('Analysis'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
-          ],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.analytics_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Analyze ${selectedImages.length} ${selectedImages.length == 1 ? 'photo' : 'photos'}',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -527,9 +450,9 @@ class _ScanScreenState extends State<ScanScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Coming Soon'),
-        content: Text('$feature functionality will be implemented next.'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('Coming soon'),
+        content: Text('$feature will be implemented next.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

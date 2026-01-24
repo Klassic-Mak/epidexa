@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
       child: ProviderScope(
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'HomeButler',
+          title: 'Skin`Aware',
           theme: lightmode,
           initialRoute: mainPageRoute,
           onGenerateRoute: generateRoute,

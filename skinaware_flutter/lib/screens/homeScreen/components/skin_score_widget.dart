@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skinaware_flutter/constants.dart';
+import 'package:skinaware_flutter/routes/route_constants.dart';
 
 class SkinScoreWidget extends StatelessWidget {
   const SkinScoreWidget({super.key});
@@ -109,7 +110,9 @@ class SkinScoreWidget extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, checkSymRoute);
+              },
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor: primaryColor,

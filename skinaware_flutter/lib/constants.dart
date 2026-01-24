@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 const fashnectlogoURL = "https://files.catbox.moe/l98aod.png";
 
-const Color primaryColor = Colors.blue;
+const Color primaryColor = Color(0xFF0284C7);
 const Color primaryColor2 = Color.fromRGBO(123, 97, 255, 1);
 
 const darkBlueColor = Color.fromRGBO(81, 133, 166, 1);

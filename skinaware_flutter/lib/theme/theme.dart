@@ -34,3 +34,35 @@ ThemeData lightmode = ThemeData(
     bodyMedium: TextStyle(color: Colors.black), // Primary text
   ),
 );
+
+
+
+// ThemeData lightmode = ThemeData(
+//   textSelectionTheme: TextSelectionThemeData(
+//     cursorColor: Colors.grey,
+//     selectionColor: primaryColor.withOpacity(0.3),
+//     // optional
+//   ),
+//   appBarTheme: const AppBarTheme(
+//     systemOverlayStyle: SystemUiOverlayStyle(
+//       statusBarColor: Colors.transparent,
+//       statusBarIconBrightness: Brightness.dark,
+//       systemNavigationBarColor: backgroundColor,
+//       systemNavigationBarIconBrightness: Brightness.dark,
+//     ),
+//     color: backgroundColor,
+//     elevation: 0,
+//     scrolledUnderElevation: 0.0,
+//   ),
+//   fontFamily: 'Poppins',
+//   scaffoldBackgroundColor: backgroundColor,
+//   brightness: Brightness.light,
+//   colorScheme: ColorScheme.light(
+//     primaryContainer: const Color.fromARGB(247, 232, 230, 230),
+//     background: backgroundColor,
+//     primary: primaryColor,
+//   ),
+//   textTheme: TextTheme(
+//     bodyMedium: TextStyle(color: Colors.black), // Primary text
+//   ),
+// );
