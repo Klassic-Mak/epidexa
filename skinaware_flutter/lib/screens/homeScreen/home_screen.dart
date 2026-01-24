@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Let's take care of \nyour skin",
+                      "Welcome to\nEpidexa",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,

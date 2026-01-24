@@ -7,9 +7,12 @@ import 'package:skinaware_flutter/screens/scan_screen.dart' show ScanScreen;
 import 'package:skinaware_flutter/screens/settings_screen.dart';
 import 'package:skinaware_flutter/screens/model_test_screen.dart';
 import 'package:skinaware_flutter/screens/skin_camera_screen.dart';
+import 'package:skinaware_flutter/screens/chat/chat_screen.dart';
+import 'package:skinaware_flutter/screens/analysis/analysis_result_screen.dart';
+import 'package:skinaware_flutter/services/ai/ollama_service.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  print("Routing to: ${settings.name}");
+  debugPrint("Routing to: ${settings.name}");
 
   switch (settings.name) {
     case mainPageRoute:
@@ -29,6 +32,18 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case camerScanRoute:
       return _RightSlide(const SkinCameraScreen());
+    case chatRoute:
+      return _RightSlide(const ChatScreen());
+
+    case analysisResultRoute:
+      final args = settings.arguments as Map<String, dynamic>;
+      return _RightSlide(
+        AnalysisResultScreen(
+          imagePath: args['imagePath'] as String,
+          result: args['result'] as AnalysisResult?,
+        ),
+      );
+
     case onBoardingRoute:
       return MaterialPageRoute(
         builder: (context) => const Scaffold(

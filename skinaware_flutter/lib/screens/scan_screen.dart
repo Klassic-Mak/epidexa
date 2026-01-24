@@ -1,66 +1,286 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:skinaware_flutter/routes/route_constants.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import '../constants.dart';
+import '../providers/chat_provider.dart';
+import '../routes/route_constants.dart';
 
-class ScanScreen extends StatefulWidget {
-  const ScanScreen({Key? key}) : super(key: key);
+class ScanScreen extends ConsumerStatefulWidget {
+  const ScanScreen({super.key});
 
   @override
-  State<ScanScreen> createState() => _ScanScreenState();
+  ConsumerState<ScanScreen> createState() => _ScanScreenState();
 }
 
-class _ScanScreenState extends State<ScanScreen> {
-  static const primaryColor = Color(0xFF0284C7);
+class _ScanScreenState extends ConsumerState<ScanScreen> {
+  List<String> selectedImages = [];
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isAnalyzing = false;
 
-  final List<String> selectedImages = [];
+  Future<void> _takePhoto() async {
+    final XFile? image = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+
+    if (image != null) {
+      setState(() {
+        selectedImages.add(image.path);
+      });
+    }
+  }
+
+  Future<void> _pickFromGallery() async {
+    final List<XFile> images = await _imagePicker.pickMultiImage(
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+
+    if (images.isNotEmpty) {
+      setState(() {
+        selectedImages.addAll(images.map((x) => x.path));
+      });
+    }
+  }
+
+  Future<void> _analyzeImages() async {
+    if (selectedImages.isEmpty) return;
+
+    setState(() {
+      _isAnalyzing = true;
+    });
+
+    try {
+      final result = await ref
+          .read(analysisProvider.notifier)
+          .analyzeSelectedImages(
+            symptoms: null,
+            duration: null,
+          );
+
+      if (mounted) {
+        setState(() {
+          _isAnalyzing = false;
+        });
+
+        if (result != null) {
+          Navigator.pushNamed(
+            context,
+            analysisResultRoute,
+            arguments: {
+              'imagePath': selectedImages.first,
+              'result': result,
+            },
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isAnalyzing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Analysis error: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final analysisState = ref.read(analysisProvider);
+    if (analysisState.selectedImages.isNotEmpty && selectedImages.isEmpty) {
+      setState(() {
+        selectedImages = List.from(analysisState.selectedImages);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final hasImages = selectedImages.isNotEmpty;
+    final analysisState = ref.watch(analysisProvider);
 
     return Scaffold(
-      bottomNavigationBar: hasImages ? _buildBottomAnalyzeBar() : null,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 30,
-              ),
-              _buildHeaderSection(),
-              const SizedBox(height: 14),
-
-              _buildActionGrid(),
-              const SizedBox(height: 14),
-
-              if (hasImages) ...[
-                _buildSelectedImagesSection(),
-                const SizedBox(height: 14),
-              ],
-
-              _buildTipsSection(),
-
-              SizedBox(height: hasImages ? 96 : 18),
-            ],
+      backgroundColor: const Color(0xFFE8F4F8),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Skin Analysis',
+          style: TextStyle(
+            color: Color(0xFF2C7A9B),
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.chat_bubble_outline,
+              color: Color(0xFF2C7A9B),
+            ),
+            onPressed: () => Navigator.pushNamed(context, chatRoute),
+            tooltip: 'Ask Dr. Epi',
+          ),
+          if (selectedImages.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Color(0xFF2C7A9B)),
+              onPressed: () {
+                setState(() {
+                  selectedImages.clear();
+                });
+                ref.read(analysisProvider.notifier).clearImages();
+              },
+            ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildHeaderSection(),
+                const SizedBox(height: 16),
+                _buildCameraOption(),
+                const SizedBox(height: 12),
+                _buildUploadOption(),
+                if (selectedImages.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _buildSelectedImagesSection(),
+                ],
+                const SizedBox(height: 16),
+                _buildTipsSection(),
+                if (selectedImages.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _buildAnalyzeButton(),
+                ],
+                const SizedBox(height: 16),
+                _buildQuickChatSection(),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+          if (_isAnalyzing || analysisState.isAnalyzing)
+            Container(
+              color: Colors.black54,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(
+                        color: Color(0xFF2C7A9B),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Dr. Epi is analyzing...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2C7A9B),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Please wait a moment',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
   Widget _buildHeaderSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2C7A9B), Color(0xFF7DD3C0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2C7A9B).withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.camera_alt,
+              size: 48,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Capture or Upload',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Take a clear photo of the skin area to analyze\nor select from photo library',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white.withValues(alpha: 0.9),
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCameraOption() {
     return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: () {
-        Navigator.pushNamed(context, camerScanRoute);
-      },
+      onTap: _takePhoto,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -68,10 +288,14 @@ class _ScanScreenState extends State<ScanScreen> {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(14),
+                color: const Color(0xFF2C7A9B).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.camera_alt_rounded, color: primaryColor),
+              child: const Icon(
+                Icons.camera_alt_rounded,
+                color: Color(0xFF2C7A9B),
+                size: 24,
+              ),
             ),
             const SizedBox(width: 14),
             const Expanded(
@@ -79,24 +303,27 @@ class _ScanScreenState extends State<ScanScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Capture or upload',
+                    'Take Photo',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF0F172A),
                     ),
                   ),
-                  SizedBox(height: 6),
+                  SizedBox(height: 4),
                   Text(
-                    'Take a clear photo of the affected area or select from your gallery.',
+                    'Use camera to capture',
                     style: TextStyle(
                       fontSize: 13,
-                      height: 1.35,
                       color: Color(0xFF64748B),
                     ),
                   ),
                 ],
               ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              color: Color(0xFF2C7A9B),
             ),
           ],
         ),
@@ -104,74 +331,65 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  Widget _buildActionGrid() {
-    return Row(
-      children: [
-        Expanded(
-          child: _actionCard(
-            icon: Icons.camera_alt_rounded,
-            title: 'Take photo',
-            subtitle: 'Open camera',
-            onTap: () => _showComingSoonDialog('Camera'),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _actionCard(
-            icon: Icons.photo_library_rounded,
-            title: 'Upload',
-            subtitle: 'From gallery',
-            onTap: () => _showComingSoonDialog('Gallery Upload'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _actionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildUploadOption() {
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      onTap: _pickFromGallery,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.10),
-                borderRadius: BorderRadius.circular(14),
+                color: const Color(0xFF7DD3C0).withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: primaryColor),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0F172A),
+              child: const Icon(
+                Icons.photo_library_rounded,
+                color: Color(0xFF2C7A9B),
+                size: 24,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF64748B),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Upload from Library',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Select one or more photos',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
               ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              color: Color(0xFF2C7A9B),
             ),
           ],
         ),
@@ -184,17 +402,23 @@ class _ScanScreenState extends State<ScanScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
+              const Text(
                 'Selected photos',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A),
@@ -204,15 +428,13 @@ class _ScanScreenState extends State<ScanScreen> {
               _countPill(selectedImages.length),
               const Spacer(),
               TextButton(
-                onPressed: () => setState(selectedImages.clear),
-                style: TextButton.styleFrom(
-                  foregroundColor: primaryColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                ),
-                child: const Text(
-                  'Clear',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
+                onPressed: () {
+                  setState(() {
+                    selectedImages.clear();
+                  });
+                  ref.read(analysisProvider.notifier).clearImages();
+                },
+                child: const Text('Clear All'),
               ),
             ],
           ),
@@ -229,17 +451,25 @@ class _ScanScreenState extends State<ScanScreen> {
             itemBuilder: (context, index) {
               return Stack(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE5E7EB)),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.image_rounded,
-                        color: Color(0xFF94A3B8),
-                        size: 34,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      File(selectedImages[index]),
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F4F8),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.image,
+                            color: Color(0xFF2C7A9B),
+                            size: 40,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -247,13 +477,17 @@ class _ScanScreenState extends State<ScanScreen> {
                     top: 6,
                     right: 6,
                     child: GestureDetector(
-                      onTap: () =>
-                          setState(() => selectedImages.removeAt(index)),
+                      onTap: () {
+                        setState(() {
+                          selectedImages.removeAt(index);
+                        });
+                        ref.read(analysisProvider.notifier).removeImage(index);
+                      },
                       child: Container(
                         width: 26,
                         height: 26,
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.65),
+                          color: Colors.black.withValues(alpha: 0.65),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -277,9 +511,9 @@ class _ScanScreenState extends State<ScanScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: primaryColor.withOpacity(0.10),
+        color: primaryColor.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: primaryColor.withOpacity(0.25)),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.25)),
       ),
       child: Text(
         '$count',
@@ -296,9 +530,15 @@ class _ScanScreenState extends State<ScanScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,10 +549,14 @@ class _ScanScreenState extends State<ScanScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(14),
+                  color: const Color(0xFF9DD9F3).withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.lightbulb_rounded, color: primaryColor),
+                child: const Icon(
+                  Icons.lightbulb_rounded,
+                  color: Color(0xFF2C7A9B),
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               const Text(
@@ -325,41 +569,45 @@ class _ScanScreenState extends State<ScanScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 14),
-
-          _tipRow(
-            icon: Icons.wb_sunny_rounded,
-            title: 'Good lighting',
-            subtitle: 'Prefer natural light or bright indoor lighting.',
+          const SizedBox(height: 16),
+          _buildTipItem(
+            Icons.wb_sunny_outlined,
+            'Good Lighting',
+            'Use natural light or bright lamp',
+            const Color(0xFFFFA07A),
           ),
           const SizedBox(height: 12),
-          _tipRow(
-            icon: Icons.center_focus_strong_rounded,
-            title: 'Keep it sharp',
-            subtitle: 'Hold steady and focus on the affected area.',
+          _buildTipItem(
+            Icons.center_focus_strong,
+            'Clear Focus',
+            'Keep camera steady and focus on the area',
+            const Color(0xFF7DD3C0),
           ),
           const SizedBox(height: 12),
-          _tipRow(
-            icon: Icons.straighten_rounded,
-            title: 'Distance',
-            subtitle: 'Take the photo about 6–12 inches away.',
+          _buildTipItem(
+            Icons.straighten,
+            'Proper Distance',
+            'Capture 15-30cm from skin',
+            const Color(0xFF9DD9F3),
           ),
           const SizedBox(height: 12),
-          _tipRow(
-            icon: Icons.crop_free_rounded,
-            title: 'Fill the frame',
-            subtitle: 'Let the affected area take most of the photo.',
+          _buildTipItem(
+            Icons.crop_free,
+            'Fill Frame',
+            'Ensure skin area fills most of the frame',
+            const Color(0xFF87CEEB),
           ),
         ],
       ),
     );
   }
 
-  Widget _tipRow({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
+  Widget _buildTipItem(
+    IconData icon,
+    String title,
+    String description,
+    Color iconColor,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -367,11 +615,10 @@ class _ScanScreenState extends State<ScanScreen> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            color: iconColor.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: primaryColor, size: 20),
+          child: Icon(icon, color: const Color(0xFF2C7A9B), size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -388,7 +635,7 @@ class _ScanScreenState extends State<ScanScreen> {
               ),
               const SizedBox(height: 3),
               Text(
-                subtitle,
+                description,
                 style: const TextStyle(
                   fontSize: 13,
                   height: 1.35,
@@ -402,61 +649,119 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  Widget _buildBottomAnalyzeBar() {
-    return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: const Color(0xFFE5E7EB))),
+  Widget _buildAnalyzeButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _isAnalyzing
+            ? null
+            : () {
+                for (final path in selectedImages) {
+                  ref.read(analysisProvider.notifier).addImage(path);
+                }
+                _analyzeImages();
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2C7A9B),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
         ),
-        child: SizedBox(
-          height: 52,
-          child: ElevatedButton(
-            onPressed: () => _showComingSoonDialog('Analysis'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.analytics_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Analyze ${selectedImages.length} ${selectedImages.length == 1 ? 'photo' : 'photos'}',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.analytics_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Analyze ${selectedImages.length} ${selectedImages.length == 1 ? 'photo' : 'photos'}',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  void _showComingSoonDialog(String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Coming soon'),
-        content: Text('$feature will be implemented next.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+  Widget _buildQuickChatSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF2C7A9B).withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2C7A9B), Color(0xFF7DD3C0)],
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: const Icon(
+                  Icons.medical_services,
+                  color: Colors.white,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Ask Dr. Epi',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2C7A9B),
+                      ),
+                    ),
+                    Text(
+                      'Direct dermatology consultation with AI',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.pushNamed(context, chatRoute),
+              icon: const Icon(Icons.chat_bubble_outline),
+              label: const Text('Start Consultation'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF2C7A9B),
+                side: const BorderSide(color: Color(0xFF2C7A9B)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
         ],
       ),
