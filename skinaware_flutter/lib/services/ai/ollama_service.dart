@@ -369,7 +369,9 @@ class OllamaService {
 
       // Add to history
       _chatHistory.add(ChatMessage(role: 'user', content: message));
-      _chatHistory.add(ChatMessage(role: 'assistant', content: invalidResponse));
+      _chatHistory.add(
+        ChatMessage(role: 'assistant', content: invalidResponse),
+      );
 
       return invalidResponse;
     }
@@ -401,11 +403,14 @@ class OllamaService {
       ),
     );
 
-    // Send to text model for comprehensive response
-    final messages = [
-      {'role': 'system', 'content': DermatologyPrompts.systemPrompt},
-      {'role': 'user', 'content': combinedPrompt},
-    ];
+    // Build messages with full chat history for context
+    final messages = _chatHistory.map((m) => m.toJson()).toList();
+
+    // Add the combined prompt as the latest user message
+    messages.add({
+      'role': 'user',
+      'content': combinedPrompt,
+    });
 
     final response = await _sendChatRequest(
       model: textModel,
@@ -646,10 +651,16 @@ class OllamaService {
       'model': model,
       'messages': messages,
       'stream': stream,
+      'options': {
+        'num_predict': 2048, // Increase max tokens for longer responses
+        'temperature': 0.7,
+        'top_p': 0.9,
+      },
     };
 
     print('🚀 Sending text request to Ollama: $baseUrl/api/chat');
     print('📦 Model: $model');
+    print('📊 Max tokens: 2048');
 
     final response = await http
         .post(
