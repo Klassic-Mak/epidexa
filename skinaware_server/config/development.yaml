@@ -21,12 +21,13 @@ webServer:
 
 
 database:
-  host: aws-1-eu-west-1.pooler.supabase.com
-  port: 6543
-  name: postgres
-  user: postgres.hklbaolpqmddlgjptity
-  password: CybcJ1oU2CwXby3a
+  host: skinaware-klassicmak-1668.h.aivencloud.com
+  port: 23192
+  name: defaultdb
+  password: AVNS_yufajU5z0j0F0LVsTQT
+  user: avnadmin
   requireSsl: true
+  maxConnections: 10
 
 
 sessionLogs:
