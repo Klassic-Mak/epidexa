@@ -31,26 +31,29 @@ void main() async {
   // client.auth.initialize();
 
   await ScreenUtil.ensureScreenSize();
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
+  @override
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(375, 690),
       minTextAdapt: true,
       splitScreenMode: true,
-      child: ProviderScope(
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Epidexa',
-          theme: lightmode,
-          initialRoute: mainPageRoute,
-          onGenerateRoute: generateRoute,
-        ),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Epidexa',
+        theme: lightmode,
+        initialRoute: mainPageRoute,
+        onGenerateRoute: generateRoute,
       ),
     );
   }

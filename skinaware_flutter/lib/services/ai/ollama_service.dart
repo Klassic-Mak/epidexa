@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import '../cloudinary_service.dart';
 import 'dermatology_prompts.dart';
 
 /// Message model for chat history
@@ -44,6 +45,19 @@ class ChatMessage {
   }
 }
 
+/// Result of image validation
+class ImageValidationResult {
+  final bool isValid;
+  final String message;
+  final String? skinAreaDescription;
+
+  ImageValidationResult({
+    required this.isValid,
+    required this.message,
+    this.skinAreaDescription,
+  });
+}
+
 /// Analysis result from AI
 class AnalysisResult {
   final String diagnosis;
@@ -52,6 +66,7 @@ class AnalysisResult {
   final String recommendations;
   final String fullResponse;
   final bool requiresUrgentCare;
+  final bool isInvalidImage;
 
   AnalysisResult({
     required this.diagnosis,
@@ -60,7 +75,26 @@ class AnalysisResult {
     required this.recommendations,
     required this.fullResponse,
     this.requiresUrgentCare = false,
+    this.isInvalidImage = false,
   });
+
+  /// Factory for invalid image result
+  factory AnalysisResult.invalidImage({bool isVietnamese = false}) {
+    final message = isVietnamese
+        ? DermatologyPrompts.invalidImageResponseVi
+        : DermatologyPrompts.invalidImageResponseEn;
+    return AnalysisResult(
+      diagnosis: isVietnamese
+          ? 'Ảnh không phù hợp để phân tích'
+          : 'Image not suitable for analysis',
+      confidence: 0.0,
+      differentialDiagnosis: [],
+      recommendations: message,
+      fullResponse: message,
+      requiresUrgentCare: false,
+      isInvalidImage: true,
+    );
+  }
 }
 
 /// Ollama API Service for LLaVA-Med and OpenBioLLM
@@ -72,6 +106,7 @@ class OllamaService {
 
   List<ChatMessage> _chatHistory = [];
   bool _isInitialized = false;
+  final CloudinaryService _cloudinaryService = CloudinaryService();
 
   OllamaService({
     this.baseUrl = 'http://118.70.222.145:11434',
@@ -135,20 +170,108 @@ class OllamaService {
     return base64Encode(bytes);
   }
 
-  /// Analyze image using LLaVA-Med vision model
-  Future<String> analyzeImage(String imagePath, {String? customPrompt}) async {
+  /// Validate if image contains skin suitable for dermatological analysis
+  Future<ImageValidationResult> validateImage(String imagePath) async {
     if (!_isInitialized) {
       throw Exception('Service not initialized. Call initialize() first.');
     }
 
-    final imageBase64 = await _imageToBase64(imagePath);
+    print('🔍 Validating image for skin content...');
+
+    // Upload image to Cloudinary
+    final imageUrl = await _cloudinaryService.uploadImage(imagePath);
+    print('📸 Cloudinary image URL: $imageUrl');
+
+    // Send to vision model for validation
+    final response = await _sendChatRequestWithImage(
+      model: visionModel,
+      prompt: DermatologyPrompts.imageValidationPrompt,
+      imageUrl: imageUrl,
+    );
+
+    print('📝 Validation response: $response');
+
+    // Parse the response
+    final upperResponse = response.toUpperCase().trim();
+    if (upperResponse.startsWith('VALID')) {
+      // Extract description after "VALID:"
+      final description = response.contains(':')
+          ? response.substring(response.indexOf(':') + 1).trim()
+          : 'Skin image detected';
+      print('✅ Image validated: $description');
+      return ImageValidationResult(
+        isValid: true,
+        message: 'Image contains skin suitable for analysis',
+        skinAreaDescription: description,
+      );
+    } else {
+      // Extract reason after "INVALID:"
+      final reason = response.contains(':')
+          ? response.substring(response.indexOf(':') + 1).trim()
+          : 'Image does not contain analyzable skin';
+      print('❌ Image invalid: $reason');
+      return ImageValidationResult(
+        isValid: false,
+        message: reason,
+      );
+    }
+  }
+
+  /// Validate image from bytes
+  Future<ImageValidationResult> validateImageBytes(Uint8List imageBytes) async {
+    // Save bytes to temp file
+    final tempDir = Directory.systemTemp;
+    final tempFile = File(
+      '${tempDir.path}/validate_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
+    await tempFile.writeAsBytes(imageBytes);
+
+    try {
+      return await validateImage(tempFile.path);
+    } finally {
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+    }
+  }
+
+  /// Analyze image using LLaVA-Med vision model (with validation)
+  Future<String> analyzeImage(
+    String imagePath, {
+    String? customPrompt,
+    bool skipValidation = false,
+  }) async {
+    if (!_isInitialized) {
+      throw Exception('Service not initialized. Call initialize() first.');
+    }
+
+    // Upload image to Cloudinary first
+    final imageUrl = await _cloudinaryService.uploadImage(imagePath);
+    print('📸 Cloudinary image URL: $imageUrl');
+
+    // Validate image first unless skipped
+    if (!skipValidation) {
+      print('🔍 Validating image before analysis...');
+      final validationResponse = await _sendChatRequestWithImage(
+        model: visionModel,
+        prompt: DermatologyPrompts.imageValidationPrompt,
+        imageUrl: imageUrl,
+      );
+
+      final upperResponse = validationResponse.toUpperCase().trim();
+      if (!upperResponse.startsWith('VALID')) {
+        print('❌ Image validation failed');
+        return DermatologyPrompts.invalidImageResponseEn;
+      }
+      print('✅ Image validation passed');
+    }
+
     final prompt = customPrompt ?? DermatologyPrompts.visionAnalysisPrompt;
 
-    final response = await _sendRequest(
+    final response = await _sendChatRequestWithImage(
       model: visionModel,
       prompt: prompt,
-      images: [imageBase64],
-      stream: false,
+      imageUrl: imageUrl,
     );
 
     return response;
@@ -163,17 +286,31 @@ class OllamaService {
       throw Exception('Service not initialized. Call initialize() first.');
     }
 
-    final imageBase64 = _bytesToBase64(imageBytes);
-    final prompt = customPrompt ?? DermatologyPrompts.visionAnalysisPrompt;
-
-    final response = await _sendRequest(
-      model: visionModel,
-      prompt: prompt,
-      images: [imageBase64],
-      stream: false,
+    // Save bytes to temp file, upload to Cloudinary, then delete temp file
+    final tempDir = Directory.systemTemp;
+    final tempFile = File(
+      '${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.jpg',
     );
+    await tempFile.writeAsBytes(imageBytes);
 
-    return response;
+    try {
+      final imageUrl = await _cloudinaryService.uploadImage(tempFile.path);
+      print('📸 Cloudinary image URL: $imageUrl');
+      final prompt = customPrompt ?? DermatologyPrompts.visionAnalysisPrompt;
+
+      final response = await _sendChatRequestWithImage(
+        model: visionModel,
+        prompt: prompt,
+        imageUrl: imageUrl,
+      );
+
+      return response;
+    } finally {
+      // Clean up temp file
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+    }
   }
 
   /// Send text-only message to OpenBioLLM
@@ -211,13 +348,43 @@ class OllamaService {
   }
 
   /// Send message with image (combined vision + text analysis)
-  Future<String> sendMessageWithImage(String message, String imagePath) async {
+  Future<String> sendMessageWithImage(
+    String message,
+    String imagePath, {
+    bool isVietnamese = false,
+  }) async {
     if (!_isInitialized) {
       throw Exception('Service not initialized. Call initialize() first.');
     }
 
-    // First, analyze image with vision model
-    final visionAnalysis = await analyzeImage(imagePath);
+    // Validate image first
+    print('🔍 Validating image before chat analysis...');
+    final validation = await validateImage(imagePath);
+
+    if (!validation.isValid) {
+      print('❌ Image validation failed: ${validation.message}');
+      final invalidResponse = isVietnamese
+          ? DermatologyPrompts.invalidImageResponseVi
+          : DermatologyPrompts.invalidImageResponseEn;
+
+      // Add to history
+      _chatHistory.add(ChatMessage(role: 'user', content: message));
+      _chatHistory.add(ChatMessage(role: 'assistant', content: invalidResponse));
+
+      return invalidResponse;
+    }
+    print('✅ Image validated: ${validation.skinAreaDescription}');
+
+    // Upload image to Cloudinary
+    final imageUrl = await _cloudinaryService.uploadImage(imagePath);
+    print('📸 Cloudinary image URL: $imageUrl');
+
+    // Analyze image with vision model using URL
+    final visionAnalysis = await _sendChatRequestWithImage(
+      model: visionModel,
+      prompt: DermatologyPrompts.visionAnalysisPrompt,
+      imageUrl: imageUrl,
+    );
 
     // Then, combine with user question for text model
     final combinedPrompt = DermatologyPrompts.getCombinedAnalysisPrompt(
@@ -225,13 +392,12 @@ class OllamaService {
       message,
     );
 
-    // Add to history with image reference
-    final imageBase64 = await _imageToBase64(imagePath);
+    // Add to history with image URL
     _chatHistory.add(
       ChatMessage(
         role: 'user',
         content: message,
-        imageBase64: imageBase64,
+        imageBase64: imageUrl, // Store URL instead of base64
       ),
     );
 
@@ -297,13 +463,28 @@ class OllamaService {
     String? symptoms,
     String? duration,
     String? previousTreatments,
+    bool isVietnamese = false,
   }) async {
     if (!_isInitialized) {
       throw Exception('Service not initialized. Call initialize() first.');
     }
 
-    // Step 1: Vision analysis
-    final visionResult = await analyzeImage(imagePath);
+    print('🔬 Starting full analysis...');
+
+    // Step 0: Validate image first
+    print('🔍 Step 0: Validating image contains skin...');
+    final validation = await validateImage(imagePath);
+
+    if (!validation.isValid) {
+      print('❌ Image validation failed: ${validation.message}');
+      return AnalysisResult.invalidImage(isVietnamese: isVietnamese);
+    }
+    print('✅ Image validated: ${validation.skinAreaDescription}');
+
+    // Step 1: Vision analysis (skip validation since we already did it)
+    print('📷 Step 1: Analyzing image with vision model...');
+    final visionResult = await analyzeImage(imagePath, skipValidation: true);
+    print('✅ Vision analysis complete (${visionResult.length} chars)');
 
     // Step 2: Build comprehensive query
     final queryParts = <String>[];
@@ -327,6 +508,7 @@ class OllamaService {
     );
 
     // Step 3: Get comprehensive analysis
+    print('💬 Step 2: Sending to text model for comprehensive analysis...');
     final messages = [
       {'role': 'system', 'content': DermatologyPrompts.systemPrompt},
       {'role': 'user', 'content': combinedPrompt},
@@ -337,9 +519,13 @@ class OllamaService {
       messages: messages,
       stream: false,
     );
+    print('✅ Text analysis complete (${response.length} chars)');
 
     // Step 4: Parse response into structured result
-    return _parseAnalysisResult(response, visionResult);
+    print('📊 Step 3: Parsing results...');
+    final result = _parseAnalysisResult(response, visionResult);
+    print('✅ Full analysis complete!');
+    return result;
   }
 
   /// Parse AI response into structured AnalysisResult
@@ -390,35 +576,60 @@ class OllamaService {
     );
   }
 
-  /// Internal: Send generate request to Ollama
-  Future<String> _sendRequest({
+  /// Internal: Send chat request with image URL to Ollama
+  Future<String> _sendChatRequestWithImage({
     required String model,
     required String prompt,
-    List<String>? images,
-    bool stream = false,
+    required String imageUrl,
   }) async {
-    final body = <String, dynamic>{
+    // Download image from Cloudinary URL and convert to base64
+    print('⬇️ Downloading image from Cloudinary: $imageUrl');
+    final imageResponse = await http.get(Uri.parse(imageUrl));
+
+    if (imageResponse.statusCode != 200) {
+      throw Exception(
+        'Failed to download image from Cloudinary: ${imageResponse.statusCode}',
+      );
+    }
+
+    final imageBase64 = base64Encode(imageResponse.bodyBytes);
+    print(
+      '✅ Image downloaded and converted to base64 (${imageBase64.length} chars)',
+    );
+
+    final body = {
       'model': model,
-      'prompt': prompt,
-      'stream': stream,
+      'messages': [
+        {
+          'role': 'user',
+          'content': prompt,
+          'images': [imageBase64], // Send base64, not URL
+        },
+      ],
+      'stream': false,
     };
 
-    if (images != null && images.isNotEmpty) {
-      body['images'] = images;
-    }
+    print('🚀 Sending request to Ollama: $baseUrl/api/chat');
+    print('📦 Model: $model');
 
     final response = await http
         .post(
-          Uri.parse('$baseUrl/api/generate'),
+          Uri.parse('$baseUrl/api/chat'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(body),
         )
         .timeout(timeout);
 
+    print('✅ Ollama response status: ${response.statusCode}');
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['response'] as String;
+      final content = data['message']['content'] as String;
+      print('📝 Response length: ${content.length} characters');
+      return content;
     } else {
+      print('❌ Ollama API error: ${response.statusCode}');
+      print('❌ Response body: ${response.body}');
       throw Exception(
         'Ollama API error: ${response.statusCode} - ${response.body}',
       );
@@ -437,6 +648,9 @@ class OllamaService {
       'stream': stream,
     };
 
+    print('🚀 Sending text request to Ollama: $baseUrl/api/chat');
+    print('📦 Model: $model');
+
     final response = await http
         .post(
           Uri.parse('$baseUrl/api/chat'),
@@ -445,10 +659,16 @@ class OllamaService {
         )
         .timeout(timeout);
 
+    print('✅ Text model response status: ${response.statusCode}');
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['message']['content'] as String;
+      final content = data['message']['content'] as String;
+      print('📝 Text response length: ${content.length} characters');
+      return content;
     } else {
+      print('❌ Text model error: ${response.statusCode}');
+      print('❌ Response body: ${response.body}');
       throw Exception(
         'Ollama API error: ${response.statusCode} - ${response.body}',
       );

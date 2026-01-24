@@ -149,34 +149,110 @@ Response should include:
 Remember: You are a supportive, knowledgeable dermatology AI assistant. Your goal is to educate, guide, and help users make informed decisions about their skin health while always emphasizing the importance of professional medical care for serious concerns.
 ''';
 
-  /// Vision model prompt for image analysis
+  /// Prompt to validate if image contains skin for analysis
+  static const String imageValidationPrompt = '''
+You are a dermatology image validator. Analyze this image and determine if it shows human skin that can be analyzed for dermatological purposes.
+
+**VALID images include:**
+- Photos showing visible skin areas (face, arms, legs, back, chest, hands, feet, scalp, etc.)
+- Photos showing skin conditions, lesions, rashes, moles, acne, discoloration
+- Skin texture, pores, wrinkles, or pigmentation that can be observed
+- Nails (fingers or toes) for nail condition analysis
+- Lips or mucous membranes near skin
+- Body parts where skin is visible and can be assessed (even if not extreme close-up)
+- Photos taken from a reasonable distance where skin details are still observable
+
+**INVALID images include:**
+- Landscapes, buildings, objects, food, animals, plants
+- Screenshots, text documents, memes, diagrams
+- Photos with NO visible human skin at all
+- Completely blurry or dark/overexposed images where nothing can be seen
+- Inappropriate or explicit content
+- Non-human subjects
+
+**Response format - IMPORTANT:**
+You MUST respond with ONLY one of these two formats:
+
+If the image shows analyzable skin:
+```
+VALID: [brief description of what skin area is shown]
+```
+
+If the image does NOT show analyzable skin:
+```
+INVALID: [reason why this image cannot be analyzed]
+```
+
+Be reasonable. Mark as VALID if human skin is clearly visible and can be assessed, even if it's not an extreme close-up. The key is whether skin condition can be observed and analyzed.
+''';
+
+  /// Vision model prompt for image analysis (only used after validation passes)
   static const String visionAnalysisPrompt = '''
-Analyze this dermatological image systematically:
+Analyze this dermatological image systematically. The image has been verified to contain human skin. Provide a comprehensive assessment based on what is visible in the image.
 
-1. **Lesion Characteristics**:
-   - Morphology (macule, papule, plaque, nodule, vesicle, bulla, pustule)
-   - Size and shape
-   - Color and pigmentation
-   - Border characteristics
-   - Surface texture
+1. **Overall Observation**:
+   - What skin area(s) are visible in the image
+   - General condition and appearance of the skin
+   - Any notable features, lesions, or abnormalities
 
-2. **Distribution Pattern**:
-   - Body location
-   - Symmetry
-   - Pattern (localized, generalized, dermatomal)
+2. **Detailed Analysis** (if visible):
+   - Lesion characteristics: morphology, color, size, borders, texture
+   - Distribution pattern: localized, generalized, symmetric, asymmetric
+   - Arrangement: grouped, linear, annular, scattered
+   - Signs of inflammation, discoloration, or texture changes
 
-3. **Associated Features**:
-   - Scaling, crusting, erosion
-   - Signs of inflammation
-   - Secondary changes
+3. **Clinical Assessment**:
+   - Skin type and overall condition
+   - Severity of any visible conditions
+   - Notable concerns or features requiring attention
 
-4. **Clinical Assessment**:
-   - Most likely diagnosis
-   - Differential diagnoses
-   - Confidence level
-   - Recommended next steps
+4. **Recommendations**:
+   - Whether closer examination is needed
+   - Any immediate concerns
+   - Suggested follow-up or professional consultation
 
-Provide a structured analysis suitable for a dermatology consultation.
+**Important**: Analyze what you can see clearly. If the image is taken from a distance, focus on overall patterns, distribution, and general skin condition. If it's a close-up, provide detailed lesion analysis. Adapt your analysis to the image quality and distance.
+
+Provide a structured, professional analysis suitable for a dermatology consultation.
+''';
+
+  /// Response when image is not valid for skin analysis
+  static const String invalidImageResponseVi = '''
+⚠️ **Không thể phân tích ảnh này**
+
+Xin lỗi, tôi chỉ có thể phân tích hình ảnh có **vùng da người** rõ ràng. Ảnh bạn gửi không phù hợp để phân tích da liễu.
+
+**Vui lòng gửi ảnh:**
+- Có vùng da người rõ ràng và có thể quan sát được
+- Đảm bảo ánh sáng tốt và ảnh không bị mờ
+- Vùng da cần phân tích có thể nhìn thấy
+
+**Ví dụ ảnh phù hợp:**
+- Nốt mụn, nốt ruồi, vết phát ban trên da
+- Vùng da bị đỏ, ngứa, hoặc bất thường
+- Móng tay/chân có vấn đề
+- Bất kỳ tình trạng da nào cần tư vấn (có thể chụp từ xa hoặc gần)
+
+Nếu bạn có câu hỏi về da mà không cần ảnh, hãy mô tả triệu chứng của bạn và tôi sẽ hỗ trợ!
+''';
+
+  static const String invalidImageResponseEn = '''
+⚠️ **Unable to analyze this image**
+
+I apologize, but I can only analyze images showing **visible human skin**. The image you sent is not suitable for dermatological analysis.
+
+**Please send an image that:**
+- Shows visible human skin that can be observed
+- Has good lighting and is not blurry
+- Features skin area that needs assessment
+
+**Examples of suitable images:**
+- Acne, moles, rashes on skin
+- Red, itchy, or abnormal skin areas
+- Nail problems (fingers or toes)
+- Any skin condition you need consultation for (can be taken from distance or close-up)
+
+If you have skin-related questions without an image, please describe your symptoms and I'll be happy to help!
 ''';
 
   /// Prompt for combining vision output with text model
@@ -185,13 +261,46 @@ Provide a structured analysis suitable for a dermatology consultation.
     String userQuestion,
   ) {
     return '''
-## Image Analysis Results
+## Visual Analysis from Dermatology AI
 $visionOutput
 
-## User's Question
+## Patient's Question/Concern
 $userQuestion
 
-Based on the image analysis above and the user's question, provide a comprehensive dermatological consultation following the standard response framework. Consider the visual findings in your assessment and recommendations.
+---
+
+As an expert dermatologist, provide a **comprehensive medical assessment** based on the visual analysis above. Your response MUST include:
+
+**1. CLINICAL DIAGNOSIS**
+- Primary diagnosis: What specific skin condition(s) does this most likely represent?
+- Differential diagnoses: List 2-3 other possible conditions to consider
+- Confidence level: Rate your diagnostic confidence (e.g., "High confidence", "Moderate - requires confirmation")
+
+**2. PATHOPHYSIOLOGY**
+- Briefly explain what causes this condition
+- Why these specific symptoms/appearances occur
+
+**3. SEVERITY ASSESSMENT**
+- Mild, Moderate, or Severe?
+- Any urgent concerns or red flags?
+- Is immediate medical attention needed?
+
+**4. TREATMENT RECOMMENDATIONS**
+- First-line treatment options (OTC and prescription)
+- Expected timeline for improvement
+- What to avoid
+
+**5. WHEN TO SEE A DOCTOR**
+- Specific signs that require professional evaluation
+- Recommended specialist (dermatologist, allergist, etc.)
+- Urgency level (routine visit vs. urgent vs. emergency)
+
+**6. LIFESTYLE & PREVENTION**
+- Daily care recommendations
+- Triggers to avoid
+- Long-term management strategies
+
+Provide a thorough, medically accurate assessment. Use clear medical terminology but explain it in patient-friendly language. Be specific about the diagnosis - don't just say "skin condition" or "dermatological issue".
 ''';
   }
 

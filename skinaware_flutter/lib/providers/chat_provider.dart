@@ -10,6 +10,43 @@ final ollamaServiceProvider = Provider<OllamaService>((ref) {
   );
 });
 
+// TODO: Uncomment when app localization is implemented
+// Supported languages enum
+// enum AppLanguage {
+//   english,
+//   vietnamese,
+// }
+
+// Language provider - can be updated based on app locale
+// final appLanguageProvider = StateProvider<AppLanguage>((ref) {
+//   // Default to English, will be updated by app based on locale
+//   return AppLanguage.english;
+// });
+
+// Helper extension
+// extension AppLanguageExtension on AppLanguage {
+//   bool get isVietnamese => this == AppLanguage.vietnamese;
+//
+//   String get code {
+//     switch (this) {
+//       case AppLanguage.vietnamese:
+//         return 'vi';
+//       case AppLanguage.english:
+//         return 'en';
+//     }
+//   }
+//
+//   static AppLanguage fromLocale(String localeCode) {
+//     if (localeCode.startsWith('vi')) {
+//       return AppLanguage.vietnamese;
+//     }
+//     return AppLanguage.english;
+//   }
+// }
+
+// Default language setting (change to true for Vietnamese)
+const bool _defaultIsVietnamese = false;
+
 // Chat state
 class ChatState {
   final List<ChatMessage> messages;
@@ -53,6 +90,9 @@ class ChatNotifier extends Notifier<ChatState> {
     return const ChatState();
   }
 
+  // Get current language setting
+  bool get _isVietnamese => _defaultIsVietnamese;
+
   Future<void> initialize() async {
     if (state.isInitialized) return;
 
@@ -69,14 +109,15 @@ class ChatNotifier extends Notifier<ChatState> {
       } else {
         state = state.copyWith(
           isLoading: false,
-          error:
-              'Unable to connect to AI server. Please check your network connection.',
+          error: _isVietnamese
+              ? 'Không thể kết nối đến máy chủ AI. Vui lòng kiểm tra kết nối mạng.'
+              : 'Unable to connect to AI server. Please check your network connection.',
         );
       }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Connection error: $e',
+        error: _isVietnamese ? 'Lỗi kết nối: $e' : 'Connection error: $e',
       );
     }
   }
@@ -104,10 +145,11 @@ class ChatNotifier extends Notifier<ChatState> {
       String response;
 
       if (state.currentImagePath != null) {
-        // Send with image
+        // Send with image (with language preference)
         response = await _ollamaService.sendMessageWithImage(
           message,
           state.currentImagePath!,
+          isVietnamese: _isVietnamese,
         );
         // Clear image after sending
         state = state.copyWith(currentImagePath: null);
@@ -128,7 +170,7 @@ class ChatNotifier extends Notifier<ChatState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Error: $e',
+        error: _isVietnamese ? 'Lỗi: $e' : 'Error: $e',
       );
     }
   }
@@ -157,12 +199,14 @@ class ChatNotifier extends Notifier<ChatState> {
         symptoms: symptoms,
         duration: duration,
         previousTreatments: previousTreatments,
+        isVietnamese: _isVietnamese,
       );
 
       // Add analysis to chat history
       final userMessage = ChatMessage(
         role: 'user',
-        content: symptoms ?? 'Analyze skin image',
+        content: symptoms ??
+            (_isVietnamese ? 'Phân tích ảnh da' : 'Analyze skin image'),
         imageBase64: imagePath,
       );
 
@@ -180,7 +224,7 @@ class ChatNotifier extends Notifier<ChatState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Analysis error: $e',
+        error: _isVietnamese ? 'Lỗi phân tích: $e' : 'Analysis error: $e',
       );
       return null;
     }
@@ -247,6 +291,9 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     return const AnalysisState();
   }
 
+  // Get current language setting
+  bool get _isVietnamese => _defaultIsVietnamese;
+
   void addImage(String imagePath) {
     state = state.copyWith(
       selectedImages: [...state.selectedImages, imagePath],
@@ -268,7 +315,11 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     String? duration,
   }) async {
     if (state.selectedImages.isEmpty) {
-      state = state.copyWith(error: 'Choose at least one image');
+      state = state.copyWith(
+        error: _isVietnamese
+            ? 'Vui lòng chọn ít nhất một ảnh'
+            : 'Please choose at least one image',
+      );
       return null;
     }
 
@@ -285,6 +336,7 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
         imagePath: state.selectedImages.first,
         symptoms: symptoms,
         duration: duration,
+        isVietnamese: _isVietnamese,
       );
 
       state = state.copyWith(
@@ -296,7 +348,7 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     } catch (e) {
       state = state.copyWith(
         isAnalyzing: false,
-        error: 'Lỗi phân tích: $e',
+        error: _isVietnamese ? 'Lỗi phân tích: $e' : 'Analysis error: $e',
       );
       return null;
     }
