@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:bcrypt/bcrypt.dart';
 import 'package:serverpod/serverpod.dart';
-import 'package:serverpod_auth_server/serverpod_auth_server.dart'
-    show
-        defaultGeneratePasswordHash,
-        defaultValidatePasswordHash,
-        PasswordValidationSuccess;
 
 import '../generated/protocol.dart';
 
 class UserEndpoint extends Endpoint {
+  // ======================
+  // REGISTER / CREATE USER
+  // ======================
   Future<Map<String, dynamic>> register(
     Session session, {
     required String email,
@@ -56,7 +55,7 @@ class UserEndpoint extends Endpoint {
       };
     }
 
-    final passwordHash = await defaultGeneratePasswordHash(password);
+    final passwordHash = _hashPassword(password);
 
     final user = User(
       email: normalizedEmail,
@@ -92,6 +91,9 @@ class UserEndpoint extends Endpoint {
     }
   }
 
+  // =========
+  // LOGIN
+  // =========
   Future<Map<String, dynamic>> login(
     Session session, {
     required String email,
@@ -112,13 +114,9 @@ class UserEndpoint extends Endpoint {
       };
     }
 
-    final result = await defaultValidatePasswordHash(
-      email: user.email,
-      hash: user.passwordHash,
-      password: password,
-    );
+    final isValid = _verifyPassword(password, user.passwordHash);
 
-    if (result is! PasswordValidationSuccess) {
+    if (!isValid) {
       return {
         'success': false,
         'error': 'Invalid email or password.',
@@ -133,6 +131,9 @@ class UserEndpoint extends Endpoint {
     };
   }
 
+  // ==================
+  // GET USER BY ID
+  // ==================
   Future<Map<String, dynamic>> getById(
     Session session, {
     required UuidValue userId,
@@ -153,6 +154,9 @@ class UserEndpoint extends Endpoint {
     };
   }
 
+  // ==========================
+  // UPDATE PROFILE (NO PASS)
+  // ==========================
   Future<Map<String, dynamic>> updateProfile(
     Session session, {
     required UuidValue userId,
@@ -217,6 +221,9 @@ class UserEndpoint extends Endpoint {
     };
   }
 
+  // ==================
+  // CHANGE PASSWORD
+  // ==================
   Future<Map<String, dynamic>> changePassword(
     Session session, {
     required UuidValue userId,
@@ -240,13 +247,10 @@ class UserEndpoint extends Endpoint {
         'user': null,
       };
     }
-    final result = await defaultValidatePasswordHash(
-      email: user.email,
-      hash: user.passwordHash,
-      password: currentPassword,
-    );
 
-    if (result is! PasswordValidationSuccess) {
+    final isValid = _verifyPassword(currentPassword, user.passwordHash);
+
+    if (!isValid) {
       return {
         'success': false,
         'error': 'Current password is incorrect.',
@@ -254,7 +258,7 @@ class UserEndpoint extends Endpoint {
       };
     }
 
-    final newHash = await defaultGeneratePasswordHash(newPassword);
+    final newHash = _hashPassword(newPassword);
     final updated = user.copyWith(passwordHash: newHash);
 
     await User.db.updateRow(session, updated);
@@ -266,6 +270,9 @@ class UserEndpoint extends Endpoint {
     };
   }
 
+  // ==================
+  // DELETE ACCOUNT
+  // ==================
   Future<Map<String, dynamic>> deleteAccount(
     Session session, {
     required UuidValue userId,
@@ -281,13 +288,9 @@ class UserEndpoint extends Endpoint {
       };
     }
 
-    final result = await defaultValidatePasswordHash(
-      email: user.email,
-      hash: user.passwordHash,
-      password: password,
-    );
+    final isValid = _verifyPassword(password, user.passwordHash);
 
-    if (result is! PasswordValidationSuccess) {
+    if (!isValid) {
       return {
         'success': false,
         'error': 'Invalid password.',
@@ -305,6 +308,20 @@ class UserEndpoint extends Endpoint {
   }
 }
 
+// -----------------------------
+// Password helpers (bcrypt)
+// -----------------------------
+String _hashPassword(String password) {
+  return BCrypt.hashpw(password, BCrypt.gensalt());
+}
+
+bool _verifyPassword(String password, String hash) {
+  return BCrypt.checkpw(password, hash);
+}
+
+// -----------------------------
+// Other helpers
+// -----------------------------
 String _normalizeEmail(String email) => email.trim().toLowerCase();
 
 bool _isValidEmail(String email) =>
