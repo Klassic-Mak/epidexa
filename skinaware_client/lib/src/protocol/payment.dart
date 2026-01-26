@@ -15,7 +15,7 @@ import 'enums/payment_status.dart' as _i2;
 
 abstract class Payment implements _i1.SerializableModel {
   Payment._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.consultationId,
     required this.amount,
@@ -24,7 +24,7 @@ abstract class Payment implements _i1.SerializableModel {
     required this.transactionId,
     required this.createdAt,
     required this.updatedAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Payment({
     _i1.UuidValue? id,
@@ -62,8 +62,10 @@ abstract class Payment implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -99,7 +101,7 @@ abstract class Payment implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Payment',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'consultationId': consultationId.toJson(),
       'amount': amount,
@@ -116,6 +118,8 @@ abstract class Payment implements _i1.SerializableModel {
     return _i1.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _PaymentImpl extends Payment {
   _PaymentImpl({
@@ -145,7 +149,7 @@ class _PaymentImpl extends Payment {
   @_i1.useResult
   @override
   Payment copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     _i1.UuidValue? consultationId,
     double? amount,
@@ -156,7 +160,7 @@ class _PaymentImpl extends Payment {
     DateTime? updatedAt,
   }) {
     return Payment(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       consultationId: consultationId ?? this.consultationId,
       amount: amount ?? this.amount,

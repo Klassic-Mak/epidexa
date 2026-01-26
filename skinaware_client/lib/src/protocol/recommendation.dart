@@ -15,14 +15,14 @@ import 'enums/severity.dart' as _i2;
 
 abstract class Recommendation implements _i1.SerializableModel {
   Recommendation._({
-    _i1.UuidValue? id,
+    this.id,
     required this.checkId,
     required this.severity,
     required this.tipsKey,
     required this.warningsKey,
     required this.encryptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Recommendation({
     _i1.UuidValue? id,
@@ -54,8 +54,10 @@ abstract class Recommendation implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   _i1.UuidValue checkId;
 
@@ -85,7 +87,7 @@ abstract class Recommendation implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Recommendation',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'checkId': checkId.toJson(),
       'severity': severity.toJson(),
       'tipsKey': tipsKey,
@@ -100,6 +102,8 @@ abstract class Recommendation implements _i1.SerializableModel {
     return _i1.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _RecommendationImpl extends Recommendation {
   _RecommendationImpl({
@@ -125,7 +129,7 @@ class _RecommendationImpl extends Recommendation {
   @_i1.useResult
   @override
   Recommendation copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? checkId,
     _i2.Severity? severity,
     String? tipsKey,
@@ -134,7 +138,7 @@ class _RecommendationImpl extends Recommendation {
     DateTime? createdAt,
   }) {
     return Recommendation(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       checkId: checkId ?? this.checkId,
       severity: severity ?? this.severity,
       tipsKey: tipsKey ?? this.tipsKey,
