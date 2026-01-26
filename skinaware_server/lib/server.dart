@@ -2,9 +2,15 @@ import 'package:serverpod/serverpod.dart';
 
 import 'src/generated/endpoints.dart';
 import 'src/generated/protocol.dart';
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as auth;
 
 void run(List<String> args) async {
-  final pod = Serverpod(args, Protocol(), Endpoints());
+  final pod = Serverpod(
+    args,
+    Protocol(),
+    Endpoints(),
+    authenticationHandler: auth.authenticationHandler,
+  );
 
   await pod.start();
 }

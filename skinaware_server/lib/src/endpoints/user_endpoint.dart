@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:bcrypt/bcrypt.dart';
 import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_server/serverpod_auth_server.dart'
+    show defaultGeneratePasswordHash, defaultValidatePasswordHash;
 
 import '../generated/protocol.dart';
 
@@ -10,7 +11,7 @@ class UserEndpoint extends Endpoint {
   // ======================
   // REGISTER / CREATE USER
   // ======================
-  Future<Map<String, dynamic>> register(
+  Future<AuthResponse> register(
     Session session, {
     required String email,
     required String password,
@@ -35,11 +36,11 @@ class UserEndpoint extends Endpoint {
     );
 
     if (validationError != null) {
-      return {
-        'success': false,
-        'error': validationError,
-        'user': null,
-      };
+      return AuthResponse(
+        success: false,
+        error: validationError,
+        user: null,
+      );
     }
 
     final existing = await User.db.findFirstRow(
@@ -48,14 +49,15 @@ class UserEndpoint extends Endpoint {
     );
 
     if (existing != null) {
-      return {
-        'success': false,
-        'error': 'An account with this email already exists.',
-        'user': null,
-      };
+      return AuthResponse(
+        success: false,
+        error: 'An account with this email already exists.',
+        user: null,
+      );
     }
 
-    final passwordHash = _hashPassword(password);
+    // ✅ Serverpod password hashing
+    final passwordHash = await defaultGeneratePasswordHash(password);
 
     final user = User(
       email: normalizedEmail,
@@ -75,26 +77,27 @@ class UserEndpoint extends Endpoint {
     try {
       final inserted = await User.db.insertRow(session, user);
 
-      return {
-        'success': true,
-        'message': 'Account created successfully.',
-        'user': inserted,
-      };
+      return AuthResponse(
+        success: true,
+        message: 'Account created successfully.',
+        error: null,
+        user: inserted,
+      );
     } catch (e) {
       session.log('Register failed: $e', level: LogLevel.error);
 
-      return {
-        'success': false,
-        'error': 'Internal server error.',
-        'user': null,
-      };
+      return AuthResponse(
+        success: false,
+        error: 'Internal server error.',
+        user: null,
+      );
     }
   }
 
   // =========
   // LOGIN
   // =========
-  Future<Map<String, dynamic>> login(
+  Future<AuthResponse> login(
     Session session, {
     required String email,
     required String password,
@@ -106,217 +109,59 @@ class UserEndpoint extends Endpoint {
       where: (t) => t.email.equals(normalizedEmail),
     );
 
-    if (user == null) {
-      return {
-        'success': false,
-        'error': 'Invalid email or password.',
-        'user': null,
-      };
+    // ✅ Timing-safe fake hash (same cost whether user exists or not)
+    final fakeHash = await defaultGeneratePasswordHash(
+      'fake_password_for_timing',
+    );
+    final hashToCheck = user?.passwordHash ?? fakeHash;
+
+    // ✅ Validate password (do NOT cast; treat it as bool)
+    final validateResult = await defaultValidatePasswordHash(
+      email: normalizedEmail,
+      password: password,
+      hash: hashToCheck,
+    );
+
+    final bool isValid = validateResult == true;
+
+    if (user == null || !isValid) {
+      return AuthResponse(
+        success: false,
+        error: 'Invalid email or password.',
+        user: null,
+      );
     }
 
-    final isValid = _verifyPassword(password, user.passwordHash);
-
-    if (!isValid) {
-      return {
-        'success': false,
-        'error': 'Invalid email or password.',
-        'user': null,
-      };
-    }
-
-    return {
-      'success': true,
-      'message': 'Login successful.',
-      'user': user,
-    };
+    return AuthResponse(
+      success: true,
+      message: 'Login successful.',
+      error: null,
+      user: user,
+    );
   }
 
   // ==================
   // GET USER BY ID
   // ==================
-  Future<Map<String, dynamic>> getById(
+  Future<AuthResponse> getById(
     Session session, {
     required UuidValue userId,
   }) async {
     final user = await User.db.findById(session, userId);
 
     if (user == null) {
-      return {
-        'success': false,
-        'error': 'User not found.',
-        'user': null,
-      };
+      return AuthResponse(
+        success: false,
+        error: 'User not found.',
+        user: null,
+      );
     }
 
-    return {
-      'success': true,
-      'user': user,
-    };
-  }
-
-  // ==========================
-  // UPDATE PROFILE (NO PASS)
-  // ==========================
-  Future<Map<String, dynamic>> updateProfile(
-    Session session, {
-    required UuidValue userId,
-    String? phone,
-    int? age,
-    Gender? gender,
-    String? name,
-    Role? role,
-    SkinType? skinType,
-    String? profilePhoto,
-  }) async {
-    final user = await User.db.findById(session, userId);
-
-    if (user == null) {
-      return {
-        'success': false,
-        'error': 'User not found.',
-        'user': null,
-      };
-    }
-
-    if (phone != null && phone.trim().length < 7) {
-      return {
-        'success': false,
-        'error': 'Invalid phone number.',
-        'user': null,
-      };
-    }
-
-    if (name != null && name.trim().length < 2) {
-      return {
-        'success': false,
-        'error': 'Name is too short.',
-        'user': null,
-      };
-    }
-
-    if (age != null && (age < 1 || age > 120)) {
-      return {
-        'success': false,
-        'error': 'Invalid age.',
-        'user': null,
-      };
-    }
-
-    final updated = user.copyWith(
-      phone: phone?.trim() ?? user.phone,
-      age: age ?? user.age,
-      gender: gender ?? user.gender,
-      name: name?.trim() ?? user.name,
-      role: role ?? user.role,
-      skinType: skinType ?? user.skinType,
-      profilePhoto: profilePhoto ?? user.profilePhoto,
+    return AuthResponse(
+      success: true,
+      user: user,
     );
-
-    final saved = await User.db.updateRow(session, updated);
-
-    return {
-      'success': true,
-      'message': 'Profile updated.',
-      'user': saved,
-    };
   }
-
-  // ==================
-  // CHANGE PASSWORD
-  // ==================
-  Future<Map<String, dynamic>> changePassword(
-    Session session, {
-    required UuidValue userId,
-    required String currentPassword,
-    required String newPassword,
-  }) async {
-    if (newPassword.length < 8) {
-      return {
-        'success': false,
-        'error': 'Password must be at least 8 characters.',
-        'user': null,
-      };
-    }
-
-    final user = await User.db.findById(session, userId);
-
-    if (user == null) {
-      return {
-        'success': false,
-        'error': 'User not found.',
-        'user': null,
-      };
-    }
-
-    final isValid = _verifyPassword(currentPassword, user.passwordHash);
-
-    if (!isValid) {
-      return {
-        'success': false,
-        'error': 'Current password is incorrect.',
-        'user': null,
-      };
-    }
-
-    final newHash = _hashPassword(newPassword);
-    final updated = user.copyWith(passwordHash: newHash);
-
-    await User.db.updateRow(session, updated);
-
-    return {
-      'success': true,
-      'message': 'Password updated successfully.',
-      'user': null,
-    };
-  }
-
-  // ==================
-  // DELETE ACCOUNT
-  // ==================
-  Future<Map<String, dynamic>> deleteAccount(
-    Session session, {
-    required UuidValue userId,
-    required String password,
-  }) async {
-    final user = await User.db.findById(session, userId);
-
-    if (user == null) {
-      return {
-        'success': false,
-        'error': 'User not found.',
-        'user': null,
-      };
-    }
-
-    final isValid = _verifyPassword(password, user.passwordHash);
-
-    if (!isValid) {
-      return {
-        'success': false,
-        'error': 'Invalid password.',
-        'user': null,
-      };
-    }
-
-    await User.db.deleteRow(session, user);
-
-    return {
-      'success': true,
-      'message': 'Account deleted successfully.',
-      'user': null,
-    };
-  }
-}
-
-// -----------------------------
-// Password helpers (bcrypt)
-// -----------------------------
-String _hashPassword(String password) {
-  return BCrypt.hashpw(password, BCrypt.gensalt());
-}
-
-bool _verifyPassword(String password, String hash) {
-  return BCrypt.checkpw(password, hash);
 }
 
 // -----------------------------

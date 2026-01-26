@@ -13,9 +13,9 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 
 abstract class Image
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   Image._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.checkId,
     required this.url,
@@ -23,7 +23,7 @@ abstract class Image
     required this.encryptionKey,
     required this.descriptionKey,
     required this.uploadedAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Image({
     _i1.UuidValue? id,
@@ -60,7 +60,7 @@ abstract class Image
   static const db = ImageRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -77,7 +77,7 @@ abstract class Image
   DateTime uploadedAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [Image]
   /// with some or all fields replaced by the given arguments.
@@ -96,7 +96,7 @@ abstract class Image
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Image',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'checkId': checkId.toJson(),
       'url': url,
@@ -111,7 +111,7 @@ abstract class Image
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'Image',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'checkId': checkId.toJson(),
       'url': url,
@@ -152,6 +152,8 @@ abstract class Image
   }
 }
 
+class _Undefined {}
+
 class _ImageImpl extends Image {
   _ImageImpl({
     _i1.UuidValue? id,
@@ -178,7 +180,7 @@ class _ImageImpl extends Image {
   @_i1.useResult
   @override
   Image copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     _i1.UuidValue? checkId,
     String? url,
@@ -188,7 +190,7 @@ class _ImageImpl extends Image {
     DateTime? uploadedAt,
   }) {
     return Image(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       checkId: checkId ?? this.checkId,
       url: url ?? this.url,
@@ -244,7 +246,7 @@ class ImageUpdateTable extends _i1.UpdateTable<ImageTable> {
       );
 }
 
-class ImageTable extends _i1.Table<_i1.UuidValue> {
+class ImageTable extends _i1.Table<_i1.UuidValue?> {
   ImageTable({super.tableRelation}) : super(tableName: 'image') {
     updateTable = ImageUpdateTable(this);
     userId = _i1.ColumnUuid(
@@ -313,7 +315,7 @@ class ImageInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Image.t;
+  _i1.Table<_i1.UuidValue?> get table => Image.t;
 }
 
 class ImageIncludeList extends _i1.IncludeList {
@@ -333,7 +335,7 @@ class ImageIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Image.t;
+  _i1.Table<_i1.UuidValue?> get table => Image.t;
 }
 
 class ImageRepository {

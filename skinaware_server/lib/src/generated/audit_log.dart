@@ -13,9 +13,9 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 
 abstract class AuditLog
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   AuditLog._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.action,
     required this.ip,
@@ -23,7 +23,7 @@ abstract class AuditLog
     required this.descriptionKey,
     required this.createdAt,
     required this.updatedAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory AuditLog({
     _i1.UuidValue? id,
@@ -60,7 +60,7 @@ abstract class AuditLog
   static const db = AuditLogRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -77,7 +77,7 @@ abstract class AuditLog
   DateTime updatedAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [AuditLog]
   /// with some or all fields replaced by the given arguments.
@@ -96,7 +96,7 @@ abstract class AuditLog
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'AuditLog',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'action': action,
       'ip': ip,
@@ -111,7 +111,7 @@ abstract class AuditLog
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'AuditLog',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'action': action,
       'ip': ip,
@@ -152,6 +152,8 @@ abstract class AuditLog
   }
 }
 
+class _Undefined {}
+
 class _AuditLogImpl extends AuditLog {
   _AuditLogImpl({
     _i1.UuidValue? id,
@@ -178,7 +180,7 @@ class _AuditLogImpl extends AuditLog {
   @_i1.useResult
   @override
   AuditLog copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     String? action,
     String? ip,
@@ -188,7 +190,7 @@ class _AuditLogImpl extends AuditLog {
     DateTime? updatedAt,
   }) {
     return AuditLog(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       action: action ?? this.action,
       ip: ip ?? this.ip,
@@ -244,7 +246,7 @@ class AuditLogUpdateTable extends _i1.UpdateTable<AuditLogTable> {
       );
 }
 
-class AuditLogTable extends _i1.Table<_i1.UuidValue> {
+class AuditLogTable extends _i1.Table<_i1.UuidValue?> {
   AuditLogTable({super.tableRelation}) : super(tableName: 'audit_log') {
     updateTable = AuditLogUpdateTable(this);
     userId = _i1.ColumnUuid(
@@ -313,7 +315,7 @@ class AuditLogInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => AuditLog.t;
+  _i1.Table<_i1.UuidValue?> get table => AuditLog.t;
 }
 
 class AuditLogIncludeList extends _i1.IncludeList {
@@ -333,7 +335,7 @@ class AuditLogIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => AuditLog.t;
+  _i1.Table<_i1.UuidValue?> get table => AuditLog.t;
 }
 
 class AuditLogRepository {

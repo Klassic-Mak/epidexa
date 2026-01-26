@@ -2,7 +2,7 @@ class: Message
 table: message
 
 fields:
-  id: UuidValue, defaultModel=random_v7
+  id: UuidValue?, defaultPersist=random_v7
   consultationId: UuidValue, relation(parent=consultation)
   senderId: UuidValue, relation(parent=app_user)
   senderType: SenderType

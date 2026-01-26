@@ -11,6 +11,7 @@ dependencies:
   firebase_admin: ^0.3.1
   crypt: ^4.3.1
   bcrypt: ^1.2.0
+  serverpod_auth_server: ^3.2.3
   
 
 

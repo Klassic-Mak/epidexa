@@ -2,7 +2,7 @@ class: Recommendation
 table: recommendation
 
 fields:
-  id: UuidValue, defaultModel=random_v7
+  id: UuidValue?, defaultPersist=random_v7
   checkId: UuidValue, relation(parent=symptom_check)
   severity: Severity
   tipsKey: String

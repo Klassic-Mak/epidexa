@@ -14,16 +14,16 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import 'sender_type.dart' as _i2;
 
 abstract class Message
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   Message._({
-    _i1.UuidValue? id,
+    this.id,
     required this.consultationId,
     required this.senderId,
     required this.senderType,
     required this.messageKey,
     required this.encryptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Message({
     _i1.UuidValue? id,
@@ -62,7 +62,7 @@ abstract class Message
   static const db = MessageRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue consultationId;
 
@@ -77,7 +77,7 @@ abstract class Message
   DateTime createdAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [Message]
   /// with some or all fields replaced by the given arguments.
@@ -95,7 +95,7 @@ abstract class Message
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Message',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'consultationId': consultationId.toJson(),
       'senderId': senderId.toJson(),
       'senderType': senderType.toJson(),
@@ -109,7 +109,7 @@ abstract class Message
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'Message',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'consultationId': consultationId.toJson(),
       'senderId': senderId.toJson(),
       'senderType': senderType.toJson(),
@@ -149,6 +149,8 @@ abstract class Message
   }
 }
 
+class _Undefined {}
+
 class _MessageImpl extends Message {
   _MessageImpl({
     _i1.UuidValue? id,
@@ -173,7 +175,7 @@ class _MessageImpl extends Message {
   @_i1.useResult
   @override
   Message copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? consultationId,
     _i1.UuidValue? senderId,
     _i2.SenderType? senderType,
@@ -182,7 +184,7 @@ class _MessageImpl extends Message {
     DateTime? createdAt,
   }) {
     return Message(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       consultationId: consultationId ?? this.consultationId,
       senderId: senderId ?? this.senderId,
       senderType: senderType ?? this.senderType,
@@ -234,7 +236,7 @@ class MessageUpdateTable extends _i1.UpdateTable<MessageTable> {
       );
 }
 
-class MessageTable extends _i1.Table<_i1.UuidValue> {
+class MessageTable extends _i1.Table<_i1.UuidValue?> {
   MessageTable({super.tableRelation}) : super(tableName: 'message') {
     updateTable = MessageUpdateTable(this);
     consultationId = _i1.ColumnUuid(
@@ -297,7 +299,7 @@ class MessageInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Message.t;
+  _i1.Table<_i1.UuidValue?> get table => Message.t;
 }
 
 class MessageIncludeList extends _i1.IncludeList {
@@ -317,7 +319,7 @@ class MessageIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Message.t;
+  _i1.Table<_i1.UuidValue?> get table => Message.t;
 }
 
 class MessageRepository {

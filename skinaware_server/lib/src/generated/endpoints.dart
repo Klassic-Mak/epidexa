@@ -15,6 +15,7 @@ import '../endpoints/user_endpoint.dart' as _i2;
 import 'package:skinaware_server/src/generated/enums/gender.dart' as _i3;
 import 'package:skinaware_server/src/generated/enums/role.dart' as _i4;
 import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i5;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i6;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -139,121 +140,8 @@ class Endpoints extends _i1.EndpointDispatch {
                 userId: params['userId'],
               ),
         ),
-        'updateProfile': _i1.MethodConnector(
-          name: 'updateProfile',
-          params: {
-            'userId': _i1.ParameterDescription(
-              name: 'userId',
-              type: _i1.getType<_i1.UuidValue>(),
-              nullable: false,
-            ),
-            'phone': _i1.ParameterDescription(
-              name: 'phone',
-              type: _i1.getType<String?>(),
-              nullable: true,
-            ),
-            'age': _i1.ParameterDescription(
-              name: 'age',
-              type: _i1.getType<int?>(),
-              nullable: true,
-            ),
-            'gender': _i1.ParameterDescription(
-              name: 'gender',
-              type: _i1.getType<_i3.Gender?>(),
-              nullable: true,
-            ),
-            'name': _i1.ParameterDescription(
-              name: 'name',
-              type: _i1.getType<String?>(),
-              nullable: true,
-            ),
-            'role': _i1.ParameterDescription(
-              name: 'role',
-              type: _i1.getType<_i4.Role?>(),
-              nullable: true,
-            ),
-            'skinType': _i1.ParameterDescription(
-              name: 'skinType',
-              type: _i1.getType<_i5.SkinType?>(),
-              nullable: true,
-            ),
-            'profilePhoto': _i1.ParameterDescription(
-              name: 'profilePhoto',
-              type: _i1.getType<String?>(),
-              nullable: true,
-            ),
-          },
-          call:
-              (
-                _i1.Session session,
-                Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i2.UserEndpoint).updateProfile(
-                session,
-                userId: params['userId'],
-                phone: params['phone'],
-                age: params['age'],
-                gender: params['gender'],
-                name: params['name'],
-                role: params['role'],
-                skinType: params['skinType'],
-                profilePhoto: params['profilePhoto'],
-              ),
-        ),
-        'changePassword': _i1.MethodConnector(
-          name: 'changePassword',
-          params: {
-            'userId': _i1.ParameterDescription(
-              name: 'userId',
-              type: _i1.getType<_i1.UuidValue>(),
-              nullable: false,
-            ),
-            'currentPassword': _i1.ParameterDescription(
-              name: 'currentPassword',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-            'newPassword': _i1.ParameterDescription(
-              name: 'newPassword',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-          },
-          call:
-              (
-                _i1.Session session,
-                Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i2.UserEndpoint).changePassword(
-                session,
-                userId: params['userId'],
-                currentPassword: params['currentPassword'],
-                newPassword: params['newPassword'],
-              ),
-        ),
-        'deleteAccount': _i1.MethodConnector(
-          name: 'deleteAccount',
-          params: {
-            'userId': _i1.ParameterDescription(
-              name: 'userId',
-              type: _i1.getType<_i1.UuidValue>(),
-              nullable: false,
-            ),
-            'password': _i1.ParameterDescription(
-              name: 'password',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-          },
-          call:
-              (
-                _i1.Session session,
-                Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i2.UserEndpoint).deleteAccount(
-                session,
-                userId: params['userId'],
-                password: params['password'],
-              ),
-        ),
       },
     );
+    modules['serverpod_auth'] = _i6.Endpoints()..initializeEndpoints(server);
   }
 }

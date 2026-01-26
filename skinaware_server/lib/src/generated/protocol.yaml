@@ -2,6 +2,3 @@ user:
   - register:
   - login:
   - getById:
-  - updateProfile:
-  - changePassword:
-  - deleteAccount:

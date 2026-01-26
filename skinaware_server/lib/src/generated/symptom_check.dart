@@ -18,9 +18,9 @@ import 'enums/severity.dart' as _i5;
 import 'package:skinaware_server/src/generated/protocol.dart' as _i6;
 
 abstract class SymptomCheck
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   SymptomCheck._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.skinType,
     required this.symptoms,
@@ -30,7 +30,7 @@ abstract class SymptomCheck
     required this.notesKey,
     required this.encryptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory SymptomCheck({
     _i1.UuidValue? id,
@@ -77,7 +77,7 @@ abstract class SymptomCheck
   static const db = SymptomCheckRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -98,7 +98,7 @@ abstract class SymptomCheck
   DateTime createdAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [SymptomCheck]
   /// with some or all fields replaced by the given arguments.
@@ -119,7 +119,7 @@ abstract class SymptomCheck
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'SymptomCheck',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'skinType': skinType.toJson(),
       'symptoms': symptoms.toJson(valueToJson: (v) => v.toJson()),
@@ -136,7 +136,7 @@ abstract class SymptomCheck
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'SymptomCheck',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'skinType': skinType.toJson(),
       'symptoms': symptoms.toJson(valueToJson: (v) => v.toJson()),
@@ -179,6 +179,8 @@ abstract class SymptomCheck
   }
 }
 
+class _Undefined {}
+
 class _SymptomCheckImpl extends SymptomCheck {
   _SymptomCheckImpl({
     _i1.UuidValue? id,
@@ -209,7 +211,7 @@ class _SymptomCheckImpl extends SymptomCheck {
   @_i1.useResult
   @override
   SymptomCheck copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     _i2.SkinType? skinType,
     List<_i3.Symptom>? symptoms,
@@ -221,7 +223,7 @@ class _SymptomCheckImpl extends SymptomCheck {
     DateTime? createdAt,
   }) {
     return SymptomCheck(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       skinType: skinType ?? this.skinType,
       symptoms: symptoms ?? this.symptoms.map((e0) => e0).toList(),
@@ -294,7 +296,7 @@ class SymptomCheckUpdateTable extends _i1.UpdateTable<SymptomCheckTable> {
       );
 }
 
-class SymptomCheckTable extends _i1.Table<_i1.UuidValue> {
+class SymptomCheckTable extends _i1.Table<_i1.UuidValue?> {
   SymptomCheckTable({super.tableRelation}) : super(tableName: 'symptom_check') {
     updateTable = SymptomCheckUpdateTable(this);
     userId = _i1.ColumnUuid(
@@ -379,7 +381,7 @@ class SymptomCheckInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => SymptomCheck.t;
+  _i1.Table<_i1.UuidValue?> get table => SymptomCheck.t;
 }
 
 class SymptomCheckIncludeList extends _i1.IncludeList {
@@ -399,7 +401,7 @@ class SymptomCheckIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => SymptomCheck.t;
+  _i1.Table<_i1.UuidValue?> get table => SymptomCheck.t;
 }
 
 class SymptomCheckRepository {

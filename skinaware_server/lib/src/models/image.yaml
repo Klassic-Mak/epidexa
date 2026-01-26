@@ -2,7 +2,7 @@ class: Image
 table: image
 
 fields:
-  id: UuidValue, defaultModel=random_v7
+  id: UuidValue?, defaultPersist=random_v7
   userId: UuidValue, relation(parent=app_user)
   checkId: UuidValue, relation(parent=symptom_check)
   url: String

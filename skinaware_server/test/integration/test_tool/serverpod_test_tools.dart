@@ -14,9 +14,10 @@
 import 'package:serverpod_test/serverpod_test.dart' as _i1;
 import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
-import 'package:skinaware_server/src/generated/enums/gender.dart' as _i4;
-import 'package:skinaware_server/src/generated/enums/role.dart' as _i5;
-import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i6;
+import 'package:skinaware_server/src/generated/auth_response.dart' as _i4;
+import 'package:skinaware_server/src/generated/enums/gender.dart' as _i5;
+import 'package:skinaware_server/src/generated/enums/role.dart' as _i6;
+import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i7;
 import 'package:skinaware_server/src/generated/protocol.dart';
 import 'package:skinaware_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -151,16 +152,16 @@ class _UserEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<Map<String, dynamic>> register(
+  _i3.Future<_i4.AuthResponse> register(
     _i1.TestSessionBuilder sessionBuilder, {
     required String email,
     required String password,
     required String phone,
     required int age,
-    required _i4.Gender gender,
+    required _i5.Gender gender,
     required String name,
-    required _i5.Role role,
-    required _i6.SkinType skinType,
+    required _i6.Role role,
+    required _i7.SkinType skinType,
     String? profilePhoto,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -192,7 +193,7 @@ class _UserEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<Map<String, dynamic>>);
+                as _i3.Future<_i4.AuthResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -200,7 +201,7 @@ class _UserEndpoint {
     });
   }
 
-  _i3.Future<Map<String, dynamic>> login(
+  _i3.Future<_i4.AuthResponse> login(
     _i1.TestSessionBuilder sessionBuilder, {
     required String email,
     required String password,
@@ -227,7 +228,7 @@ class _UserEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<Map<String, dynamic>>);
+                as _i3.Future<_i4.AuthResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -235,7 +236,7 @@ class _UserEndpoint {
     });
   }
 
-  _i3.Future<Map<String, dynamic>> getById(
+  _i3.Future<_i4.AuthResponse> getById(
     _i1.TestSessionBuilder sessionBuilder, {
     required _i2.UuidValue userId,
   }) async {
@@ -258,7 +259,7 @@ class _UserEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<Map<String, dynamic>>);
+                as _i3.Future<_i4.AuthResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

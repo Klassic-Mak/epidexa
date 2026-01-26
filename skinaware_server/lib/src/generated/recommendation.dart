@@ -14,16 +14,16 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import 'enums/severity.dart' as _i2;
 
 abstract class Recommendation
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   Recommendation._({
-    _i1.UuidValue? id,
+    this.id,
     required this.checkId,
     required this.severity,
     required this.tipsKey,
     required this.warningsKey,
     required this.encryptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Recommendation({
     _i1.UuidValue? id,
@@ -60,7 +60,7 @@ abstract class Recommendation
   static const db = RecommendationRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue checkId;
 
@@ -75,7 +75,7 @@ abstract class Recommendation
   DateTime createdAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [Recommendation]
   /// with some or all fields replaced by the given arguments.
@@ -93,7 +93,7 @@ abstract class Recommendation
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Recommendation',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'checkId': checkId.toJson(),
       'severity': severity.toJson(),
       'tipsKey': tipsKey,
@@ -107,7 +107,7 @@ abstract class Recommendation
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'Recommendation',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'checkId': checkId.toJson(),
       'severity': severity.toJson(),
       'tipsKey': tipsKey,
@@ -147,6 +147,8 @@ abstract class Recommendation
   }
 }
 
+class _Undefined {}
+
 class _RecommendationImpl extends Recommendation {
   _RecommendationImpl({
     _i1.UuidValue? id,
@@ -171,7 +173,7 @@ class _RecommendationImpl extends Recommendation {
   @_i1.useResult
   @override
   Recommendation copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? checkId,
     _i2.Severity? severity,
     String? tipsKey,
@@ -180,7 +182,7 @@ class _RecommendationImpl extends Recommendation {
     DateTime? createdAt,
   }) {
     return Recommendation(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       checkId: checkId ?? this.checkId,
       severity: severity ?? this.severity,
       tipsKey: tipsKey ?? this.tipsKey,
@@ -229,7 +231,7 @@ class RecommendationUpdateTable extends _i1.UpdateTable<RecommendationTable> {
       );
 }
 
-class RecommendationTable extends _i1.Table<_i1.UuidValue> {
+class RecommendationTable extends _i1.Table<_i1.UuidValue?> {
   RecommendationTable({super.tableRelation})
     : super(tableName: 'recommendation') {
     updateTable = RecommendationUpdateTable(this);
@@ -293,7 +295,7 @@ class RecommendationInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Recommendation.t;
+  _i1.Table<_i1.UuidValue?> get table => Recommendation.t;
 }
 
 class RecommendationIncludeList extends _i1.IncludeList {
@@ -313,7 +315,7 @@ class RecommendationIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Recommendation.t;
+  _i1.Table<_i1.UuidValue?> get table => Recommendation.t;
 }
 
 class RecommendationRepository {
