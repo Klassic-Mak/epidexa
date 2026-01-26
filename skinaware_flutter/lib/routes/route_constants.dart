@@ -14,3 +14,4 @@ const String onBoarding2Route = "onBoarding2Route";
 const String onBoarding3Route = "onBoarding3Route";
 const String checkSymRoute = "checkSymRoute";
 const String camerScanRoute = "camerScanRoute";
+const String profileRoute = "profileRoute";

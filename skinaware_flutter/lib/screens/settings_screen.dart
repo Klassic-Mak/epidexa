@@ -1,13 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skinaware_flutter/providers/userProvider.dart';
+import 'package:skinaware_flutter/routes/route_constants.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // ✅ Match your theme
   static const Color primaryColor = Color(0xFF0284C7);
   static const Color pageBg = Color(0xFFF7F8FC);
@@ -32,15 +36,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 30, 16, 22),
         children: [
           _ProfileHeader(
             primaryColor: primaryColor,
-            name: "Sarah Johnson",
-            meta: "Member since Jan 2024",
+            name: user?.name ?? 'User',
+            meta: user?.email ?? 'No email provided',
             onEdit: () {},
+            imageSrc:
+                user?.profilePhoto ??
+                'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png',
           ),
           const SizedBox(height: 12),
 
@@ -203,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _DangerTile(
                   title: "Sign out",
                   icon: Icons.logout_rounded,
-                  onTap: () {},
+                  onTap: () async => await _confirmSignOut(context),
                 ),
               ],
             ),
@@ -212,6 +220,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+  Future<void> _confirmSignOut(BuildContext context) async {
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (c) => AlertDialog(
+            title: const Text('Sign out'),
+            content: const Text('Are you sure you want to sign out?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(c).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(c).pop(true),
+                child: const Text(
+                  'Sign out',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    if (!confirmed) return;
+
+    // Clear user state via the nearest ProviderScope to avoid ref cast issues
+    ProviderScope.containerOf(context).read(userProvider.notifier).logout();
+
+    // Navigate back to onboarding and remove all previous routes
+    Navigator.pushNamedAndRemoveUntil(context, onBoarding1Route, (r) => false);
+  }
 }
 
 class _ProfileHeader extends StatelessWidget {
@@ -219,8 +260,10 @@ class _ProfileHeader extends StatelessWidget {
   final String name;
   final String meta;
   final VoidCallback onEdit;
+  final String imageSrc;
 
   const _ProfileHeader({
+    required this.imageSrc,
     required this.primaryColor,
     required this.name,
     required this.meta,
@@ -232,18 +275,10 @@ class _ProfileHeader extends StatelessWidget {
     return _CardShell(
       child: Row(
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              Icons.person_outline_rounded,
-              color: primaryColor,
-              size: 30,
-            ),
+          CircleAvatar(
+            radius: 26,
+            backgroundImage: CachedNetworkImageProvider(imageSrc),
+            backgroundColor: primaryColor.withValues(alpha: 0.12),
           ),
           const SizedBox(width: 12),
           Expanded(
