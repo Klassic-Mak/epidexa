@@ -70,6 +70,30 @@ class EndpointUser extends _i1.EndpointRef {
         'getById',
         {'userId': userId},
       );
+
+  _i2.Future<_i3.AuthResponse> updateProfile({
+    required _i1.UuidValue userId,
+    String? name,
+    String? phone,
+    int? age,
+    _i4.Gender? gender,
+    _i5.Role? role,
+    _i6.SkinType? skinType,
+    String? profilePhoto,
+  }) => caller.callServerEndpoint<_i3.AuthResponse>(
+    'user',
+    'updateProfile',
+    {
+      'userId': userId,
+      'name': name,
+      'phone': phone,
+      'age': age,
+      'gender': gender,
+      'role': role,
+      'skinType': skinType,
+      'profilePhoto': profilePhoto,
+    },
+  );
 }
 
 class Modules {

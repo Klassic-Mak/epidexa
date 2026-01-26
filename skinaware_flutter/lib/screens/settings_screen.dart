@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skinaware_client/skinaware_client.dart';
 import 'package:skinaware_flutter/providers/userProvider.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
+import 'package:skinaware_flutter/general_components/pop.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -18,6 +20,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   String selectedLanguage = 'English';
   String selectedSkinType = 'Combination Skin';
+  bool _isDoctor = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUserRole();
+  }
+
+  void _checkUserRole() {
+    final user = ref.read(userProvider);
+    if (user != null) {
+      setState(() {
+        _isDoctor = user.role == Role.DOCTOR;
+      });
+    }
+  }
+
+  Future<void> _toggleDoctorRole(bool value) async {
+    final user = ref.read(userProvider);
+    if (user == null) return;
+
+    setState(() {
+      _isDoctor = value;
+    });
+
+    final newRole = value ? Role.DOCTOR : Role.USER;
+    ref.read(userProvider.notifier).updateProfile(role: newRole);
+
+    if (mounted) {
+      showTopToast(
+        context,
+        value ? 'Switched to Doctor mode' : 'Switched to User mode',
+        isSuccess: true,
+      );
+    }
+  }
 
   final List<String> languages = const [
     'English',
@@ -50,6 +88,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 user?.profilePhoto ??
                 'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png',
           ),
+          const SizedBox(height: 12),
+
+          _SectionCard(
+            title: "Role Settings",
+            icon: Icons.person_outline,
+            primaryColor: primaryColor,
+            child: Column(
+              children: [
+                _SettingToggle(
+                  primaryColor: primaryColor,
+                  icon: Icons.medical_services_outlined,
+                  title: "Doctor Mode",
+                  subtitle: _isDoctor
+                      ? "You can provide consultations"
+                      : "Switch to access doctor features",
+                  value: _isDoctor,
+                  onChanged: _toggleDoctorRole,
+                ),
+              ],
+            ),
+          ),
+
           const SizedBox(height: 12),
 
           _SectionCard(

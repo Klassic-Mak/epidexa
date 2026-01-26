@@ -2,3 +2,4 @@ user:
   - register:
   - login:
   - getById:
+  - updateProfile:

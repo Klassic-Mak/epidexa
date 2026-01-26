@@ -162,6 +162,85 @@ class UserEndpoint extends Endpoint {
       user: user,
     );
   }
+
+  // ==================
+  // UPDATE USER PROFILE
+  // ==================
+  Future<AuthResponse> updateProfile(
+    Session session, {
+    required UuidValue userId,
+    String? name,
+    String? phone,
+    int? age,
+    Gender? gender,
+    Role? role,
+    SkinType? skinType,
+    String? profilePhoto,
+  }) async {
+    final user = await User.db.findById(session, userId);
+
+    if (user == null) {
+      return AuthResponse(
+        success: false,
+        error: 'User not found.',
+        user: null,
+      );
+    }
+
+    // Validate inputs if provided
+    if (name != null && name.trim().length < 2) {
+      return AuthResponse(
+        success: false,
+        error: 'Name is too short.',
+        user: null,
+      );
+    }
+
+    if (phone != null && (phone.trim().isEmpty || phone.trim().length < 7)) {
+      return AuthResponse(
+        success: false,
+        error: 'Invalid phone number.',
+        user: null,
+      );
+    }
+
+    if (age != null && (age < 1 || age > 120)) {
+      return AuthResponse(
+        success: false,
+        error: 'Invalid age.',
+        user: null,
+      );
+    }
+
+    // Update user with new values
+    final updatedUser = user.copyWith(
+      name: name?.trim() ?? user.name,
+      phone: phone?.trim() ?? user.phone,
+      age: age ?? user.age,
+      gender: gender ?? user.gender,
+      role: role ?? user.role,
+      skinType: skinType ?? user.skinType,
+      profilePhoto: profilePhoto ?? user.profilePhoto,
+    );
+
+    try {
+      final saved = await User.db.updateRow(session, updatedUser);
+
+      return AuthResponse(
+        success: true,
+        message: 'Profile updated successfully.',
+        user: saved,
+      );
+    } catch (e) {
+      session.log('Update profile failed: $e', level: LogLevel.error);
+
+      return AuthResponse(
+        success: false,
+        error: 'Failed to update profile.',
+        user: null,
+      );
+    }
+  }
 }
 
 // -----------------------------
