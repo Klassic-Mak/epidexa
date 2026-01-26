@@ -1,12 +1,13 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
-import 'package:pytorch_lite/pytorch_lite.dart';
+// import 'package:pytorch_lite/pytorch_lite.dart';  // DISABLED - Using Ollama AI instead
 import 'package:image/image.dart' as img;
 
 /// Service for running inference using PyTorch Mobile model
+/// NOTE: This service is DISABLED. The app uses Ollama AI instead.
 class PyTorchInferenceService {
-  ClassificationModel? _model;
+  // ClassificationModel? _model;
   bool _isInitialized = false;
   List<String>? _labels;
 
@@ -21,11 +22,14 @@ class PyTorchInferenceService {
 
       // Load model with classification configuration
       // Don't use labelPath - it causes the plugin to read labels from image bytes
-      _model = await PytorchLite.loadClassificationModel(
-        'assets/models/skinaware.ptl',
-        224, // image width
-        224, // image height
-      );
+      // _model = await PytorchLite.loadClassificationModel(
+      //   'assets/models/skinaware.ptl',
+      //   224, // image width
+      //   224, // image height
+      // );
+      
+      // DISABLED - Using Ollama AI instead
+      throw UnimplementedError('PyTorch model disabled. Use Ollama AI instead.');
 
       // Load labels separately
       _labels = await _loadLabels();
@@ -114,7 +118,8 @@ class PyTorchInferenceService {
       final imageBytes = await _preprocessImage(imagePath);
 
       // Run inference - returns String with format "label score"
-      final result = await _model!.getImagePrediction(imageBytes);
+      // final result = await _model!.getImagePrediction(imageBytes);
+      throw UnimplementedError('PyTorch inference disabled. Use Ollama AI instead.');
 
       // Parse result string
       String predictedLabel = 'Unknown';
@@ -173,7 +178,7 @@ class PyTorchInferenceService {
 
   /// Dispose resources
   void dispose() {
-    _model = null;
+    // _model = null;
     _labels = null;
     _isInitialized = false;
   }

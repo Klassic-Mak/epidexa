@@ -29,7 +29,7 @@ dependencies:
   wave_blob: ^1.0.5
   shared_preferences: ^2.5.4
   google_sign_in: ^7.2.0
-  pytorch_lite: ^1.0.0
+  # pytorch_lite: ^1.0.0  # Commented out - using Ollama AI instead
   image_picker: ^1.2.1
   image: ^4.0.17
   permission_handler: ^12.0.1
