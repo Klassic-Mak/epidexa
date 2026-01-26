@@ -15,7 +15,7 @@ import 'enums/consultation_status.dart' as _i2;
 
 abstract class Consultation implements _i1.SerializableModel {
   Consultation._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.doctorId,
     required this.checkId,
@@ -24,7 +24,7 @@ abstract class Consultation implements _i1.SerializableModel {
     required this.encryptionKey,
     required this.createdAt,
     this.respondedAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Consultation({
     _i1.UuidValue? id,
@@ -66,8 +66,10 @@ abstract class Consultation implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -103,7 +105,7 @@ abstract class Consultation implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Consultation',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'doctorId': doctorId.toJson(),
       'checkId': checkId.toJson(),
@@ -151,7 +153,7 @@ class _ConsultationImpl extends Consultation {
   @_i1.useResult
   @override
   Consultation copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     _i1.UuidValue? doctorId,
     _i1.UuidValue? checkId,
@@ -162,7 +164,7 @@ class _ConsultationImpl extends Consultation {
     Object? respondedAt = _Undefined,
   }) {
     return Consultation(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       doctorId: doctorId ?? this.doctorId,
       checkId: checkId ?? this.checkId,

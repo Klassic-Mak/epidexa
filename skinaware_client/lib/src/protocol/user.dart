@@ -17,7 +17,7 @@ import 'enums/skin_type.dart' as _i4;
 
 abstract class User implements _i1.SerializableModel {
   User._({
-    _i1.UuidValue? id,
+    this.id,
     required this.email,
     required this.phone,
     required this.age,
@@ -30,7 +30,7 @@ abstract class User implements _i1.SerializableModel {
     required this.encryptionKey,
     required this.descriptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory User({
     _i1.UuidValue? id,
@@ -72,8 +72,10 @@ abstract class User implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   String email;
 
@@ -121,7 +123,7 @@ abstract class User implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'User',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'email': email,
       'phone': phone,
       'age': age,
@@ -181,7 +183,7 @@ class _UserImpl extends User {
   @_i1.useResult
   @override
   User copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     String? email,
     String? phone,
     int? age,
@@ -196,7 +198,7 @@ class _UserImpl extends User {
     DateTime? createdAt,
   }) {
     return User(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       email: email ?? this.email,
       phone: phone ?? this.phone,
       age: age ?? this.age,

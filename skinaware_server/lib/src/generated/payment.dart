@@ -14,9 +14,9 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import 'enums/payment_status.dart' as _i2;
 
 abstract class Payment
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   Payment._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.consultationId,
     required this.amount,
@@ -25,7 +25,7 @@ abstract class Payment
     required this.transactionId,
     required this.createdAt,
     required this.updatedAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Payment({
     _i1.UuidValue? id,
@@ -68,7 +68,7 @@ abstract class Payment
   static const db = PaymentRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -87,7 +87,7 @@ abstract class Payment
   DateTime updatedAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [Payment]
   /// with some or all fields replaced by the given arguments.
@@ -107,7 +107,7 @@ abstract class Payment
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Payment',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'consultationId': consultationId.toJson(),
       'amount': amount,
@@ -123,7 +123,7 @@ abstract class Payment
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'Payment',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'consultationId': consultationId.toJson(),
       'amount': amount,
@@ -165,6 +165,8 @@ abstract class Payment
   }
 }
 
+class _Undefined {}
+
 class _PaymentImpl extends Payment {
   _PaymentImpl({
     _i1.UuidValue? id,
@@ -193,7 +195,7 @@ class _PaymentImpl extends Payment {
   @_i1.useResult
   @override
   Payment copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     _i1.UuidValue? consultationId,
     double? amount,
@@ -204,7 +206,7 @@ class _PaymentImpl extends Payment {
     DateTime? updatedAt,
   }) {
     return Payment(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       consultationId: consultationId ?? this.consultationId,
       amount: amount ?? this.amount,
@@ -269,7 +271,7 @@ class PaymentUpdateTable extends _i1.UpdateTable<PaymentTable> {
       );
 }
 
-class PaymentTable extends _i1.Table<_i1.UuidValue> {
+class PaymentTable extends _i1.Table<_i1.UuidValue?> {
   PaymentTable({super.tableRelation}) : super(tableName: 'payment') {
     updateTable = PaymentUpdateTable(this);
     userId = _i1.ColumnUuid(
@@ -346,7 +348,7 @@ class PaymentInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Payment.t;
+  _i1.Table<_i1.UuidValue?> get table => Payment.t;
 }
 
 class PaymentIncludeList extends _i1.IncludeList {
@@ -366,7 +368,7 @@ class PaymentIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Payment.t;
+  _i1.Table<_i1.UuidValue?> get table => Payment.t;
 }
 
 class PaymentRepository {

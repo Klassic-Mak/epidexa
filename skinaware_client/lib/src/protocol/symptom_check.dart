@@ -19,7 +19,7 @@ import 'package:skinaware_client/src/protocol/protocol.dart' as _i6;
 
 abstract class SymptomCheck implements _i1.SerializableModel {
   SymptomCheck._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.skinType,
     required this.symptoms,
@@ -29,7 +29,7 @@ abstract class SymptomCheck implements _i1.SerializableModel {
     required this.notesKey,
     required this.encryptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory SymptomCheck({
     _i1.UuidValue? id,
@@ -71,8 +71,10 @@ abstract class SymptomCheck implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -111,7 +113,7 @@ abstract class SymptomCheck implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'SymptomCheck',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'skinType': skinType.toJson(),
       'symptoms': symptoms.toJson(valueToJson: (v) => v.toJson()),
@@ -129,6 +131,8 @@ abstract class SymptomCheck implements _i1.SerializableModel {
     return _i1.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _SymptomCheckImpl extends SymptomCheck {
   _SymptomCheckImpl({
@@ -160,7 +164,7 @@ class _SymptomCheckImpl extends SymptomCheck {
   @_i1.useResult
   @override
   SymptomCheck copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     _i2.SkinType? skinType,
     List<_i3.Symptom>? symptoms,
@@ -172,7 +176,7 @@ class _SymptomCheckImpl extends SymptomCheck {
     DateTime? createdAt,
   }) {
     return SymptomCheck(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       skinType: skinType ?? this.skinType,
       symptoms: symptoms ?? this.symptoms.map((e0) => e0).toList(),

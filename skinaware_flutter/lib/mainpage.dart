@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:skinaware_flutter/constants.dart';
+import 'package:skinaware_flutter/providers/userProvider.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/screens/homeScreen/home_screen.dart';
+import 'package:skinaware_flutter/screens/profileScreen/profile_screen.dart';
 import 'package:skinaware_flutter/screens/reportScreen/reportScreenTest.dart';
 import 'package:skinaware_flutter/screens/scan_screen.dart';
 import 'package:skinaware_flutter/screens/settings_screen.dart';
@@ -31,6 +33,7 @@ class _MainpageState extends ConsumerState<Mainpage> {
       HomeScreen(),
       ReportSkinTestScreen(),
       const ScanScreen(),
+
       const SettingsScreen(),
     ];
   }
@@ -49,9 +52,11 @@ class _MainpageState extends ConsumerState<Mainpage> {
     );
   }
 
-  Widget _buildProfileIcon(BuildContext context, {bool isActive = false}) {
-    final imageUrl =
-        "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+  Widget _buildProfileIcon(
+    BuildContext context,
+    String userImage, {
+    bool isActive = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
       child: Container(
@@ -68,7 +73,7 @@ class _MainpageState extends ConsumerState<Mainpage> {
         ),
         child: CircleAvatar(
           radius: isActive ? 14 : 12,
-          backgroundImage: CachedNetworkImageProvider(imageUrl),
+          backgroundImage: CachedNetworkImageProvider(userImage),
           backgroundColor: Colors.grey.shade200,
           onBackgroundImageError: (exception, stackTrace) {
             AssetImage("assets/images/user.png");
@@ -80,6 +85,8 @@ class _MainpageState extends ConsumerState<Mainpage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+    final userName = user?.name.toString() ?? "User";
     final count = 1;
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -103,12 +110,16 @@ class _MainpageState extends ConsumerState<Mainpage> {
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 leading: GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, profilePageRoute);
+                    Navigator.pushNamed(context, profileRoute);
                   },
-                  child: _buildProfileIcon(context),
+                  child: _buildProfileIcon(
+                    context,
+                    user?.profilePhoto ??
+                        'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png',
+                  ),
                 ),
                 title: Text(
-                  'Hello, Sarah Minpole👋',
+                  'Hello, ${userName}👋',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,

@@ -16,9 +16,9 @@ import 'enums/role.dart' as _i3;
 import 'enums/skin_type.dart' as _i4;
 
 abstract class User
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   User._({
-    _i1.UuidValue? id,
+    this.id,
     required this.email,
     required this.phone,
     required this.age,
@@ -31,7 +31,7 @@ abstract class User
     required this.encryptionKey,
     required this.descriptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory User({
     _i1.UuidValue? id,
@@ -78,7 +78,7 @@ abstract class User
   static const db = UserRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   String email;
 
@@ -105,7 +105,7 @@ abstract class User
   DateTime createdAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [User]
   /// with some or all fields replaced by the given arguments.
@@ -129,7 +129,7 @@ abstract class User
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'User',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'email': email,
       'phone': phone,
       'age': age,
@@ -149,7 +149,7 @@ abstract class User
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'User',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'email': email,
       'phone': phone,
       'age': age,
@@ -233,7 +233,7 @@ class _UserImpl extends User {
   @_i1.useResult
   @override
   User copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     String? email,
     String? phone,
     int? age,
@@ -248,7 +248,7 @@ class _UserImpl extends User {
     DateTime? createdAt,
   }) {
     return User(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       email: email ?? this.email,
       phone: phone ?? this.phone,
       age: age ?? this.age,
@@ -335,7 +335,7 @@ class UserUpdateTable extends _i1.UpdateTable<UserTable> {
       );
 }
 
-class UserTable extends _i1.Table<_i1.UuidValue> {
+class UserTable extends _i1.Table<_i1.UuidValue?> {
   UserTable({super.tableRelation}) : super(tableName: 'app_user') {
     updateTable = UserUpdateTable(this);
     email = _i1.ColumnString(
@@ -442,7 +442,7 @@ class UserInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => User.t;
+  _i1.Table<_i1.UuidValue?> get table => User.t;
 }
 
 class UserIncludeList extends _i1.IncludeList {
@@ -462,7 +462,7 @@ class UserIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => User.t;
+  _i1.Table<_i1.UuidValue?> get table => User.t;
 }
 
 class UserRepository {

@@ -13,9 +13,9 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 
 abstract class Doctor
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   Doctor._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.name,
     required this.credentialsKey,
@@ -26,7 +26,7 @@ abstract class Doctor
     required this.availability,
     required this.fee,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Doctor({
     _i1.UuidValue? id,
@@ -67,7 +67,7 @@ abstract class Doctor
   static const db = DoctorRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -90,7 +90,7 @@ abstract class Doctor
   DateTime createdAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [Doctor]
   /// with some or all fields replaced by the given arguments.
@@ -112,7 +112,7 @@ abstract class Doctor
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Doctor',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'name': name,
       'credentialsKey': credentialsKey,
@@ -130,7 +130,7 @@ abstract class Doctor
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'Doctor',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'name': name,
       'credentialsKey': credentialsKey,
@@ -174,6 +174,8 @@ abstract class Doctor
   }
 }
 
+class _Undefined {}
+
 class _DoctorImpl extends Doctor {
   _DoctorImpl({
     _i1.UuidValue? id,
@@ -206,7 +208,7 @@ class _DoctorImpl extends Doctor {
   @_i1.useResult
   @override
   Doctor copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     String? name,
     String? credentialsKey,
@@ -219,7 +221,7 @@ class _DoctorImpl extends Doctor {
     DateTime? createdAt,
   }) {
     return Doctor(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       name: name ?? this.name,
       credentialsKey: credentialsKey ?? this.credentialsKey,
@@ -293,7 +295,7 @@ class DoctorUpdateTable extends _i1.UpdateTable<DoctorTable> {
       );
 }
 
-class DoctorTable extends _i1.Table<_i1.UuidValue> {
+class DoctorTable extends _i1.Table<_i1.UuidValue?> {
   DoctorTable({super.tableRelation}) : super(tableName: 'doctor') {
     updateTable = DoctorUpdateTable(this);
     userId = _i1.ColumnUuid(
@@ -383,7 +385,7 @@ class DoctorInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Doctor.t;
+  _i1.Table<_i1.UuidValue?> get table => Doctor.t;
 }
 
 class DoctorIncludeList extends _i1.IncludeList {
@@ -403,7 +405,7 @@ class DoctorIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Doctor.t;
+  _i1.Table<_i1.UuidValue?> get table => Doctor.t;
 }
 
 class DoctorRepository {

@@ -2,7 +2,7 @@ class: Consultation
 table: consultation
 
 fields:
-  id: UuidValue, defaultModel=random_v7
+  id: UuidValue?, defaultPersist=random_v7
   userId: UuidValue, relation(parent=app_user)
   doctorId: UuidValue, relation(parent=doctor)
   checkId: UuidValue, relation(parent=symptom_check)

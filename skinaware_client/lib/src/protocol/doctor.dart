@@ -14,7 +14,7 @@ import 'package:serverpod_client/serverpod_client.dart' as _i1;
 
 abstract class Doctor implements _i1.SerializableModel {
   Doctor._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.name,
     required this.credentialsKey,
@@ -25,7 +25,7 @@ abstract class Doctor implements _i1.SerializableModel {
     required this.availability,
     required this.fee,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Doctor({
     _i1.UuidValue? id,
@@ -61,8 +61,10 @@ abstract class Doctor implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -104,7 +106,7 @@ abstract class Doctor implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Doctor',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'name': name,
       'credentialsKey': credentialsKey,
@@ -123,6 +125,8 @@ abstract class Doctor implements _i1.SerializableModel {
     return _i1.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _DoctorImpl extends Doctor {
   _DoctorImpl({
@@ -156,7 +160,7 @@ class _DoctorImpl extends Doctor {
   @_i1.useResult
   @override
   Doctor copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     String? name,
     String? credentialsKey,
@@ -169,7 +173,7 @@ class _DoctorImpl extends Doctor {
     DateTime? createdAt,
   }) {
     return Doctor(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       name: name ?? this.name,
       credentialsKey: credentialsKey ?? this.credentialsKey,

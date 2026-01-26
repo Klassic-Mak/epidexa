@@ -14,9 +14,9 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import 'enums/consultation_status.dart' as _i2;
 
 abstract class Consultation
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   Consultation._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.doctorId,
     required this.checkId,
@@ -25,7 +25,7 @@ abstract class Consultation
     required this.encryptionKey,
     required this.createdAt,
     this.respondedAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Consultation({
     _i1.UuidValue? id,
@@ -72,7 +72,7 @@ abstract class Consultation
   static const db = ConsultationRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -91,7 +91,7 @@ abstract class Consultation
   DateTime? respondedAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [Consultation]
   /// with some or all fields replaced by the given arguments.
@@ -111,7 +111,7 @@ abstract class Consultation
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Consultation',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'doctorId': doctorId.toJson(),
       'checkId': checkId.toJson(),
@@ -127,7 +127,7 @@ abstract class Consultation
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'Consultation',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'doctorId': doctorId.toJson(),
       'checkId': checkId.toJson(),
@@ -199,7 +199,7 @@ class _ConsultationImpl extends Consultation {
   @_i1.useResult
   @override
   Consultation copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     _i1.UuidValue? doctorId,
     _i1.UuidValue? checkId,
@@ -210,7 +210,7 @@ class _ConsultationImpl extends Consultation {
     Object? respondedAt = _Undefined,
   }) {
     return Consultation(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       doctorId: doctorId ?? this.doctorId,
       checkId: checkId ?? this.checkId,
@@ -276,7 +276,7 @@ class ConsultationUpdateTable extends _i1.UpdateTable<ConsultationTable> {
       );
 }
 
-class ConsultationTable extends _i1.Table<_i1.UuidValue> {
+class ConsultationTable extends _i1.Table<_i1.UuidValue?> {
   ConsultationTable({super.tableRelation}) : super(tableName: 'consultation') {
     updateTable = ConsultationUpdateTable(this);
     userId = _i1.ColumnUuid(
@@ -353,7 +353,7 @@ class ConsultationInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Consultation.t;
+  _i1.Table<_i1.UuidValue?> get table => Consultation.t;
 }
 
 class ConsultationIncludeList extends _i1.IncludeList {
@@ -373,7 +373,7 @@ class ConsultationIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Consultation.t;
+  _i1.Table<_i1.UuidValue?> get table => Consultation.t;
 }
 
 class ConsultationRepository {

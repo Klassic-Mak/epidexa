@@ -14,7 +14,7 @@ import 'package:serverpod_client/serverpod_client.dart' as _i1;
 
 abstract class Image implements _i1.SerializableModel {
   Image._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.checkId,
     required this.url,
@@ -22,7 +22,7 @@ abstract class Image implements _i1.SerializableModel {
     required this.encryptionKey,
     required this.descriptionKey,
     required this.uploadedAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Image({
     _i1.UuidValue? id,
@@ -54,8 +54,10 @@ abstract class Image implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -88,7 +90,7 @@ abstract class Image implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Image',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'checkId': checkId.toJson(),
       'url': url,
@@ -104,6 +106,8 @@ abstract class Image implements _i1.SerializableModel {
     return _i1.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _ImageImpl extends Image {
   _ImageImpl({
@@ -131,7 +135,7 @@ class _ImageImpl extends Image {
   @_i1.useResult
   @override
   Image copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     _i1.UuidValue? checkId,
     String? url,
@@ -141,7 +145,7 @@ class _ImageImpl extends Image {
     DateTime? uploadedAt,
   }) {
     return Image(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       checkId: checkId ?? this.checkId,
       url: url ?? this.url,

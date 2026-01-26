@@ -13,16 +13,16 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 
 abstract class Consent
-    implements _i1.TableRow<_i1.UuidValue>, _i1.ProtocolSerialization {
+    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
   Consent._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.type,
     required this.accepted,
     required this.encryptionKey,
     required this.descriptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Consent({
     _i1.UuidValue? id,
@@ -55,7 +55,7 @@ abstract class Consent
   static const db = ConsentRepository._();
 
   @override
-  _i1.UuidValue id;
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -70,7 +70,7 @@ abstract class Consent
   DateTime createdAt;
 
   @override
-  _i1.Table<_i1.UuidValue> get table => t;
+  _i1.Table<_i1.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [Consent]
   /// with some or all fields replaced by the given arguments.
@@ -88,7 +88,7 @@ abstract class Consent
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Consent',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'type': type,
       'accepted': accepted,
@@ -102,7 +102,7 @@ abstract class Consent
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'Consent',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'type': type,
       'accepted': accepted,
@@ -142,6 +142,8 @@ abstract class Consent
   }
 }
 
+class _Undefined {}
+
 class _ConsentImpl extends Consent {
   _ConsentImpl({
     _i1.UuidValue? id,
@@ -166,7 +168,7 @@ class _ConsentImpl extends Consent {
   @_i1.useResult
   @override
   Consent copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     String? type,
     bool? accepted,
@@ -175,7 +177,7 @@ class _ConsentImpl extends Consent {
     DateTime? createdAt,
   }) {
     return Consent(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       type: type ?? this.type,
       accepted: accepted ?? this.accepted,
@@ -224,7 +226,7 @@ class ConsentUpdateTable extends _i1.UpdateTable<ConsentTable> {
       );
 }
 
-class ConsentTable extends _i1.Table<_i1.UuidValue> {
+class ConsentTable extends _i1.Table<_i1.UuidValue?> {
   ConsentTable({super.tableRelation}) : super(tableName: 'consent') {
     updateTable = ConsentUpdateTable(this);
     userId = _i1.ColumnUuid(
@@ -286,7 +288,7 @@ class ConsentInclude extends _i1.IncludeObject {
   Map<String, _i1.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Consent.t;
+  _i1.Table<_i1.UuidValue?> get table => Consent.t;
 }
 
 class ConsentIncludeList extends _i1.IncludeList {
@@ -306,7 +308,7 @@ class ConsentIncludeList extends _i1.IncludeList {
   Map<String, _i1.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue> get table => Consent.t;
+  _i1.Table<_i1.UuidValue?> get table => Consent.t;
 }
 
 class ConsentRepository {

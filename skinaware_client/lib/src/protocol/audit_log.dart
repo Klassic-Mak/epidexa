@@ -14,7 +14,7 @@ import 'package:serverpod_client/serverpod_client.dart' as _i1;
 
 abstract class AuditLog implements _i1.SerializableModel {
   AuditLog._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.action,
     required this.ip,
@@ -22,7 +22,7 @@ abstract class AuditLog implements _i1.SerializableModel {
     required this.descriptionKey,
     required this.createdAt,
     required this.updatedAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory AuditLog({
     _i1.UuidValue? id,
@@ -54,8 +54,10 @@ abstract class AuditLog implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -88,7 +90,7 @@ abstract class AuditLog implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'AuditLog',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'action': action,
       'ip': ip,
@@ -104,6 +106,8 @@ abstract class AuditLog implements _i1.SerializableModel {
     return _i1.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _AuditLogImpl extends AuditLog {
   _AuditLogImpl({
@@ -131,7 +135,7 @@ class _AuditLogImpl extends AuditLog {
   @_i1.useResult
   @override
   AuditLog copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     String? action,
     String? ip,
@@ -141,7 +145,7 @@ class _AuditLogImpl extends AuditLog {
     DateTime? updatedAt,
   }) {
     return AuditLog(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       action: action ?? this.action,
       ip: ip ?? this.ip,

@@ -7,14 +7,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:skinaware_flutter/constants.dart';
 import 'package:skinaware_flutter/general_components/divider_list_tile.dart';
 import 'package:skinaware_flutter/general_components/shimmers/shimmer_widget.dart';
+import 'package:skinaware_flutter/providers/userProvider.dart';
 
 import 'components/profile_card.dart';
 import 'components/profile_menu_item_list_tile.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  final String name = "Sarah Minpole";
-  final String email = 'minpolesarah@gmail.com';
-  final String imagesrc = "https://randomuser.me/api/portraits/women/2.jpg";
   bool isShowHi = true;
   bool isShowSeller = false;
 
@@ -29,6 +27,12 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
+    final user = ref.read(userProvider);
+    final String name = user?.name ?? 'User';
+    final String email = user?.email ?? '';
+    final String imagesrc =
+        user?.profilePhoto ??
+        'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png';
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Theme.of(context).scaffoldBackgroundColor,
@@ -72,10 +76,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   ProfileCard(
                     isShowHi: widget.isShowHi,
-                    name: widget.name,
-                    email: widget.email,
-                    imageSrc: widget.imagesrc,
-                    proLableText: "Seller",
+                    name: name,
+                    email: email,
+                    imageSrc: imagesrc,
+                    proLableText: "USer",
                     //
                     isPro: widget.isShowSeller,
                     press: () {},

@@ -1,0 +1,6 @@
+class: AuthResponse
+fields:
+  success: bool
+  message: String?
+  error: String?
+  user: User?

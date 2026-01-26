@@ -14,14 +14,14 @@ import 'package:serverpod_client/serverpod_client.dart' as _i1;
 
 abstract class Consent implements _i1.SerializableModel {
   Consent._({
-    _i1.UuidValue? id,
+    this.id,
     required this.userId,
     required this.type,
     required this.accepted,
     required this.encryptionKey,
     required this.descriptionKey,
     required this.createdAt,
-  }) : id = id ?? _i1.Uuid().v7obj();
+  });
 
   factory Consent({
     _i1.UuidValue? id,
@@ -49,8 +49,10 @@ abstract class Consent implements _i1.SerializableModel {
     );
   }
 
-  /// The id of the object.
-  _i1.UuidValue id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  _i1.UuidValue? id;
 
   _i1.UuidValue userId;
 
@@ -80,7 +82,7 @@ abstract class Consent implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Consent',
-      'id': id.toJson(),
+      if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
       'type': type,
       'accepted': accepted,
@@ -95,6 +97,8 @@ abstract class Consent implements _i1.SerializableModel {
     return _i1.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _ConsentImpl extends Consent {
   _ConsentImpl({
@@ -120,7 +124,7 @@ class _ConsentImpl extends Consent {
   @_i1.useResult
   @override
   Consent copyWith({
-    _i1.UuidValue? id,
+    Object? id = _Undefined,
     _i1.UuidValue? userId,
     String? type,
     bool? accepted,
@@ -129,7 +133,7 @@ class _ConsentImpl extends Consent {
     DateTime? createdAt,
   }) {
     return Consent(
-      id: id ?? this.id,
+      id: id is _i1.UuidValue? ? id : this.id,
       userId: userId ?? this.userId,
       type: type ?? this.type,
       accepted: accepted ?? this.accepted,

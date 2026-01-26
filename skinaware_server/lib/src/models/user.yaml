@@ -2,7 +2,7 @@ class: User
 table: app_user
 
 fields:
-  id: UuidValue, defaultModel=random_v7
+  id: UuidValue?, defaultPersist=random_v7
   email: String
   phone: String
   age: int
