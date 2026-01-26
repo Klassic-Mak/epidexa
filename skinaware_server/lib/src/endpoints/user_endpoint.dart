@@ -5,6 +5,9 @@ import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart'
     show defaultGeneratePasswordHash, defaultValidatePasswordHash;
 
+import 'package:serverpod_auth_server/serverpod_auth_server.dart'
+    show defaultValidatePasswordHash, PasswordValidationSuccess;
+
 import '../generated/protocol.dart';
 
 class UserEndpoint extends Endpoint {
@@ -94,9 +97,6 @@ class UserEndpoint extends Endpoint {
     }
   }
 
-  // =========
-  // LOGIN
-  // =========
   Future<AuthResponse> login(
     Session session, {
     required String email,
@@ -109,22 +109,23 @@ class UserEndpoint extends Endpoint {
       where: (t) => t.email.equals(normalizedEmail),
     );
 
-    // ✅ Timing-safe fake hash (same cost whether user exists or not)
-    final fakeHash = await defaultGeneratePasswordHash(
-      'fake_password_for_timing',
-    );
-    final hashToCheck = user?.passwordHash ?? fakeHash;
+    if (user == null) {
+      return AuthResponse(
+        success: false,
+        error: 'Invalid email or password.',
+        user: null,
+      );
+    }
 
-    // ✅ Validate password (do NOT cast; treat it as bool)
-    final validateResult = await defaultValidatePasswordHash(
-      email: normalizedEmail,
+    final result = await defaultValidatePasswordHash(
       password: password,
-      hash: hashToCheck,
+      email: normalizedEmail,
+      hash: user.passwordHash,
     );
 
-    final bool isValid = validateResult == true;
+    final isValid = result is PasswordValidationSuccess;
 
-    if (user == null || !isValid) {
+    if (!isValid) {
       return AuthResponse(
         success: false,
         error: 'Invalid email or password.',
@@ -135,7 +136,6 @@ class UserEndpoint extends Endpoint {
     return AuthResponse(
       success: true,
       message: 'Login successful.',
-      error: null,
       user: user,
     );
   }
