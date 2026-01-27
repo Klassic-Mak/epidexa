@@ -8,7 +8,7 @@ import 'package:skinaware_flutter/screens/onboarding_screen.dart';
 import 'package:skinaware_flutter/screens/profileScreen/profile_screen.dart';
 import 'package:skinaware_flutter/screens/scan_screen.dart' show ScanScreen;
 import 'package:skinaware_flutter/screens/settings_screen.dart';
-import 'package:skinaware_flutter/screens/model_test_screen.dart';
+// import 'package:skinaware_flutter/screens/model_test_screen.dart';  // DISABLED - PyTorch not in use
 import 'package:skinaware_flutter/screens/skin_camera_screen.dart';
 import 'package:skinaware_flutter/screens/chat/chat_screen.dart';
 import 'package:skinaware_flutter/screens/analysis/analysis_result_screen.dart';
@@ -65,7 +65,15 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         ),
       );
     case modelTestRoute:
-      return _RightSlide(const ModelTestScreen());
+      // return _RightSlide(const ModelTestScreen());  // DISABLED - PyTorch model not in use
+      return MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: const Text('Model Test')),
+          body: const Center(
+            child: Text('PyTorch model testing is disabled.\nUsing Ollama AI instead.'),
+          ),
+        ),
+      );
 
     default:
       return MaterialPageRoute(

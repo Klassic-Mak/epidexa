@@ -3,3 +3,4 @@ user:
   - login:
   - updateUser:
   - getById:
+  - updateProfile:
