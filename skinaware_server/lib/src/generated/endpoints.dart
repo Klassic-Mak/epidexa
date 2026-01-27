@@ -122,6 +122,78 @@ class Endpoints extends _i1.EndpointDispatch {
                 password: params['password'],
               ),
         ),
+        'updateUser': _i1.MethodConnector(
+          name: 'updateUser',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'password': _i1.ParameterDescription(
+              name: 'password',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'phone': _i1.ParameterDescription(
+              name: 'phone',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'age': _i1.ParameterDescription(
+              name: 'age',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'gender': _i1.ParameterDescription(
+              name: 'gender',
+              type: _i1.getType<_i3.Gender?>(),
+              nullable: true,
+            ),
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'role': _i1.ParameterDescription(
+              name: 'role',
+              type: _i1.getType<_i4.Role?>(),
+              nullable: true,
+            ),
+            'skinType': _i1.ParameterDescription(
+              name: 'skinType',
+              type: _i1.getType<_i5.SkinType?>(),
+              nullable: true,
+            ),
+            'profilePhoto': _i1.ParameterDescription(
+              name: 'profilePhoto',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['user'] as _i2.UserEndpoint).updateUser(
+                session,
+                userId: params['userId'],
+                email: params['email'],
+                password: params['password'],
+                phone: params['phone'],
+                age: params['age'],
+                gender: params['gender'],
+                name: params['name'],
+                role: params['role'],
+                skinType: params['skinType'],
+                profilePhoto: params['profilePhoto'],
+              ),
+        ),
         'getById': _i1.MethodConnector(
           name: 'getById',
           params: {

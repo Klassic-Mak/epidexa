@@ -236,6 +236,57 @@ class _UserEndpoint {
     });
   }
 
+  _i3.Future<_i4.AuthResponse> updateUser(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required _i2.UuidValue userId,
+    String? email,
+    String? password,
+    String? phone,
+    int? age,
+    _i5.Gender? gender,
+    String? name,
+    _i6.Role? role,
+    _i7.SkinType? skinType,
+    String? profilePhoto,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'user',
+            method: 'updateUser',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'user',
+          methodName: 'updateUser',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'email': email,
+            'password': password,
+            'phone': phone,
+            'age': age,
+            'gender': gender,
+            'name': name,
+            'role': role,
+            'skinType': skinType,
+            'profilePhoto': profilePhoto,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i4.AuthResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<_i4.AuthResponse> getById(
     _i1.TestSessionBuilder sessionBuilder, {
     required _i2.UuidValue userId,

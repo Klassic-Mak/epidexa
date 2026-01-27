@@ -13,4 +13,6 @@ void run(List<String> args) async {
   );
 
   await pod.start();
+  pod.logVerbose("Sever Started on PORT:808");
+  pod.logVerbose("Epidexa Server Running...");
 }

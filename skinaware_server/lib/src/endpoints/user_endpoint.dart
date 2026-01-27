@@ -140,6 +140,143 @@ class UserEndpoint extends Endpoint {
     );
   }
 
+  // ======================
+  // UPDATE USER
+  // ======================
+  Future<AuthResponse> updateUser(
+    Session session, {
+    required UuidValue userId,
+
+    // Optional updates
+    String? email,
+    String? password,
+    String? phone,
+    int? age,
+    Gender? gender,
+    String? name,
+    Role? role,
+    SkinType? skinType,
+    String? profilePhoto,
+  }) async {
+    // 1) Fetch existing user
+    final existingUser = await User.db.findById(session, userId);
+
+    if (existingUser == null) {
+      return AuthResponse(
+        success: false,
+        error: 'User not found.',
+        user: null,
+      );
+    }
+
+    // 2) Clean & normalize inputs (only if provided)
+    final normalizedEmail = email != null ? _normalizeEmail(email) : null;
+    final cleanPhone = phone?.trim();
+    final cleanName = name?.trim();
+
+    // 3) Validate only provided fields
+    final validationError = _validateUpdateUser(
+      email: normalizedEmail,
+      password: password,
+      phone: cleanPhone,
+      age: age,
+      name: cleanName,
+    );
+
+    if (validationError != null) {
+      return AuthResponse(
+        success: false,
+        error: validationError,
+        user: null,
+      );
+    }
+
+    // 4) If email is changing, ensure it's not already taken
+    if (normalizedEmail != null && normalizedEmail != existingUser.email) {
+      final emailTaken = await User.db.findFirstRow(
+        session,
+        where: (t) => t.email.equals(normalizedEmail),
+      );
+
+      if (emailTaken != null) {
+        return AuthResponse(
+          success: false,
+          error: 'An account with this email already exists.',
+          user: null,
+        );
+      }
+    }
+
+    // 5) If password provided, hash it
+    String? newPasswordHash;
+    if (password != null && password.isNotEmpty) {
+      newPasswordHash = await defaultGeneratePasswordHash(password);
+    }
+
+    // 6) Create updated object (merge: keep old values when null)
+    final updatedUser = existingUser.copyWith(
+      email: normalizedEmail ?? existingUser.email,
+      phone: cleanPhone ?? existingUser.phone,
+      age: age ?? existingUser.age,
+      gender: gender ?? existingUser.gender,
+      name: cleanName ?? existingUser.name,
+      role: role ?? existingUser.role,
+      skinType: skinType ?? existingUser.skinType,
+      profilePhoto: profilePhoto ?? existingUser.profilePhoto,
+      passwordHash: newPasswordHash ?? existingUser.passwordHash,
+      // keep encryption/description keys unchanged
+      // encryptionKey: existingUser.encryptionKey,
+      // descriptionKey: existingUser.descriptionKey,
+    );
+
+    try {
+      final saved = await User.db.updateRow(session, updatedUser);
+
+      return AuthResponse(
+        success: true,
+        message: 'Profile updated successfully.',
+        error: null,
+        user: saved,
+      );
+    } catch (e) {
+      session.log('Update user failed: $e', level: LogLevel.error);
+
+      return AuthResponse(
+        success: false,
+        error: 'Internal server error.',
+        user: null,
+      );
+    }
+  }
+
+  // -----------------------------
+  // Update validation helper
+  // -----------------------------
+  String? _validateUpdateUser({
+    String? email,
+    String? password,
+    String? phone,
+    int? age,
+    String? name,
+  }) {
+    if (email != null && !_isValidEmail(email)) {
+      return 'Invalid email address.';
+    }
+    if (password != null && password.isNotEmpty && password.length < 8) {
+      return 'Password must be at least 8 characters.';
+    }
+    if (phone != null && (phone.isEmpty || phone.length < 7)) {
+      return 'Invalid phone number.';
+    }
+    if (name != null && name.isNotEmpty && name.length < 2) {
+      return 'Name is too short.';
+    }
+    if (age != null && (age < 1 || age > 120)) {
+      return 'Invalid age.';
+    }
+    return null;
+  }
+
   // ==================
   // GET USER BY ID
   // ==================

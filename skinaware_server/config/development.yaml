@@ -27,7 +27,7 @@ database:
   password: AVNS_yufajU5z0j0F0LVsTQT
   user: avnadmin
   requireSsl: true
-  maxConnections: 2
+  maxConnectionCount: 10
 
 
 sessionLogs:
