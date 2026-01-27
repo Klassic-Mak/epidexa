@@ -64,6 +64,34 @@ class EndpointUser extends _i1.EndpointRef {
     },
   );
 
+  _i2.Future<_i3.AuthResponse> updateUser({
+    required _i1.UuidValue userId,
+    String? email,
+    String? password,
+    String? phone,
+    int? age,
+    _i4.Gender? gender,
+    String? name,
+    _i5.Role? role,
+    _i6.SkinType? skinType,
+    String? profilePhoto,
+  }) => caller.callServerEndpoint<_i3.AuthResponse>(
+    'user',
+    'updateUser',
+    {
+      'userId': userId,
+      'email': email,
+      'password': password,
+      'phone': phone,
+      'age': age,
+      'gender': gender,
+      'name': name,
+      'role': role,
+      'skinType': skinType,
+      'profilePhoto': profilePhoto,
+    },
+  );
+
   _i2.Future<_i3.AuthResponse> getById({required _i1.UuidValue userId}) =>
       caller.callServerEndpoint<_i3.AuthResponse>(
         'user',
