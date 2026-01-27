@@ -16,32 +16,25 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final PageController _controller;
 
-  // ✅ Unsplash "source" URLs (simple + reliable for demos)
-  // You can later replace with your own hosted assets if you want.
   final _pages = const <_OnboardPageData>[
     _OnboardPageData(
-      title: "Scan your skin in seconds",
+      title: "Understand your skin in seconds",
+
       subtitle:
-          "Capture a clear photo and let SkinAware detect visible skin changes with smart analysis.",
+          "Snap a photo and get instant skin analysis with Epidexa's personalized care recommendations.",
+
       imageUrl: "assets/images/girl-scan.jpeg",
-      chip: "Camera scan",
+      chip: "Skin analysis",
       icon: Icons.camera_alt_outlined,
     ),
-    // _OnboardPageData(
-    //   title: "Spot concerns early",
-    //   subtitle:
-    //       "Track dryness, irritation, and patterns that may relate to common skin conditions.",
-    //   imageUrl: "https://source.unsplash.com/tWTFjznQlBA/1200x900",
-    //   chip: "Skin checks",
-    //   icon: Icons.health_and_safety_outlined,
-    // ),
+
     _OnboardPageData(
       title: "Empowered with Dr. Epi",
       subtitle:
           "Use our AI assistant, Dr. Epi, to receive faster insights and more accurate skin health guidance.",
 
       imageUrl: "assets/images/epi-bot.png",
-      chip: "Routine tips",
+      chip: "AI assistant",
       icon: Icons.spa_outlined,
     ),
   ];

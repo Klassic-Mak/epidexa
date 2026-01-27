@@ -17,7 +17,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   static const Color pageBg = Color(0xFFF7F8FC);
 
   String selectedLanguage = 'English';
-  String selectedSkinType = 'Combination Skin';
+  String? selectedSkinType;
 
   final List<String> languages = const [
     'English',
@@ -37,6 +37,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
+
+    // Initialize selectedSkinType from user on first build
+    if (selectedSkinType == null && user != null) {
+      final st = user.skinType;
+      selectedSkinType = _skinTypeLabel(st);
+    }
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 30, 16, 22),
@@ -49,6 +55,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             imageSrc:
                 user?.profilePhoto ??
                 'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png',
+          ),
+          const SizedBox(height: 12),
+
+          // Personal info section: phone, age, gender
+          _SectionCard(
+            title: "Personal Info",
+            icon: Icons.person_outline,
+            primaryColor: primaryColor,
+            child: Column(
+              children: [
+                _SettingTile(
+                  primaryColor: primaryColor,
+                  icon: Icons.phone,
+                  title: "Phone",
+                  subtitle: user?.phone ?? 'Not set',
+                  onTap: () {},
+                ),
+                _DividerSoft(),
+                _SettingTile(
+                  primaryColor: primaryColor,
+                  icon: Icons.cake_outlined,
+                  title: "Age",
+                  subtitle: user?.age?.toString() ?? 'Not set',
+                  onTap: () {},
+                ),
+                _DividerSoft(),
+                _SettingTile(
+                  primaryColor: primaryColor,
+                  icon: Icons.wc,
+                  title: "Gender",
+                  subtitle:
+                      user?.gender?.toString().split('.').last ?? 'Not set',
+                  onTap: () {},
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
 
@@ -150,7 +192,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   value: selectedLanguage,
                   items: languages,
                   primaryColor: primaryColor,
-                  onChanged: (v) => setState(() => selectedLanguage = v),
+                  onChanged: (v) => setState(() {
+                    if (v != null) selectedLanguage = v;
+                  }),
                 ),
                 const SizedBox(height: 14),
                 _SettingToggle(
@@ -219,6 +263,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  String _skinTypeLabel(dynamic skinType) {
+    if (skinType == null) return 'Combination Skin';
+    final name = skinType.toString().split('.').last.toLowerCase();
+    switch (name) {
+      case 'normal':
+        return 'Normal Skin';
+      case 'dry':
+        return 'Dry Skin';
+      case 'oily':
+        return 'Oily Skin';
+      case 'combination':
+        return 'Combination Skin';
+      case 'sensitive':
+        return 'Sensitive Skin';
+      default:
+        return 'Combination Skin';
+    }
   }
 
   Future<void> _confirmSignOut(BuildContext context) async {
@@ -410,10 +473,10 @@ class _FieldLabel extends StatelessWidget {
 }
 
 class _ModernDropdown extends StatelessWidget {
-  final String value;
+  final String? value;
   final List<String> items;
   final Color primaryColor;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<String?> onChanged;
 
   const _ModernDropdown({
     required this.value,
@@ -432,14 +495,14 @@ class _ModernDropdown extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
+        child: DropdownButton<String?>(
           value: value,
           isExpanded: true,
           borderRadius: BorderRadius.circular(14),
           icon: const Icon(Icons.keyboard_arrow_down_rounded),
           items: items
               .map(
-                (e) => DropdownMenuItem(
+                (e) => DropdownMenuItem<String?>(
                   value: e,
                   child: Text(
                     e,
@@ -452,9 +515,7 @@ class _ModernDropdown extends StatelessWidget {
                 ),
               )
               .toList(),
-          onChanged: (v) {
-            if (v != null) onChanged(v);
-          },
+          onChanged: onChanged,
         ),
       ),
     );

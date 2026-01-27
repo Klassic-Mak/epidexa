@@ -371,7 +371,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 );
                                 setState(() => isBusy = false);
                               }
-                              Focus.of(context).unfocus();
+                              try {
+                                FocusScope.of(context).unfocus();
+                              } catch (_) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                              }
                             },
                             child: Container(
                               height: 50,

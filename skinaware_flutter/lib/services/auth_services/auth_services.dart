@@ -13,6 +13,7 @@ import 'package:skinaware_flutter/general_components/pop.dart';
 import 'package:skinaware_flutter/providers/serverpod_provider.dart';
 import 'package:skinaware_flutter/providers/userProvider.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
+import 'package:skinaware_flutter/screens/auths/complete_profile_screen.dart';
 
 class AuthServices {
   Future<void> signUpWithEmailPassword({
@@ -50,12 +51,6 @@ class AuthServices {
 
       _closeLoaderSafely(context);
 
-      // Debug
-      print('registration success: ${res.success}');
-      print('registration message: ${res.message}');
-      print('registration error: ${res.error}');
-      print('registration user: ${res.user}');
-
       if (!res.success) {
         showTopToast(
           context,
@@ -77,7 +72,11 @@ class AuthServices {
       );
 
       if (context.mounted) {
-        Navigator.pushReplacementNamed(context, mainPageRoute);
+        // After successful sign up, redirect user to complete profile screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const CompleteProfileScreen()),
+        );
       }
     } on SocketException {
       _closeLoaderSafely(context);

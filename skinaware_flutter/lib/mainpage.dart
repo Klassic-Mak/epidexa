@@ -109,9 +109,7 @@ class _MainpageState extends ConsumerState<Mainpage> {
                 elevation: 0,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 leading: GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, profileRoute);
-                  },
+                  onTap: () {},
                   child: _buildProfileIcon(
                     context,
                     user?.profilePhoto ??

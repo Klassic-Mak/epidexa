@@ -68,6 +68,9 @@ class _MyAppState extends State<MyApp> {
 
             String initialRoute;
             switch (authRoute) {
+              case AuthRoute.onboarding:
+                initialRoute = onBoarding1Route;
+                break;
               case AuthRoute.mainPage:
                 initialRoute = mainPageRoute;
                 break;
