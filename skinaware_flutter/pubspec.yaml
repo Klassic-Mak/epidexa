@@ -38,6 +38,7 @@ dependencies:
   camera: ^0.11.0+2
   cloudinary_sdk: ^5.0.0+1
   serverpod_auth_client: ^3.2.3
+  flutter_markdown: ^0.7.4+3
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'

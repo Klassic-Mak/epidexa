@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../services/ai/gemini_service.dart';
 import '../../routes/route_constants.dart';
 
@@ -442,13 +443,73 @@ class _RecommendationsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          SelectableText(
-            text,
-            style: const TextStyle(
-              color: Color(0xFF0F172A),
-              fontSize: 14.6,
-              height: 1.55,
-              fontWeight: FontWeight.w600,
+          MarkdownBody(
+            data: text,
+            selectable: true,
+            styleSheet: MarkdownStyleSheet(
+              p: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 14.6,
+                height: 1.55,
+                fontWeight: FontWeight.w500,
+              ),
+              strong: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 14.6,
+                height: 1.55,
+                fontWeight: FontWeight.w700,
+              ),
+              em: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 14.6,
+                height: 1.55,
+                fontWeight: FontWeight.w500,
+                fontStyle: FontStyle.italic,
+              ),
+              h1: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+              h2: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+              h3: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+              listBullet: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 14.6,
+                fontWeight: FontWeight.w600,
+              ),
+              code: TextStyle(
+                color: const Color(0xFF0F172A),
+                backgroundColor: const Color(0xFFE2E8F0),
+                fontSize: 13,
+                fontFamily: 'monospace',
+              ),
+              codeblockDecoration: BoxDecoration(
+                color: const Color(0xFFE2E8F0),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              blockquote: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 14.6,
+                fontStyle: FontStyle.italic,
+              ),
+              blockquoteDecoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: AnalysisResultScreen.primaryColor,
+                    width: 3,
+                  ),
+                ),
+              ),
+              blockquotePadding: const EdgeInsets.only(left: 12),
             ),
           ),
         ],
