@@ -2,25 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skinaware_client/skinaware_client.dart';
 import 'package:skinaware_flutter/constants.dart';
-import 'package:skinaware_flutter/providers/on_boading_provider.dart';
 import 'package:skinaware_flutter/providers/onboarding_data_provider.dart';
+import 'package:skinaware_flutter/providers/userProvider.dart';
+import 'package:skinaware_flutter/providers/serverpod_provider.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 
-class PersonalizedOnboardingScreen extends ConsumerStatefulWidget {
-  const PersonalizedOnboardingScreen({super.key});
+class ProfileOnboardingScreen extends ConsumerStatefulWidget {
+  const ProfileOnboardingScreen({super.key});
 
   @override
-  ConsumerState<PersonalizedOnboardingScreen> createState() => _PersonalizedOnboardingScreenState();
+  ConsumerState<ProfileOnboardingScreen> createState() => _ProfileOnboardingScreenState();
 }
 
-class _PersonalizedOnboardingScreenState extends ConsumerState<PersonalizedOnboardingScreen> {
+class _ProfileOnboardingScreenState extends ConsumerState<ProfileOnboardingScreen> {
   late final PageController _controller;
   int _currentPage = 0;
+  bool _isSaving = false;
 
   final List<_OnboardingStep> _steps = [
     _OnboardingStep(
-      title: 'Welcome to Epidexa',
-      subtitle: 'Your AI-powered skin health companion. Let\'s personalize your experience.',
+      title: 'Let\'s personalize your experience',
+      subtitle: 'Answer a few questions so Dr. Epi can give you tailored recommendations.',
       type: _StepType.intro,
     ),
     _OnboardingStep(
@@ -93,20 +95,76 @@ class _PersonalizedOnboardingScreenState extends ConsumerState<PersonalizedOnboa
   }
 
   Future<void> _finish() async {
-    // Save onboarding data to preferences
-    await ref.read(onboardingDataProvider.notifier).saveToPrefs();
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
 
-    // Mark onboarding as completed (persisted)
-    await ref.read(onboardingCompletedProvider.notifier).setCompleted(true);
+    try {
+      // Get current user
+      final user = ref.read(userProvider);
+      if (user?.id == null) {
+        // No user logged in, just save locally and go to main
+        await ref.read(onboardingDataProvider.notifier).saveToPrefs();
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, mainPageRoute);
+        return;
+      }
 
-    if (!mounted) return;
-    Navigator.pushReplacementNamed(context, loginRoute);
+      // Get onboarding data
+      final data = ref.read(onboardingDataProvider);
+
+      // Save to server
+      final client = ref.read(serverpodClientProvider);
+      final response = await client.profile.saveProfile(
+        userId: user!.id!,
+        skinType: data.skinType ?? SkinType.NORMAL,
+        skinSensitivity: data.skinSensitivity,
+        oiliness: data.oiliness,
+        skinConcerns: data.skinConcerns.isNotEmpty ? data.skinConcerns.join(',') : null,
+        primaryConcern: data.primaryConcern,
+        knownAllergies: data.allergies.isNotEmpty ? data.allergies.join(',') : null,
+        currentMedications: data.medications.isNotEmpty ? data.medications.join(',') : null,
+        skinConditionHistory: data.skinConditionHistory.isNotEmpty ? data.skinConditionHistory.join(',') : null,
+        sunExposure: data.sunExposure,
+        waterIntake: data.waterIntake,
+        sleepQuality: data.sleepQuality,
+        stressLevel: data.stressLevel,
+        skinGoals: data.skinGoals.isNotEmpty ? data.skinGoals.join(',') : null,
+        preferredLanguage: data.preferredLanguage,
+        productBudget: data.productBudget,
+        routineComplexity: data.routineComplexity,
+      );
+
+      if (response.success) {
+        // Also update user's skin type in the user record
+        await client.user.updateProfile(
+          userId: user.id!,
+          skinType: data.skinType,
+          age: data.age,
+          gender: data.gender,
+        );
+
+        // Save locally as backup
+        await ref.read(onboardingDataProvider.notifier).saveToPrefs();
+
+        // Store profile in provider
+        ref.read(userProfileProvider.notifier).state = response.profile;
+      }
+
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, mainPageRoute);
+    } catch (e) {
+      // If server save fails, save locally and continue
+      await ref.read(onboardingDataProvider.notifier).saveToPrefs();
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, mainPageRoute);
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   Future<void> _skip() async {
-    await ref.read(onboardingCompletedProvider.notifier).setCompleted(true);
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, loginRoute);
+    Navigator.pushReplacementNamed(context, mainPageRoute);
   }
 
   @override
@@ -171,7 +229,7 @@ class _PersonalizedOnboardingScreenState extends ConsumerState<PersonalizedOnboa
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: _nextPage,
+                  onPressed: _isSaving ? null : _nextPage,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
@@ -180,10 +238,19 @@ class _PersonalizedOnboardingScreenState extends ConsumerState<PersonalizedOnboa
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    isLastPage ? 'Get Started' : 'Continue',
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
-                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          isLastPage ? 'Get Started' : 'Continue',
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                        ),
                 ),
               ),
             ),
