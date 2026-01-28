@@ -251,6 +251,17 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
     ];
   }
 
+  /// Auto-initialize if not already initialized
+  Future<void> _ensureInitialized() async {
+    if (!_isInitialized) {
+      print('🔄 Auto-initializing Gemini service...');
+      final success = await initialize();
+      if (!success) {
+        throw Exception('Failed to initialize Gemini service. Please check your network connection.');
+      }
+    }
+  }
+
   /// Convert image file to base64
   Future<String> _imageToBase64(String imagePath) async {
     final file = File(imagePath);
@@ -265,9 +276,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
 
   /// Validate if image contains skin suitable for dermatological analysis
   Future<ImageValidationResult> validateImage(String imagePath) async {
-    if (!_isInitialized) {
-      throw Exception('Service not initialized. Call initialize() first.');
-    }
+    await _ensureInitialized();
 
     print('🔍 Validating image for skin content...');
 
@@ -333,9 +342,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
     String? customPrompt,
     bool skipValidation = false,
   }) async {
-    if (!_isInitialized) {
-      throw Exception('Service not initialized. Call initialize() first.');
-    }
+    await _ensureInitialized();
 
     final imageBase64 = await _imageToBase64(imagePath);
     print('📸 Image converted to base64 (${imageBase64.length} chars)');
@@ -371,9 +378,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
     Uint8List imageBytes, {
     String? customPrompt,
   }) async {
-    if (!_isInitialized) {
-      throw Exception('Service not initialized. Call initialize() first.');
-    }
+    await _ensureInitialized();
 
     final imageBase64 = _bytesToBase64(imageBytes);
     print('📸 Image converted to base64 (${imageBase64.length} chars)');
@@ -390,9 +395,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
 
   /// Send text-only message
   Future<String> sendMessage(String message) async {
-    if (!_isInitialized) {
-      throw Exception('Service not initialized. Call initialize() first.');
-    }
+    await _ensureInitialized();
 
     // Add user message to history
     _chatHistory.add(
@@ -424,9 +427,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
     String imagePath, {
     bool isVietnamese = false,
   }) async {
-    if (!_isInitialized) {
-      throw Exception('Service not initialized. Call initialize() first.');
-    }
+    await _ensureInitialized();
 
     // Validate image first
     print('🔍 Validating image before chat analysis...');
@@ -504,9 +505,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
 
   /// Stream response for real-time display
   Stream<String> streamMessage(String message) async* {
-    if (!_isInitialized) {
-      throw Exception('Service not initialized. Call initialize() first.');
-    }
+    await _ensureInitialized();
 
     _chatHistory.add(
       ChatMessage(
@@ -540,9 +539,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
     String? previousTreatments,
     bool isVietnamese = false,
   }) async {
-    if (!_isInitialized) {
-      throw Exception('Service not initialized. Call initialize() first.');
-    }
+    await _ensureInitialized();
 
     print('🔬 Starting full analysis with Gemini...');
 
