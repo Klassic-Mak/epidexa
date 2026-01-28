@@ -13,7 +13,6 @@ import 'package:skinaware_flutter/general_components/pop.dart';
 import 'package:skinaware_flutter/providers/serverpod_provider.dart';
 import 'package:skinaware_flutter/providers/userProvider.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
-import 'package:skinaware_flutter/screens/auths/complete_profile_screen.dart';
 
 class AuthServices {
   Future<void> signUpWithEmailPassword({
@@ -72,11 +71,8 @@ class AuthServices {
       );
 
       if (context.mounted) {
-        // After successful sign up, redirect user to complete profile screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const CompleteProfileScreen()),
-        );
+        // After successful sign up, redirect user to profile onboarding
+        Navigator.pushReplacementNamed(context, profileOnboardingRoute);
       }
     } on SocketException {
       _closeLoaderSafely(context);
