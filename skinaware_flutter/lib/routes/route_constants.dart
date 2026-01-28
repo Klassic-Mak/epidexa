@@ -7,6 +7,7 @@ const String settingsRoute = "settingsRoute";
 const String scanRoute = "scanRoute";
 const String chatRoute = "chatRoute";
 const String analysisResultRoute = "analysisResultRoute";
+const String offlineAnalysisResultRoute = "offlineAnalysisResultRoute";
 const String modelTestRoute = "modelTestRoute";
 const String onBoardingRoute = "onBoardingRoute";
 const String onBoarding1Route = "onBoarding1Route";

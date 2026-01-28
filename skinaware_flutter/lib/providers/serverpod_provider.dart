@@ -19,7 +19,9 @@ String _computeDefaultServerUrl() {
 
   try {
     if (Platform.isAndroid) {
-      return 'http://192.168.43.152:$port/';
+      // Use your computer's IP address (works via Wi-Fi)
+      // For USB debugging, use: 'http://localhost:$port/' and run: adb reverse tcp:8080 tcp:8080
+      return 'http://192.168.100.3:$port/';
     }
 
     // iOS simulator: localhost works
