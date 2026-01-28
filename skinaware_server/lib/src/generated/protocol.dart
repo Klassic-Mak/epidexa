@@ -29,10 +29,12 @@ import 'enums/symptom.dart' as _i16;
 import 'image.dart' as _i17;
 import 'message.dart' as _i18;
 import 'payment.dart' as _i19;
-import 'recommendation.dart' as _i20;
-import 'sender_type.dart' as _i21;
-import 'symptom_check.dart' as _i22;
-import 'user.dart' as _i23;
+import 'profile_response.dart' as _i20;
+import 'recommendation.dart' as _i21;
+import 'sender_type.dart' as _i22;
+import 'symptom_check.dart' as _i23;
+import 'user.dart' as _i24;
+import 'user_profile.dart' as _i25;
 export 'audit_log.dart';
 export 'auth_response.dart';
 export 'consent.dart';
@@ -49,10 +51,12 @@ export 'enums/symptom.dart';
 export 'image.dart';
 export 'message.dart';
 export 'payment.dart';
+export 'profile_response.dart';
 export 'recommendation.dart';
 export 'sender_type.dart';
 export 'symptom_check.dart';
 export 'user.dart';
+export 'user_profile.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -1005,6 +1009,152 @@ class Protocol extends _i1.SerializationManagerServer {
       ],
       managed: true,
     ),
+    _i2.TableDefinition(
+      name: 'user_profile',
+      dartName: 'UserProfile',
+      schema: 'public',
+      module: 'skinaware',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'skinType',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:SkinType',
+        ),
+        _i2.ColumnDefinition(
+          name: 'skinSensitivity',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'oiliness',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'skinConcerns',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'primaryConcern',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'knownAllergies',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'currentMedications',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'skinConditionHistory',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'sunExposure',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'waterIntake',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'sleepQuality',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'stressLevel',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'skinGoals',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'preferredLanguage',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'productBudget',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'routineComplexity',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'user_profile_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
     ..._i3.Protocol.targetTableDefinitions,
     ..._i2.Protocol.targetTableDefinitions,
   ];
@@ -1084,17 +1234,23 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i19.Payment) {
       return _i19.Payment.fromJson(data) as T;
     }
-    if (t == _i20.Recommendation) {
-      return _i20.Recommendation.fromJson(data) as T;
+    if (t == _i20.ProfileResponse) {
+      return _i20.ProfileResponse.fromJson(data) as T;
     }
-    if (t == _i21.SenderType) {
-      return _i21.SenderType.fromJson(data) as T;
+    if (t == _i21.Recommendation) {
+      return _i21.Recommendation.fromJson(data) as T;
     }
-    if (t == _i22.SymptomCheck) {
-      return _i22.SymptomCheck.fromJson(data) as T;
+    if (t == _i22.SenderType) {
+      return _i22.SenderType.fromJson(data) as T;
     }
-    if (t == _i23.User) {
-      return _i23.User.fromJson(data) as T;
+    if (t == _i23.SymptomCheck) {
+      return _i23.SymptomCheck.fromJson(data) as T;
+    }
+    if (t == _i24.User) {
+      return _i24.User.fromJson(data) as T;
+    }
+    if (t == _i25.UserProfile) {
+      return _i25.UserProfile.fromJson(data) as T;
     }
     if (t == _i1.getType<_i4.AuditLog?>()) {
       return (data != null ? _i4.AuditLog.fromJson(data) : null) as T;
@@ -1145,17 +1301,23 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i19.Payment?>()) {
       return (data != null ? _i19.Payment.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i20.Recommendation?>()) {
-      return (data != null ? _i20.Recommendation.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i20.ProfileResponse?>()) {
+      return (data != null ? _i20.ProfileResponse.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i21.SenderType?>()) {
-      return (data != null ? _i21.SenderType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i21.Recommendation?>()) {
+      return (data != null ? _i21.Recommendation.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i22.SymptomCheck?>()) {
-      return (data != null ? _i22.SymptomCheck.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i22.SenderType?>()) {
+      return (data != null ? _i22.SenderType.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i23.User?>()) {
-      return (data != null ? _i23.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i23.SymptomCheck?>()) {
+      return (data != null ? _i23.SymptomCheck.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i24.User?>()) {
+      return (data != null ? _i24.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i25.UserProfile?>()) {
+      return (data != null ? _i25.UserProfile.fromJson(data) : null) as T;
     }
     if (t == List<_i16.Symptom>) {
       return (data as List).map((e) => deserialize<_i16.Symptom>(e)).toList()
@@ -1194,10 +1356,12 @@ class Protocol extends _i1.SerializationManagerServer {
       _i17.Image => 'Image',
       _i18.Message => 'Message',
       _i19.Payment => 'Payment',
-      _i20.Recommendation => 'Recommendation',
-      _i21.SenderType => 'SenderType',
-      _i22.SymptomCheck => 'SymptomCheck',
-      _i23.User => 'User',
+      _i20.ProfileResponse => 'ProfileResponse',
+      _i21.Recommendation => 'Recommendation',
+      _i22.SenderType => 'SenderType',
+      _i23.SymptomCheck => 'SymptomCheck',
+      _i24.User => 'User',
+      _i25.UserProfile => 'UserProfile',
       _ => null,
     };
   }
@@ -1244,14 +1408,18 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'Message';
       case _i19.Payment():
         return 'Payment';
-      case _i20.Recommendation():
+      case _i20.ProfileResponse():
+        return 'ProfileResponse';
+      case _i21.Recommendation():
         return 'Recommendation';
-      case _i21.SenderType():
+      case _i22.SenderType():
         return 'SenderType';
-      case _i22.SymptomCheck():
+      case _i23.SymptomCheck():
         return 'SymptomCheck';
-      case _i23.User():
+      case _i24.User():
         return 'User';
+      case _i25.UserProfile():
+        return 'UserProfile';
     }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -1318,17 +1486,23 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Payment') {
       return deserialize<_i19.Payment>(data['data']);
     }
+    if (dataClassName == 'ProfileResponse') {
+      return deserialize<_i20.ProfileResponse>(data['data']);
+    }
     if (dataClassName == 'Recommendation') {
-      return deserialize<_i20.Recommendation>(data['data']);
+      return deserialize<_i21.Recommendation>(data['data']);
     }
     if (dataClassName == 'SenderType') {
-      return deserialize<_i21.SenderType>(data['data']);
+      return deserialize<_i22.SenderType>(data['data']);
     }
     if (dataClassName == 'SymptomCheck') {
-      return deserialize<_i22.SymptomCheck>(data['data']);
+      return deserialize<_i23.SymptomCheck>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i23.User>(data['data']);
+      return deserialize<_i24.User>(data['data']);
+    }
+    if (dataClassName == 'UserProfile') {
+      return deserialize<_i25.UserProfile>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1370,12 +1544,14 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i18.Message.t;
       case _i19.Payment:
         return _i19.Payment.t;
-      case _i20.Recommendation:
-        return _i20.Recommendation.t;
-      case _i22.SymptomCheck:
-        return _i22.SymptomCheck.t;
-      case _i23.User:
-        return _i23.User.t;
+      case _i21.Recommendation:
+        return _i21.Recommendation.t;
+      case _i23.SymptomCheck:
+        return _i23.SymptomCheck.t;
+      case _i24.User:
+        return _i24.User.t;
+      case _i25.UserProfile:
+        return _i25.UserProfile.t;
     }
     return null;
   }

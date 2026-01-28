@@ -12,12 +12,116 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'package:skinaware_client/src/protocol/auth_response.dart' as _i3;
-import 'package:skinaware_client/src/protocol/enums/gender.dart' as _i4;
-import 'package:skinaware_client/src/protocol/enums/role.dart' as _i5;
-import 'package:skinaware_client/src/protocol/enums/skin_type.dart' as _i6;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i7;
-import 'protocol.dart' as _i8;
+import 'package:skinaware_client/src/protocol/profile_response.dart' as _i3;
+import 'package:skinaware_client/src/protocol/enums/skin_type.dart' as _i4;
+import 'package:skinaware_client/src/protocol/auth_response.dart' as _i5;
+import 'package:skinaware_client/src/protocol/enums/gender.dart' as _i6;
+import 'package:skinaware_client/src/protocol/enums/role.dart' as _i7;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i8;
+import 'protocol.dart' as _i9;
+
+/// {@category Endpoint}
+class EndpointProfile extends _i1.EndpointRef {
+  EndpointProfile(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'profile';
+
+  /// Create or update user profile from onboarding data
+  _i2.Future<_i3.ProfileResponse> saveProfile({
+    required _i1.UuidValue userId,
+    required _i4.SkinType skinType,
+    String? skinSensitivity,
+    String? oiliness,
+    String? skinConcerns,
+    String? primaryConcern,
+    String? knownAllergies,
+    String? currentMedications,
+    String? skinConditionHistory,
+    String? sunExposure,
+    String? waterIntake,
+    String? sleepQuality,
+    String? stressLevel,
+    String? skinGoals,
+    String? preferredLanguage,
+    String? productBudget,
+    String? routineComplexity,
+  }) => caller.callServerEndpoint<_i3.ProfileResponse>(
+    'profile',
+    'saveProfile',
+    {
+      'userId': userId,
+      'skinType': skinType,
+      'skinSensitivity': skinSensitivity,
+      'oiliness': oiliness,
+      'skinConcerns': skinConcerns,
+      'primaryConcern': primaryConcern,
+      'knownAllergies': knownAllergies,
+      'currentMedications': currentMedications,
+      'skinConditionHistory': skinConditionHistory,
+      'sunExposure': sunExposure,
+      'waterIntake': waterIntake,
+      'sleepQuality': sleepQuality,
+      'stressLevel': stressLevel,
+      'skinGoals': skinGoals,
+      'preferredLanguage': preferredLanguage,
+      'productBudget': productBudget,
+      'routineComplexity': routineComplexity,
+    },
+  );
+
+  /// Get user profile by user ID
+  _i2.Future<_i3.ProfileResponse> getByUserId({
+    required _i1.UuidValue userId,
+  }) => caller.callServerEndpoint<_i3.ProfileResponse>(
+    'profile',
+    'getByUserId',
+    {'userId': userId},
+  );
+
+  /// Update specific profile fields
+  _i2.Future<_i3.ProfileResponse> updateProfile({
+    required _i1.UuidValue userId,
+    _i4.SkinType? skinType,
+    String? skinSensitivity,
+    String? oiliness,
+    String? skinConcerns,
+    String? primaryConcern,
+    String? knownAllergies,
+    String? currentMedications,
+    String? skinConditionHistory,
+    String? sunExposure,
+    String? waterIntake,
+    String? sleepQuality,
+    String? stressLevel,
+    String? skinGoals,
+    String? preferredLanguage,
+    String? productBudget,
+    String? routineComplexity,
+  }) => caller.callServerEndpoint<_i3.ProfileResponse>(
+    'profile',
+    'updateProfile',
+    {
+      'userId': userId,
+      'skinType': skinType,
+      'skinSensitivity': skinSensitivity,
+      'oiliness': oiliness,
+      'skinConcerns': skinConcerns,
+      'primaryConcern': primaryConcern,
+      'knownAllergies': knownAllergies,
+      'currentMedications': currentMedications,
+      'skinConditionHistory': skinConditionHistory,
+      'sunExposure': sunExposure,
+      'waterIntake': waterIntake,
+      'sleepQuality': sleepQuality,
+      'stressLevel': stressLevel,
+      'skinGoals': skinGoals,
+      'preferredLanguage': preferredLanguage,
+      'productBudget': productBudget,
+      'routineComplexity': routineComplexity,
+    },
+  );
+}
 
 /// {@category Endpoint}
 class EndpointUser extends _i1.EndpointRef {
@@ -26,17 +130,17 @@ class EndpointUser extends _i1.EndpointRef {
   @override
   String get name => 'user';
 
-  _i2.Future<_i3.AuthResponse> register({
+  _i2.Future<_i5.AuthResponse> register({
     required String email,
     required String password,
     required String phone,
     required int age,
-    required _i4.Gender gender,
+    required _i6.Gender gender,
     required String name,
-    required _i5.Role role,
-    required _i6.SkinType skinType,
+    required _i7.Role role,
+    required _i4.SkinType skinType,
     String? profilePhoto,
-  }) => caller.callServerEndpoint<_i3.AuthResponse>(
+  }) => caller.callServerEndpoint<_i5.AuthResponse>(
     'user',
     'register',
     {
@@ -52,10 +156,10 @@ class EndpointUser extends _i1.EndpointRef {
     },
   );
 
-  _i2.Future<_i3.AuthResponse> login({
+  _i2.Future<_i5.AuthResponse> login({
     required String email,
     required String password,
-  }) => caller.callServerEndpoint<_i3.AuthResponse>(
+  }) => caller.callServerEndpoint<_i5.AuthResponse>(
     'user',
     'login',
     {
@@ -64,18 +168,18 @@ class EndpointUser extends _i1.EndpointRef {
     },
   );
 
-  _i2.Future<_i3.AuthResponse> updateUser({
+  _i2.Future<_i5.AuthResponse> updateUser({
     required _i1.UuidValue userId,
     String? email,
     String? password,
     String? phone,
     int? age,
-    _i4.Gender? gender,
+    _i6.Gender? gender,
     String? name,
-    _i5.Role? role,
-    _i6.SkinType? skinType,
+    _i7.Role? role,
+    _i4.SkinType? skinType,
     String? profilePhoto,
-  }) => caller.callServerEndpoint<_i3.AuthResponse>(
+  }) => caller.callServerEndpoint<_i5.AuthResponse>(
     'user',
     'updateUser',
     {
@@ -92,23 +196,23 @@ class EndpointUser extends _i1.EndpointRef {
     },
   );
 
-  _i2.Future<_i3.AuthResponse> getById({required _i1.UuidValue userId}) =>
-      caller.callServerEndpoint<_i3.AuthResponse>(
+  _i2.Future<_i5.AuthResponse> getById({required _i1.UuidValue userId}) =>
+      caller.callServerEndpoint<_i5.AuthResponse>(
         'user',
         'getById',
         {'userId': userId},
       );
 
-  _i2.Future<_i3.AuthResponse> updateProfile({
+  _i2.Future<_i5.AuthResponse> updateProfile({
     required _i1.UuidValue userId,
     String? name,
     String? phone,
     int? age,
-    _i4.Gender? gender,
-    _i5.Role? role,
-    _i6.SkinType? skinType,
+    _i6.Gender? gender,
+    _i7.Role? role,
+    _i4.SkinType? skinType,
     String? profilePhoto,
-  }) => caller.callServerEndpoint<_i3.AuthResponse>(
+  }) => caller.callServerEndpoint<_i5.AuthResponse>(
     'user',
     'updateProfile',
     {
@@ -126,10 +230,10 @@ class EndpointUser extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i7.Caller(client);
+    auth = _i8.Caller(client);
   }
 
-  late final _i7.Caller auth;
+  late final _i8.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -152,7 +256,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i8.Protocol(),
+         _i9.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -161,16 +265,22 @@ class Client extends _i1.ServerpodClientShared {
          disconnectStreamsOnLostInternetConnection:
              disconnectStreamsOnLostInternetConnection,
        ) {
+    profile = EndpointProfile(this);
     user = EndpointUser(this);
     modules = Modules(this);
   }
+
+  late final EndpointProfile profile;
 
   late final EndpointUser user;
 
   late final Modules modules;
 
   @override
-  Map<String, _i1.EndpointRef> get endpointRefLookup => {'user': user};
+  Map<String, _i1.EndpointRef> get endpointRefLookup => {
+    'profile': profile,
+    'user': user,
+  };
 
   @override
   Map<String, _i1.ModuleEndpointCaller> get moduleLookup => {

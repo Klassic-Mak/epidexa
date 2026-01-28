@@ -4,7 +4,7 @@ import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/screens/auths/login_screen.dart';
 import 'package:skinaware_flutter/screens/auths/signup_screen.dart';
 import 'package:skinaware_flutter/screens/check_symtopms_screen/check_sys_screen.dart';
-import 'package:skinaware_flutter/screens/onboarding_screen.dart';
+import 'package:skinaware_flutter/screens/onboarding/personalized_onboarding_screen.dart';
 import 'package:skinaware_flutter/screens/profileScreen/profile_screen.dart';
 import 'package:skinaware_flutter/screens/scan_screen.dart' show ScanScreen;
 import 'package:skinaware_flutter/screens/settings_screen.dart';
@@ -35,7 +35,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case onBoarding1Route:
       return _RightSlide(
-        OnboardingScreen(),
+        const PersonalizedOnboardingScreen(),
       );
     case profileRoute:
       return _RightSlide(ProfileScreen());

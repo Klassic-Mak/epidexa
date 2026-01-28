@@ -126,9 +126,32 @@ class GeminiService {
 
   List<ChatMessage> _chatHistory = [];
   bool _isInitialized = false;
+  String _userProfileContext = '';
 
-  /// System prompt for the dermatology AI
-  static const String _systemPrompt = '''
+  /// Set user profile for personalization
+  void setUserProfile(String profileContext) {
+    _userProfileContext = profileContext;
+    // Reinitialize chat history with updated system prompt
+    if (_isInitialized) {
+      _chatHistory = [
+        ChatMessage(
+          role: 'system',
+          content: _getPersonalizedSystemPrompt(),
+        ),
+      ];
+    }
+  }
+
+  /// Get the personalized system prompt
+  String _getPersonalizedSystemPrompt() {
+    if (_userProfileContext.isEmpty) {
+      return _baseSystemPrompt;
+    }
+    return '$_baseSystemPrompt\n\n$_userProfileContext';
+  }
+
+  /// Base system prompt for the dermatology AI
+  static const String _baseSystemPrompt = '''
 You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** platform. You specialize in skin health analysis, dermatological consultation, and personalized skincare guidance.
 
 ## Core Capabilities
@@ -198,7 +221,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
         _chatHistory = [
           ChatMessage(
             role: 'system',
-            content: _systemPrompt,
+            content: _getPersonalizedSystemPrompt(),
           ),
         ];
         print('✅ Gemini service initialized successfully');
@@ -223,7 +246,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
     _chatHistory = [
       ChatMessage(
         role: 'system',
-        content: _systemPrompt,
+        content: _getPersonalizedSystemPrompt(),
       ),
     ];
   }
@@ -452,7 +475,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
 
     // Build messages with chat history for context
     final messages = <Map<String, dynamic>>[
-      {'role': 'system', 'content': _systemPrompt},
+      {'role': 'system', 'content': _getPersonalizedSystemPrompt()},
     ];
 
     // Add previous context (without images to save tokens)
@@ -562,7 +585,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
     // Step 3: Get comprehensive analysis
     print('💬 Step 2: Getting comprehensive analysis from Gemini...');
     final messages = [
-      {'role': 'system', 'content': _systemPrompt},
+      {'role': 'system', 'content': _getPersonalizedSystemPrompt()},
       {'role': 'user', 'content': combinedPrompt},
     ];
 
@@ -633,7 +656,7 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
     final body = {
       'model': model,
       'messages': [
-        {'role': 'system', 'content': _systemPrompt},
+        {'role': 'system', 'content': _getPersonalizedSystemPrompt()},
         {
           'role': 'user',
           'content': [

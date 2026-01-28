@@ -27,11 +27,13 @@ import 'enums/symptom.dart' as _i14;
 import 'image.dart' as _i15;
 import 'message.dart' as _i16;
 import 'payment.dart' as _i17;
-import 'recommendation.dart' as _i18;
-import 'sender_type.dart' as _i19;
-import 'symptom_check.dart' as _i20;
-import 'user.dart' as _i21;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i22;
+import 'profile_response.dart' as _i18;
+import 'recommendation.dart' as _i19;
+import 'sender_type.dart' as _i20;
+import 'symptom_check.dart' as _i21;
+import 'user.dart' as _i22;
+import 'user_profile.dart' as _i23;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i24;
 export 'audit_log.dart';
 export 'auth_response.dart';
 export 'consent.dart';
@@ -48,10 +50,12 @@ export 'enums/symptom.dart';
 export 'image.dart';
 export 'message.dart';
 export 'payment.dart';
+export 'profile_response.dart';
 export 'recommendation.dart';
 export 'sender_type.dart';
 export 'symptom_check.dart';
 export 'user.dart';
+export 'user_profile.dart';
 export 'client.dart';
 
 class Protocol extends _i1.SerializationManager {
@@ -136,17 +140,23 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i17.Payment) {
       return _i17.Payment.fromJson(data) as T;
     }
-    if (t == _i18.Recommendation) {
-      return _i18.Recommendation.fromJson(data) as T;
+    if (t == _i18.ProfileResponse) {
+      return _i18.ProfileResponse.fromJson(data) as T;
     }
-    if (t == _i19.SenderType) {
-      return _i19.SenderType.fromJson(data) as T;
+    if (t == _i19.Recommendation) {
+      return _i19.Recommendation.fromJson(data) as T;
     }
-    if (t == _i20.SymptomCheck) {
-      return _i20.SymptomCheck.fromJson(data) as T;
+    if (t == _i20.SenderType) {
+      return _i20.SenderType.fromJson(data) as T;
     }
-    if (t == _i21.User) {
-      return _i21.User.fromJson(data) as T;
+    if (t == _i21.SymptomCheck) {
+      return _i21.SymptomCheck.fromJson(data) as T;
+    }
+    if (t == _i22.User) {
+      return _i22.User.fromJson(data) as T;
+    }
+    if (t == _i23.UserProfile) {
+      return _i23.UserProfile.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.AuditLog?>()) {
       return (data != null ? _i2.AuditLog.fromJson(data) : null) as T;
@@ -196,17 +206,23 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i17.Payment?>()) {
       return (data != null ? _i17.Payment.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.Recommendation?>()) {
-      return (data != null ? _i18.Recommendation.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.ProfileResponse?>()) {
+      return (data != null ? _i18.ProfileResponse.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i19.SenderType?>()) {
-      return (data != null ? _i19.SenderType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i19.Recommendation?>()) {
+      return (data != null ? _i19.Recommendation.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i20.SymptomCheck?>()) {
-      return (data != null ? _i20.SymptomCheck.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i20.SenderType?>()) {
+      return (data != null ? _i20.SenderType.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i21.User?>()) {
-      return (data != null ? _i21.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i21.SymptomCheck?>()) {
+      return (data != null ? _i21.SymptomCheck.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i22.User?>()) {
+      return (data != null ? _i22.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i23.UserProfile?>()) {
+      return (data != null ? _i23.UserProfile.fromJson(data) : null) as T;
     }
     if (t == List<_i14.Symptom>) {
       return (data as List).map((e) => deserialize<_i14.Symptom>(e)).toList()
@@ -219,7 +235,7 @@ class Protocol extends _i1.SerializationManager {
           as T;
     }
     try {
-      return _i22.Protocol().deserialize<T>(data, t);
+      return _i24.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -242,10 +258,12 @@ class Protocol extends _i1.SerializationManager {
       _i15.Image => 'Image',
       _i16.Message => 'Message',
       _i17.Payment => 'Payment',
-      _i18.Recommendation => 'Recommendation',
-      _i19.SenderType => 'SenderType',
-      _i20.SymptomCheck => 'SymptomCheck',
-      _i21.User => 'User',
+      _i18.ProfileResponse => 'ProfileResponse',
+      _i19.Recommendation => 'Recommendation',
+      _i20.SenderType => 'SenderType',
+      _i21.SymptomCheck => 'SymptomCheck',
+      _i22.User => 'User',
+      _i23.UserProfile => 'UserProfile',
       _ => null,
     };
   }
@@ -292,16 +310,20 @@ class Protocol extends _i1.SerializationManager {
         return 'Message';
       case _i17.Payment():
         return 'Payment';
-      case _i18.Recommendation():
+      case _i18.ProfileResponse():
+        return 'ProfileResponse';
+      case _i19.Recommendation():
         return 'Recommendation';
-      case _i19.SenderType():
+      case _i20.SenderType():
         return 'SenderType';
-      case _i20.SymptomCheck():
+      case _i21.SymptomCheck():
         return 'SymptomCheck';
-      case _i21.User():
+      case _i22.User():
         return 'User';
+      case _i23.UserProfile():
+        return 'UserProfile';
     }
-    className = _i22.Protocol().getClassNameForObject(data);
+    className = _i24.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth.$className';
     }
@@ -362,21 +384,27 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'Payment') {
       return deserialize<_i17.Payment>(data['data']);
     }
+    if (dataClassName == 'ProfileResponse') {
+      return deserialize<_i18.ProfileResponse>(data['data']);
+    }
     if (dataClassName == 'Recommendation') {
-      return deserialize<_i18.Recommendation>(data['data']);
+      return deserialize<_i19.Recommendation>(data['data']);
     }
     if (dataClassName == 'SenderType') {
-      return deserialize<_i19.SenderType>(data['data']);
+      return deserialize<_i20.SenderType>(data['data']);
     }
     if (dataClassName == 'SymptomCheck') {
-      return deserialize<_i20.SymptomCheck>(data['data']);
+      return deserialize<_i21.SymptomCheck>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i21.User>(data['data']);
+      return deserialize<_i22.User>(data['data']);
+    }
+    if (dataClassName == 'UserProfile') {
+      return deserialize<_i23.UserProfile>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth.')) {
       data['className'] = dataClassName.substring(15);
-      return _i22.Protocol().deserializeByClassName(data);
+      return _i24.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -391,7 +419,7 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i22.Protocol().mapRecordToJson(record);
+      return _i24.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

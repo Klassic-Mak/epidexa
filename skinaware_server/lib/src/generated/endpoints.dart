@@ -11,23 +11,285 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import '../endpoints/user_endpoint.dart' as _i2;
-import 'package:skinaware_server/src/generated/enums/gender.dart' as _i3;
-import 'package:skinaware_server/src/generated/enums/role.dart' as _i4;
-import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i5;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i6;
+import '../endpoints/profile_endpoint.dart' as _i2;
+import '../endpoints/user_endpoint.dart' as _i3;
+import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i4;
+import 'package:skinaware_server/src/generated/enums/gender.dart' as _i5;
+import 'package:skinaware_server/src/generated/enums/role.dart' as _i6;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i7;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
   void initializeEndpoints(_i1.Server server) {
     var endpoints = <String, _i1.Endpoint>{
-      'user': _i2.UserEndpoint()
+      'profile': _i2.ProfileEndpoint()
+        ..initialize(
+          server,
+          'profile',
+          null,
+        ),
+      'user': _i3.UserEndpoint()
         ..initialize(
           server,
           'user',
           null,
         ),
     };
+    connectors['profile'] = _i1.EndpointConnector(
+      name: 'profile',
+      endpoint: endpoints['profile']!,
+      methodConnectors: {
+        'saveProfile': _i1.MethodConnector(
+          name: 'saveProfile',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'skinType': _i1.ParameterDescription(
+              name: 'skinType',
+              type: _i1.getType<_i4.SkinType>(),
+              nullable: false,
+            ),
+            'skinSensitivity': _i1.ParameterDescription(
+              name: 'skinSensitivity',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'oiliness': _i1.ParameterDescription(
+              name: 'oiliness',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'skinConcerns': _i1.ParameterDescription(
+              name: 'skinConcerns',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'primaryConcern': _i1.ParameterDescription(
+              name: 'primaryConcern',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'knownAllergies': _i1.ParameterDescription(
+              name: 'knownAllergies',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'currentMedications': _i1.ParameterDescription(
+              name: 'currentMedications',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'skinConditionHistory': _i1.ParameterDescription(
+              name: 'skinConditionHistory',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'sunExposure': _i1.ParameterDescription(
+              name: 'sunExposure',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'waterIntake': _i1.ParameterDescription(
+              name: 'waterIntake',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'sleepQuality': _i1.ParameterDescription(
+              name: 'sleepQuality',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'stressLevel': _i1.ParameterDescription(
+              name: 'stressLevel',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'skinGoals': _i1.ParameterDescription(
+              name: 'skinGoals',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'preferredLanguage': _i1.ParameterDescription(
+              name: 'preferredLanguage',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'productBudget': _i1.ParameterDescription(
+              name: 'productBudget',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'routineComplexity': _i1.ParameterDescription(
+              name: 'routineComplexity',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['profile'] as _i2.ProfileEndpoint).saveProfile(
+                    session,
+                    userId: params['userId'],
+                    skinType: params['skinType'],
+                    skinSensitivity: params['skinSensitivity'],
+                    oiliness: params['oiliness'],
+                    skinConcerns: params['skinConcerns'],
+                    primaryConcern: params['primaryConcern'],
+                    knownAllergies: params['knownAllergies'],
+                    currentMedications: params['currentMedications'],
+                    skinConditionHistory: params['skinConditionHistory'],
+                    sunExposure: params['sunExposure'],
+                    waterIntake: params['waterIntake'],
+                    sleepQuality: params['sleepQuality'],
+                    stressLevel: params['stressLevel'],
+                    skinGoals: params['skinGoals'],
+                    preferredLanguage: params['preferredLanguage'],
+                    productBudget: params['productBudget'],
+                    routineComplexity: params['routineComplexity'],
+                  ),
+        ),
+        'getByUserId': _i1.MethodConnector(
+          name: 'getByUserId',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['profile'] as _i2.ProfileEndpoint).getByUserId(
+                    session,
+                    userId: params['userId'],
+                  ),
+        ),
+        'updateProfile': _i1.MethodConnector(
+          name: 'updateProfile',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'skinType': _i1.ParameterDescription(
+              name: 'skinType',
+              type: _i1.getType<_i4.SkinType?>(),
+              nullable: true,
+            ),
+            'skinSensitivity': _i1.ParameterDescription(
+              name: 'skinSensitivity',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'oiliness': _i1.ParameterDescription(
+              name: 'oiliness',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'skinConcerns': _i1.ParameterDescription(
+              name: 'skinConcerns',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'primaryConcern': _i1.ParameterDescription(
+              name: 'primaryConcern',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'knownAllergies': _i1.ParameterDescription(
+              name: 'knownAllergies',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'currentMedications': _i1.ParameterDescription(
+              name: 'currentMedications',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'skinConditionHistory': _i1.ParameterDescription(
+              name: 'skinConditionHistory',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'sunExposure': _i1.ParameterDescription(
+              name: 'sunExposure',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'waterIntake': _i1.ParameterDescription(
+              name: 'waterIntake',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'sleepQuality': _i1.ParameterDescription(
+              name: 'sleepQuality',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'stressLevel': _i1.ParameterDescription(
+              name: 'stressLevel',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'skinGoals': _i1.ParameterDescription(
+              name: 'skinGoals',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'preferredLanguage': _i1.ParameterDescription(
+              name: 'preferredLanguage',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'productBudget': _i1.ParameterDescription(
+              name: 'productBudget',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'routineComplexity': _i1.ParameterDescription(
+              name: 'routineComplexity',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['profile'] as _i2.ProfileEndpoint).updateProfile(
+                    session,
+                    userId: params['userId'],
+                    skinType: params['skinType'],
+                    skinSensitivity: params['skinSensitivity'],
+                    oiliness: params['oiliness'],
+                    skinConcerns: params['skinConcerns'],
+                    primaryConcern: params['primaryConcern'],
+                    knownAllergies: params['knownAllergies'],
+                    currentMedications: params['currentMedications'],
+                    skinConditionHistory: params['skinConditionHistory'],
+                    sunExposure: params['sunExposure'],
+                    waterIntake: params['waterIntake'],
+                    sleepQuality: params['sleepQuality'],
+                    stressLevel: params['stressLevel'],
+                    skinGoals: params['skinGoals'],
+                    preferredLanguage: params['preferredLanguage'],
+                    productBudget: params['productBudget'],
+                    routineComplexity: params['routineComplexity'],
+                  ),
+        ),
+      },
+    );
     connectors['user'] = _i1.EndpointConnector(
       name: 'user',
       endpoint: endpoints['user']!,
@@ -57,7 +319,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'gender': _i1.ParameterDescription(
               name: 'gender',
-              type: _i1.getType<_i3.Gender>(),
+              type: _i1.getType<_i5.Gender>(),
               nullable: false,
             ),
             'name': _i1.ParameterDescription(
@@ -67,12 +329,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'role': _i1.ParameterDescription(
               name: 'role',
-              type: _i1.getType<_i4.Role>(),
+              type: _i1.getType<_i6.Role>(),
               nullable: false,
             ),
             'skinType': _i1.ParameterDescription(
               name: 'skinType',
-              type: _i1.getType<_i5.SkinType>(),
+              type: _i1.getType<_i4.SkinType>(),
               nullable: false,
             ),
             'profilePhoto': _i1.ParameterDescription(
@@ -85,7 +347,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i2.UserEndpoint).register(
+              ) async => (endpoints['user'] as _i3.UserEndpoint).register(
                 session,
                 email: params['email'],
                 password: params['password'],
@@ -116,7 +378,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i2.UserEndpoint).login(
+              ) async => (endpoints['user'] as _i3.UserEndpoint).login(
                 session,
                 email: params['email'],
                 password: params['password'],
@@ -152,7 +414,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'gender': _i1.ParameterDescription(
               name: 'gender',
-              type: _i1.getType<_i3.Gender?>(),
+              type: _i1.getType<_i5.Gender?>(),
               nullable: true,
             ),
             'name': _i1.ParameterDescription(
@@ -162,12 +424,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'role': _i1.ParameterDescription(
               name: 'role',
-              type: _i1.getType<_i4.Role?>(),
+              type: _i1.getType<_i6.Role?>(),
               nullable: true,
             ),
             'skinType': _i1.ParameterDescription(
               name: 'skinType',
-              type: _i1.getType<_i5.SkinType?>(),
+              type: _i1.getType<_i4.SkinType?>(),
               nullable: true,
             ),
             'profilePhoto': _i1.ParameterDescription(
@@ -180,7 +442,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i2.UserEndpoint).updateUser(
+              ) async => (endpoints['user'] as _i3.UserEndpoint).updateUser(
                 session,
                 userId: params['userId'],
                 email: params['email'],
@@ -207,7 +469,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i2.UserEndpoint).getById(
+              ) async => (endpoints['user'] as _i3.UserEndpoint).getById(
                 session,
                 userId: params['userId'],
               ),
@@ -237,17 +499,17 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'gender': _i1.ParameterDescription(
               name: 'gender',
-              type: _i1.getType<_i3.Gender?>(),
+              type: _i1.getType<_i5.Gender?>(),
               nullable: true,
             ),
             'role': _i1.ParameterDescription(
               name: 'role',
-              type: _i1.getType<_i4.Role?>(),
+              type: _i1.getType<_i6.Role?>(),
               nullable: true,
             ),
             'skinType': _i1.ParameterDescription(
               name: 'skinType',
-              type: _i1.getType<_i5.SkinType?>(),
+              type: _i1.getType<_i4.SkinType?>(),
               nullable: true,
             ),
             'profilePhoto': _i1.ParameterDescription(
@@ -260,7 +522,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i2.UserEndpoint).updateProfile(
+              ) async => (endpoints['user'] as _i3.UserEndpoint).updateProfile(
                 session,
                 userId: params['userId'],
                 name: params['name'],
@@ -274,6 +536,6 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth'] = _i6.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i7.Endpoints()..initializeEndpoints(server);
   }
 }

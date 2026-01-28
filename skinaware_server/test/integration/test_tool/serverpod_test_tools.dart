@@ -14,10 +14,11 @@
 import 'package:serverpod_test/serverpod_test.dart' as _i1;
 import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
-import 'package:skinaware_server/src/generated/auth_response.dart' as _i4;
-import 'package:skinaware_server/src/generated/enums/gender.dart' as _i5;
-import 'package:skinaware_server/src/generated/enums/role.dart' as _i6;
-import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i7;
+import 'package:skinaware_server/src/generated/profile_response.dart' as _i4;
+import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i5;
+import 'package:skinaware_server/src/generated/auth_response.dart' as _i6;
+import 'package:skinaware_server/src/generated/enums/gender.dart' as _i7;
+import 'package:skinaware_server/src/generated/enums/role.dart' as _i8;
 import 'package:skinaware_server/src/generated/protocol.dart';
 import 'package:skinaware_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -125,6 +126,8 @@ void withServerpod(
 }
 
 class TestEndpoints {
+  late final _ProfileEndpoint profile;
+
   late final _UserEndpoint user;
 }
 
@@ -135,10 +138,186 @@ class _InternalTestEndpoints extends TestEndpoints
     _i2.SerializationManager serializationManager,
     _i2.EndpointDispatch endpoints,
   ) {
+    profile = _ProfileEndpoint(
+      endpoints,
+      serializationManager,
+    );
     user = _UserEndpoint(
       endpoints,
       serializationManager,
     );
+  }
+}
+
+class _ProfileEndpoint {
+  _ProfileEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i4.ProfileResponse> saveProfile(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required _i2.UuidValue userId,
+    required _i5.SkinType skinType,
+    String? skinSensitivity,
+    String? oiliness,
+    String? skinConcerns,
+    String? primaryConcern,
+    String? knownAllergies,
+    String? currentMedications,
+    String? skinConditionHistory,
+    String? sunExposure,
+    String? waterIntake,
+    String? sleepQuality,
+    String? stressLevel,
+    String? skinGoals,
+    String? preferredLanguage,
+    String? productBudget,
+    String? routineComplexity,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'profile',
+            method: 'saveProfile',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'saveProfile',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'skinType': skinType,
+            'skinSensitivity': skinSensitivity,
+            'oiliness': oiliness,
+            'skinConcerns': skinConcerns,
+            'primaryConcern': primaryConcern,
+            'knownAllergies': knownAllergies,
+            'currentMedications': currentMedications,
+            'skinConditionHistory': skinConditionHistory,
+            'sunExposure': sunExposure,
+            'waterIntake': waterIntake,
+            'sleepQuality': sleepQuality,
+            'stressLevel': stressLevel,
+            'skinGoals': skinGoals,
+            'preferredLanguage': preferredLanguage,
+            'productBudget': productBudget,
+            'routineComplexity': routineComplexity,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i4.ProfileResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i4.ProfileResponse> getByUserId(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required _i2.UuidValue userId,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'profile',
+            method: 'getByUserId',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'getByUserId',
+          parameters: _i1.testObjectToJson({'userId': userId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i4.ProfileResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i4.ProfileResponse> updateProfile(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required _i2.UuidValue userId,
+    _i5.SkinType? skinType,
+    String? skinSensitivity,
+    String? oiliness,
+    String? skinConcerns,
+    String? primaryConcern,
+    String? knownAllergies,
+    String? currentMedications,
+    String? skinConditionHistory,
+    String? sunExposure,
+    String? waterIntake,
+    String? sleepQuality,
+    String? stressLevel,
+    String? skinGoals,
+    String? preferredLanguage,
+    String? productBudget,
+    String? routineComplexity,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'profile',
+            method: 'updateProfile',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'updateProfile',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'skinType': skinType,
+            'skinSensitivity': skinSensitivity,
+            'oiliness': oiliness,
+            'skinConcerns': skinConcerns,
+            'primaryConcern': primaryConcern,
+            'knownAllergies': knownAllergies,
+            'currentMedications': currentMedications,
+            'skinConditionHistory': skinConditionHistory,
+            'sunExposure': sunExposure,
+            'waterIntake': waterIntake,
+            'sleepQuality': sleepQuality,
+            'stressLevel': stressLevel,
+            'skinGoals': skinGoals,
+            'preferredLanguage': preferredLanguage,
+            'productBudget': productBudget,
+            'routineComplexity': routineComplexity,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i4.ProfileResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
   }
 }
 
@@ -152,16 +331,16 @@ class _UserEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i4.AuthResponse> register(
+  _i3.Future<_i6.AuthResponse> register(
     _i1.TestSessionBuilder sessionBuilder, {
     required String email,
     required String password,
     required String phone,
     required int age,
-    required _i5.Gender gender,
+    required _i7.Gender gender,
     required String name,
-    required _i6.Role role,
-    required _i7.SkinType skinType,
+    required _i8.Role role,
+    required _i5.SkinType skinType,
     String? profilePhoto,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -193,7 +372,7 @@ class _UserEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i4.AuthResponse>);
+                as _i3.Future<_i6.AuthResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -201,7 +380,7 @@ class _UserEndpoint {
     });
   }
 
-  _i3.Future<_i4.AuthResponse> login(
+  _i3.Future<_i6.AuthResponse> login(
     _i1.TestSessionBuilder sessionBuilder, {
     required String email,
     required String password,
@@ -228,7 +407,7 @@ class _UserEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i4.AuthResponse>);
+                as _i3.Future<_i6.AuthResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -236,17 +415,17 @@ class _UserEndpoint {
     });
   }
 
-  _i3.Future<_i4.AuthResponse> updateUser(
+  _i3.Future<_i6.AuthResponse> updateUser(
     _i1.TestSessionBuilder sessionBuilder, {
     required _i2.UuidValue userId,
     String? email,
     String? password,
     String? phone,
     int? age,
-    _i5.Gender? gender,
+    _i7.Gender? gender,
     String? name,
-    _i6.Role? role,
-    _i7.SkinType? skinType,
+    _i8.Role? role,
+    _i5.SkinType? skinType,
     String? profilePhoto,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -279,7 +458,7 @@ class _UserEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i4.AuthResponse>);
+                as _i3.Future<_i6.AuthResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -287,7 +466,7 @@ class _UserEndpoint {
     });
   }
 
-  _i3.Future<_i4.AuthResponse> getById(
+  _i3.Future<_i6.AuthResponse> getById(
     _i1.TestSessionBuilder sessionBuilder, {
     required _i2.UuidValue userId,
   }) async {
@@ -310,7 +489,7 @@ class _UserEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i4.AuthResponse>);
+                as _i3.Future<_i6.AuthResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -318,15 +497,15 @@ class _UserEndpoint {
     });
   }
 
-  _i3.Future<_i4.AuthResponse> updateProfile(
+  _i3.Future<_i6.AuthResponse> updateProfile(
     _i1.TestSessionBuilder sessionBuilder, {
     required _i2.UuidValue userId,
     String? name,
     String? phone,
     int? age,
-    _i5.Gender? gender,
-    _i6.Role? role,
-    _i7.SkinType? skinType,
+    _i7.Gender? gender,
+    _i8.Role? role,
+    _i5.SkinType? skinType,
     String? profilePhoto,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -357,7 +536,7 @@ class _UserEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i4.AuthResponse>);
+                as _i3.Future<_i6.AuthResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

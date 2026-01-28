@@ -1,3 +1,7 @@
+profile:
+  - saveProfile:
+  - getByUserId:
+  - updateProfile:
 user:
   - register:
   - login:

@@ -1,13 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/ai/gemini_service.dart';
+import 'onboarding_data_provider.dart';
 
 // Gemini service provider (via AIML API)
 final geminiServiceProvider = Provider<GeminiService>((ref) {
-  return GeminiService(
+  final service = GeminiService(
     apiKey: '34bc1a39049b47c7a5f88692895ef25d',
     baseUrl: 'https://api.aimlapi.com/v1/chat/completions',
     model: 'google/gemini-2.5-flash',
   );
+
+  // Load user profile for personalization
+  final onboardingData = ref.watch(onboardingDataProvider);
+  final profilePrompt = onboardingData.toPersonalizationPrompt();
+  if (profilePrompt.isNotEmpty) {
+    service.setUserProfile(profilePrompt);
+  }
+
+  return service;
 });
 
 // Legacy alias for backwards compatibility
@@ -102,6 +112,14 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
+      // Load user profile for personalization
+      await ref.read(onboardingDataProvider.notifier).loadFromPrefs();
+      final onboardingData = ref.read(onboardingDataProvider);
+      final profilePrompt = onboardingData.toPersonalizationPrompt();
+      if (profilePrompt.isNotEmpty) {
+        _geminiService.setUserProfile(profilePrompt);
+      }
+
       final success = await _geminiService.initialize();
       if (success) {
         state = state.copyWith(

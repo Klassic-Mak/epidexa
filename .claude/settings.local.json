@@ -10,7 +10,11 @@
       "Bash(adb devices:*)",
       "Bash(adb kill-server:*)",
       "Bash(adb start-server:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(serverpod generate:*)",
+      "Bash(dart run serverpod_cli generate:*)",
+      "Bash(where:*)",
+      "Bash(\"C:\\\\Users\\\\NCS\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\bin\\\\serverpod.bat\" generate)"
     ]
   }
 }

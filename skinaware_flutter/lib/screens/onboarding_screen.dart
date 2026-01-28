@@ -179,94 +179,106 @@ class _OnboardPage extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 6, 18, 10),
-      child: Column(
-        children: [
-          // Upper image section (modern)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(26),
-            child: AspectRatio(
-              aspectRatio: 16 / 15.5,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset(
-                    data.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, _) => Container(
-                      color: Colors.black12,
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.image_not_supported_outlined),
-                    ),
-                  ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Calculate image height based on available space
+          // Reserve space for the content card (~140px) and spacing
+          final maxImageHeight = constraints.maxHeight - 160;
+          final imageHeight = maxImageHeight.clamp(180.0, 400.0);
 
-                  // Soft gradient overlay for readability
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.05),
-                          Colors.black.withOpacity(0.40),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Top-left chip
-                  Positioned(
-                    left: 14,
-                    top: 14,
-                    child: _ChipPill(
-                      icon: data.icon,
-                      label: data.chip,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          // Content card
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.black.withOpacity(0.06)),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
-                  color: Colors.black.withOpacity(0.06),
-                ),
-              ],
-            ),
+          return SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  data.title,
-                  style: t.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
+                // Upper image section (modern)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(26),
+                  child: SizedBox(
+                    height: imageHeight,
+                    width: double.infinity,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(
+                          data.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.black12,
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.image_not_supported_outlined),
+                          ),
+                        ),
+
+                        // Soft gradient overlay for readability
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.05),
+                                Colors.black.withOpacity(0.40),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Top-left chip
+                        Positioned(
+                          left: 14,
+                          top: 14,
+                          child: _ChipPill(
+                            icon: data.icon,
+                            label: data.chip,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  data.subtitle,
-                  style: t.bodyMedium?.copyWith(
-                    color: Colors.black54,
-                    height: 1.45,
+
+                const SizedBox(height: 18),
+
+                // Content card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.black.withOpacity(0.06)),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                        color: Colors.black.withOpacity(0.06),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data.title,
+                        style: t.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        data.subtitle,
+                        style: t.bodyMedium?.copyWith(
+                          color: Colors.black54,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
