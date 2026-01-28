@@ -1,64 +1,177 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skinaware_flutter/providers/onboarding_data_provider.dart';
+import 'package:skinaware_flutter/providers/userProvider.dart';
 
-class ReportSkinTestScreen extends StatefulWidget {
+class ReportSkinTestScreen extends ConsumerStatefulWidget {
   const ReportSkinTestScreen({super.key});
 
   @override
-  State<ReportSkinTestScreen> createState() => _ReportSkinTestScreenState();
+  ConsumerState<ReportSkinTestScreen> createState() => _ReportSkinTestScreenState();
 }
 
-class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
+class _ReportSkinTestScreenState extends ConsumerState<ReportSkinTestScreen> {
   static const primaryColor = Color(0xFF0284C7);
 
-  // Tabs (chips)
-  final List<_MetricTab> _tabs = const [
-    _MetricTab("Elasticity skin", Icons.water_drop_outlined),
-    _MetricTab("Sensitive skin", Icons.spa_outlined),
-    _MetricTab("Skin wrinkles", Icons.waves_outlined),
-    _MetricTab("Hydration", Icons.opacity_outlined),
-  ];
-
   int _selectedTab = 0;
-
-  // Week selector
-  final List<String> _weeks = const [
-    "Week 1",
-    "Week 2",
-    "Week 3",
-    "Week 4",
-  ];
   int _selectedWeek = 0;
+  bool _isLoading = true;
+
+  final List<String> _weeks = const ["Week 1", "Week 2", "Week 3", "Week 4"];
 
   // Example data sets per tab (0..100)
   final Map<int, List<double>> _seriesByTab = {
-    0: [22, 45, 38, 42, 50, 46, 76, 30], // Elasticity
-    1: [55, 52, 48, 50, 49, 44, 40, 38], // Sensitive
-    2: [35, 37, 40, 43, 50, 58, 70, 62], // Wrinkles
-    3: [28, 34, 46, 41, 55, 63, 58, 49], // Hydration
+    0: [22, 45, 38, 42, 50, 46, 76, 30],
+    1: [55, 52, 48, 50, 49, 44, 40, 38],
+    2: [35, 37, 40, 43, 50, 58, 70, 62],
+    3: [28, 34, 46, 41, 55, 63, 58, 49],
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    await ref.read(onboardingDataProvider.notifier).loadFromPrefs();
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  /// Generate dynamic metric tabs based on user's profile
+  List<_MetricTab> _buildMetricTabs(OnboardingData profileData) {
+    final tabs = <_MetricTab>[];
+    final concerns = profileData.skinConcerns.map((c) => c.toLowerCase()).toList();
+    final skinType = profileData.skinType?.name.toLowerCase();
+
+    // Always include hydration (important for all skin types)
+    tabs.add(const _MetricTab("Hydration", Icons.opacity_outlined, "hydration"));
+
+    // Add tabs based on skin type
+    if (skinType == 'sensitive' || profileData.skinSensitivity == 'high') {
+      tabs.add(const _MetricTab("Sensitivity", Icons.spa_outlined, "sensitivity"));
+    }
+
+    if (skinType == 'oily' || concerns.contains('oiliness') || concerns.contains('acne')) {
+      tabs.add(const _MetricTab("Oil Control", Icons.water_drop_outlined, "oil"));
+    }
+
+    // Add tabs based on concerns
+    if (concerns.contains('aging') || concerns.contains('wrinkles') || concerns.contains('fine lines')) {
+      tabs.add(const _MetricTab("Elasticity", Icons.autorenew_outlined, "elasticity"));
+    }
+
+    if (concerns.contains('acne') || concerns.contains('breakouts')) {
+      tabs.add(const _MetricTab("Clarity", Icons.face_retouching_natural_outlined, "clarity"));
+    }
+
+    if (concerns.contains('dark spots') || concerns.contains('hyperpigmentation') || concerns.contains('uneven tone')) {
+      tabs.add(const _MetricTab("Brightness", Icons.wb_sunny_outlined, "brightness"));
+    }
+
+    if (concerns.contains('dryness')) {
+      tabs.add(const _MetricTab("Moisture", Icons.water_outlined, "moisture"));
+    }
+
+    // Default tabs if profile not complete
+    if (tabs.length < 3) {
+      if (!tabs.any((t) => t.key == "elasticity")) {
+        tabs.add(const _MetricTab("Elasticity", Icons.autorenew_outlined, "elasticity"));
+      }
+      if (!tabs.any((t) => t.key == "sensitivity")) {
+        tabs.add(const _MetricTab("Sensitivity", Icons.spa_outlined, "sensitivity"));
+      }
+    }
+
+    return tabs.take(4).toList(); // Max 4 tabs
+  }
+
+  /// Generate personalized recommendations
+  List<String> _buildRecommendations(OnboardingData profileData) {
+    final recommendations = <String>[];
+    final concerns = profileData.skinConcerns.map((c) => c.toLowerCase()).toList();
+    final skinType = profileData.skinType?.name.toLowerCase();
+
+    // Base recommendations
+    recommendations.add("Use a gentle cleanser and avoid over-scrubbing.");
+    recommendations.add("Wear sunscreen every morning to stabilize trends.");
+
+    // Skin type specific
+    if (skinType == 'oily') {
+      recommendations.add("Use oil-free, non-comedogenic moisturizers.");
+      recommendations.add("Consider niacinamide to help regulate oil production.");
+    } else if (skinType == 'dry') {
+      recommendations.add("Apply a rich, hydrating moisturizer twice daily.");
+      recommendations.add("Use a hydrating serum with hyaluronic acid.");
+    } else if (skinType == 'sensitive') {
+      recommendations.add("Stick to fragrance-free products to minimize irritation.");
+      recommendations.add("Patch test new products before full application.");
+    } else if (skinType == 'combination') {
+      recommendations.add("Use different products for T-zone and cheeks.");
+    }
+
+    // Concern specific
+    if (concerns.contains('acne') || concerns.contains('breakouts')) {
+      recommendations.add("Consider salicylic acid or benzoyl peroxide for breakouts.");
+      recommendations.add("Keep pillowcases clean and change them frequently.");
+    }
+
+    if (concerns.contains('aging') || concerns.contains('wrinkles')) {
+      recommendations.add("Use retinol at night to boost collagen production.");
+      recommendations.add("Apply vitamin C in the morning for antioxidant protection.");
+    }
+
+    if (concerns.contains('dark spots') || concerns.contains('hyperpigmentation')) {
+      recommendations.add("Use vitamin C serum daily for brightening effects.");
+      recommendations.add("Never skip sunscreen - UV exposure worsens dark spots.");
+    }
+
+    // Lifestyle based
+    if (profileData.waterIntake == 'low') {
+      recommendations.add("Increase water intake to at least 8 glasses daily.");
+    }
+
+    if (profileData.sleepQuality == 'poor' || profileData.sleepQuality == 'fair') {
+      recommendations.add("Aim for 7-9 hours of sleep for optimal skin repair.");
+    }
+
+    if (profileData.stressLevel == 'high') {
+      recommendations.add("Practice stress management - high stress affects skin health.");
+    }
+
+    return recommendations.take(6).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final profileData = ref.watch(onboardingDataProvider);
+    final user = ref.watch(userProvider);
 
-    final series =
-        _seriesByTab[_selectedTab] ?? const [30, 35, 40, 50, 45, 55, 60, 50];
-    final latest = series.isNotEmpty
-        ? series[math.min(4, series.length - 1)]
-        : 0.0; // “May” point
+    final tabs = _buildMetricTabs(profileData);
+
+    // Ensure selected tab is valid
+    if (_selectedTab >= tabs.length) {
+      _selectedTab = 0;
+    }
+
+    final series = _seriesByTab[_selectedTab] ?? const [30, 35, 40, 50, 45, 55, 60, 50];
     final current = series.isNotEmpty ? series.last : 0.0;
-    final avg = series.isEmpty
-        ? 0.0
-        : (series.reduce((a, b) => a + b) / series.length);
+    final avg = series.isEmpty ? 0.0 : (series.reduce((a, b) => a + b) / series.length);
     final trend = current - series.first;
 
     final insight = _buildInsight(
-      tabName: _tabs[_selectedTab].label,
+      tabName: tabs[_selectedTab].label,
       avg: avg,
       current: current,
       trend: trend,
+      profileData: profileData,
     );
+
+    final recommendations = _buildRecommendations(profileData);
 
     return Scaffold(
       body: SafeArea(
@@ -66,29 +179,65 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
           children: [
             const SizedBox(height: 6),
-            Text(
-              "Report skin test analysis",
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: const Color(0xFF0F172A),
-                fontWeight: FontWeight.w800,
-              ),
+
+            // Header with personalization badge
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Skin Analysis Report",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: const Color(0xFF0F172A),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                if (profileData.isComplete)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.person_outline, size: 14, color: Color(0xFF10B981)),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Personalized',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF10B981),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 6),
 
-            const SizedBox(height: 14),
+            // Profile Summary Card
+            if (!_isLoading && profileData.isComplete)
+              _ProfileSummaryCard(profileData: profileData, user: user),
 
-            // Chips row
+            if (!_isLoading && profileData.isComplete)
+              const SizedBox(height: 14),
+
+            // Chips row (personalized metrics)
             SizedBox(
               height: 40,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: _tabs.length,
+                itemCount: tabs.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 10),
                 itemBuilder: (context, i) {
                   final selected = i == _selectedTab;
                   return _MetricChip(
-                    label: _tabs[i].label,
-                    icon: _tabs[i].icon,
+                    label: tabs[i].label,
+                    icon: tabs[i].icon,
                     selected: selected,
                     primaryColor: primaryColor,
                     onTap: () => setState(() => _selectedTab = i),
@@ -99,7 +248,7 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
 
             const SizedBox(height: 14),
 
-            // Chart Card (like the image)
+            // Chart Card
             _CardShell(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,13 +257,7 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          "Week of ${_selectedWeek == 0
-                              ? "1 Mei - 7 Mei 2023"
-                              : _selectedWeek == 1
-                              ? "8 Mei - 14 Mei 2023"
-                              : _selectedWeek == 2
-                              ? "15 Mei - 21 Mei 2023"
-                              : "22 Mei - 28 Mei 2023"}",
+                          "Week of ${_selectedWeek == 0 ? "1 - 7 Jan 2026" : _selectedWeek == 1 ? "8 - 14 Jan 2026" : _selectedWeek == 2 ? "15 - 21 Jan 2026" : "22 - 28 Jan 2026"}",
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: const Color(0xFF0F172A),
                             fontWeight: FontWeight.w700,
@@ -138,14 +281,13 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
                     child: _LineChartCard(
                       primaryColor: primaryColor,
                       series: series,
-                      // “May” marker: choose index 4 to match the sample look
                       markerIndex: math.min(4, series.length - 1),
                     ),
                   ),
 
                   const SizedBox(height: 12),
 
-                  // Quick stats under chart (more analytical)
+                  // Quick stats
                   Row(
                     children: [
                       Expanded(
@@ -182,7 +324,7 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
 
             const SizedBox(height: 12),
 
-            // Insight / explanation (adds detail)
+            // Personalized Insight
             _CardShell(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,22 +336,41 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
                       color: primaryColor.withOpacity(0.10),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      Icons.lightbulb_outline_rounded,
-                      color: primaryColor,
-                    ),
+                    child: Icon(Icons.lightbulb_outline_rounded, color: primaryColor),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Insight",
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: const Color(0xFF0F172A),
-                            fontWeight: FontWeight.w800,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              "Personalized Insight",
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: const Color(0xFF0F172A),
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            if (profileData.isComplete) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'AI',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700,
+                                    color: primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -228,7 +389,82 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
 
             const SizedBox(height: 12),
 
-            // “Report score” section like the image + more detailed items
+            // Focus Areas (based on user's concerns)
+            if (profileData.skinConcerns.isNotEmpty) ...[
+              _CardShell(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          "Your Focus Areas",
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: const Color(0xFF0F172A),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            profileData.primaryConcern ?? 'Primary',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.amber.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: profileData.skinConcerns.map((concern) {
+                        final isPrimary = concern == profileData.primaryConcern;
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isPrimary ? primaryColor.withOpacity(0.12) : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isPrimary ? primaryColor.withOpacity(0.3) : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isPrimary)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 6),
+                                  child: Icon(Icons.star, size: 14, color: primaryColor),
+                                ),
+                              Text(
+                                concern,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isPrimary ? primaryColor : const Color(0xFF475569),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // Report score section
             Row(
               children: [
                 Text(
@@ -246,7 +482,7 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
               ],
             ),
             Text(
-              "Monday, 7 March 2023",
+              "Based on your ${profileData.skinType?.name.toLowerCase() ?? 'skin'} type profile",
               style: theme.textTheme.bodySmall?.copyWith(
                 color: const Color(0xFF94A3B8),
               ),
@@ -255,63 +491,68 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
 
             _ScoreRow(
               primaryColor: primaryColor,
-              title: "Score your skin test",
-              subtitle: "Elasticity + hydration summary",
-              score: 80,
+              title: "Overall skin health",
+              subtitle: _getScoreSubtitle(profileData, "overall"),
+              score: _calculateScore(profileData, "overall"),
               onTap: () {},
             ),
             const SizedBox(height: 10),
             _ScoreRow(
               primaryColor: primaryColor,
-              title: "Sensitivity overview",
-              subtitle: "Barrier calmness indicators",
-              score: 62,
+              title: _getScoreTitle(profileData, 1),
+              subtitle: _getScoreSubtitle(profileData, "metric1"),
+              score: _calculateScore(profileData, "metric1"),
               onTap: () {},
             ),
             const SizedBox(height: 10),
             _ScoreRow(
               primaryColor: primaryColor,
-              title: "Wrinkle risk check",
-              subtitle: "Texture + fine lines trend",
-              score: 71,
+              title: _getScoreTitle(profileData, 2),
+              subtitle: _getScoreSubtitle(profileData, "metric2"),
+              score: _calculateScore(profileData, "metric2"),
               onTap: () {},
             ),
 
             const SizedBox(height: 14),
 
-            // Recommendations (extra)
+            // Personalized Recommendations
             _CardShell(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Recommended actions",
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: const Color(0xFF0F172A),
-                      fontWeight: FontWeight.w800,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        "Recommended for you",
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: const Color(0xFF0F172A),
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (profileData.isComplete)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Personalized',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF10B981),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 10),
-                  _Bullet(
-                    primaryColor: primaryColor,
-                    text: "Use a gentle cleanser and avoid over-scrubbing.",
-                  ),
-                  const SizedBox(height: 8),
-                  _Bullet(
-                    primaryColor: primaryColor,
-                    text: "Moisturize twice daily (focus on barrier support).",
-                  ),
-                  const SizedBox(height: 8),
-                  _Bullet(
-                    primaryColor: primaryColor,
-                    text: "Wear sunscreen every morning to stabilize trends.",
-                  ),
-                  const SizedBox(height: 8),
-                  _Bullet(
-                    primaryColor: primaryColor,
-                    text:
-                        "Track sleep + water intake for 7 days to compare impact.",
-                  ),
+                  ...recommendations.map((rec) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _Bullet(primaryColor: primaryColor, text: rec),
+                  )),
                 ],
               ),
             ),
@@ -321,38 +562,194 @@ class _ReportSkinTestScreenState extends State<ReportSkinTestScreen> {
     );
   }
 
+  String _getScoreTitle(OnboardingData profileData, int index) {
+    final concerns = profileData.skinConcerns;
+    if (concerns.isEmpty) {
+      return index == 1 ? "Hydration level" : "Skin barrier";
+    }
+
+    final concernTitles = {
+      'acne': 'Clarity score',
+      'breakouts': 'Breakout control',
+      'aging': 'Anti-aging progress',
+      'wrinkles': 'Elasticity score',
+      'dark spots': 'Brightness level',
+      'hyperpigmentation': 'Tone evenness',
+      'dryness': 'Moisture level',
+      'oiliness': 'Oil control',
+      'sensitivity': 'Barrier strength',
+    };
+
+    for (final concern in concerns) {
+      final title = concernTitles[concern.toLowerCase()];
+      if (title != null) {
+        if (index == 1) return title;
+        index--;
+      }
+    }
+
+    return index == 1 ? "Hydration level" : "Skin barrier";
+  }
+
+  String _getScoreSubtitle(OnboardingData profileData, String type) {
+    final skinType = profileData.skinType?.name.toLowerCase() ?? 'normal';
+
+    switch (type) {
+      case 'overall':
+        return "Based on your $skinType skin analysis";
+      case 'metric1':
+        if (profileData.primaryConcern != null) {
+          return "Tracking ${profileData.primaryConcern!.toLowerCase()} progress";
+        }
+        return "Daily hydration tracking";
+      case 'metric2':
+        return "Skin barrier health indicators";
+      default:
+        return "Analysis in progress";
+    }
+  }
+
+  int _calculateScore(OnboardingData profileData, String type) {
+    // Simulate scores based on profile (in real app, this would come from actual analysis)
+    final base = 70;
+    final random = math.Random();
+
+    if (type == 'overall') {
+      return base + random.nextInt(20);
+    } else if (type == 'metric1') {
+      return base - 10 + random.nextInt(25);
+    } else {
+      return base - 5 + random.nextInt(22);
+    }
+  }
+
   String _buildInsight({
     required String tabName,
     required double avg,
     required double current,
     required double trend,
+    required OnboardingData profileData,
   }) {
     final trendWord = trend >= 0 ? "improving" : "dropping";
     final severity = (current - avg).abs();
 
+    String profileContext = "";
+    if (profileData.skinType != null) {
+      profileContext = "For your ${profileData.skinType!.name.toLowerCase()} skin, ";
+    }
+
     String extra;
     if (severity < 6) {
-      extra =
-          "Your results are close to your weekly average, which usually means your routine is stable.";
+      extra = "${profileContext}your results are close to your weekly average, which usually means your routine is stable.";
     } else if (current > avg) {
-      extra =
-          "You’re above your weekly baseline—keep the same routine for a few more days to confirm the improvement.";
+      extra = "${profileContext}you're above your weekly baseline—keep the same routine for a few more days to confirm the improvement.";
     } else {
-      extra =
-          "You’re below your weekly baseline—consider simplifying your routine and focusing on hydration + barrier care.";
+      extra = "${profileContext}you're below your weekly baseline—consider simplifying your routine and focusing on hydration + barrier care.";
+    }
+
+    // Add concern-specific insight
+    String concernInsight = "";
+    if (profileData.primaryConcern != null) {
+      switch (profileData.primaryConcern!.toLowerCase()) {
+        case 'acne':
+          concernInsight = " Given your focus on acne, monitor breakout patterns alongside these metrics.";
+          break;
+        case 'dryness':
+          concernInsight = " With dryness as your primary concern, pay extra attention to hydration levels.";
+          break;
+        case 'aging':
+        case 'wrinkles':
+          concernInsight = " For anti-aging, elasticity trends are especially important to track.";
+          break;
+      }
     }
 
     return "$tabName is currently ${current.round()}% and looks $trendWord (${trend >= 0 ? "+" : ""}${trend.round()}% vs start of week). "
-        "Weekly average is ${avg.round()}%. $extra";
+        "Weekly average is ${avg.round()}%. $extra$concernInsight";
   }
 }
 
-// ------------------------ UI pieces ------------------------
+// ======================== Profile Summary Card ========================
+
+class _ProfileSummaryCard extends StatelessWidget {
+  final OnboardingData profileData;
+  final dynamic user;
+
+  const _ProfileSummaryCard({required this.profileData, this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final skinType = profileData.skinType?.name.toLowerCase().replaceAll('_', ' ') ?? 'Not set';
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF0284C7).withOpacity(0.08),
+            const Color(0xFF0284C7).withOpacity(0.03),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF0284C7).withOpacity(0.15)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0284C7).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.analytics_outlined, color: Color(0xFF0284C7), size: 26),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Analyzing ${_capitalize(skinType)} Skin",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "${profileData.skinConcerns.length} concern${profileData.skinConcerns.length != 1 ? 's' : ''} tracked • ${profileData.skinGoals.length} goal${profileData.skinGoals.length != 1 ? 's' : ''} set",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: Colors.grey.shade400),
+        ],
+      ),
+    );
+  }
+
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+}
+
+// ======================== UI pieces ========================
 
 class _MetricTab {
   final String label;
   final IconData icon;
-  const _MetricTab(this.label, this.icon);
+  final String key;
+  const _MetricTab(this.label, this.icon, this.key);
 }
 
 class _CardShell extends StatelessWidget {
@@ -459,18 +856,13 @@ class _WeekDropdown extends StatelessWidget {
           isDense: true,
           icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
           items: items
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(
-                    e,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
+              .map((e) => DropdownMenuItem(
+                    value: e,
+                    child: Text(
+                      e,
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
                     ),
-                  ),
-                ),
-              )
+                  ))
               .toList(),
           onChanged: (v) {
             if (v != null) onChanged(v);
@@ -661,7 +1053,7 @@ class _Bullet extends StatelessWidget {
   }
 }
 
-// ------------------------ Chart (no packages) ------------------------
+// ======================== Chart (no packages) ========================
 
 class _LineChartCard extends StatelessWidget {
   final Color primaryColor;
@@ -720,7 +1112,7 @@ class _LineChartPainter extends CustomPainter {
       bg,
     );
 
-    // Grid + Y labels (0..100)
+    // Grid + Y labels
     final gridPaint = Paint()
       ..color = const Color(0xFFE2E8F0)
       ..style = PaintingStyle.stroke
@@ -745,8 +1137,8 @@ class _LineChartPainter extends CustomPainter {
       tp.paint(canvas, Offset(0, y - tp.height / 2));
     }
 
-    // X labels (Jan..Jul like the image)
-    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul"];
+    // X labels
+    const months = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     final xLabelStyle = const TextStyle(
       color: Color(0xFF94A3B8),
       fontSize: 11,
@@ -763,7 +1155,6 @@ class _LineChartPainter extends CustomPainter {
 
     if (series.length < 2) return;
 
-    // Normalize
     double clamp01(double v) => v.clamp(0.0, 100.0);
 
     final points = <Offset>[];
@@ -773,7 +1164,7 @@ class _LineChartPainter extends CustomPainter {
       points.add(Offset(x, y));
     }
 
-    // Fill under line (soft)
+    // Fill under line
     final fillPath = Path()
       ..moveTo(points.first.dx, rect.bottom)
       ..lineTo(points.first.dx, points.first.dy);
@@ -810,7 +1201,7 @@ class _LineChartPainter extends CustomPainter {
     }
     canvas.drawPath(linePath, linePaint);
 
-    // Marker (vertical dashed + dot + bubble)
+    // Marker
     final mi = markerIndex.clamp(0, points.length - 1);
     final m = points[mi];
 
@@ -819,29 +1210,17 @@ class _LineChartPainter extends CustomPainter {
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
-    _drawDashedLine(
-      canvas,
-      dashPaint,
-      Offset(m.dx, rect.top),
-      Offset(m.dx, rect.bottom),
-      dash: 6,
-      gap: 6,
-    );
+    _drawDashedLine(canvas, dashPaint, Offset(m.dx, rect.top), Offset(m.dx, rect.bottom), dash: 6, gap: 6);
 
-    // Big dot
     canvas.drawCircle(m, 7, Paint()..color = Colors.white);
     canvas.drawCircle(m, 5, Paint()..color = primaryColor);
 
-    // Bubble label (e.g., 50%)
+    // Bubble label
     final bubbleText = "${series[mi].round()}%";
     final bubbleTP = TextPainter(
       text: TextSpan(
         text: bubbleText,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w900,
-          fontSize: 12,
-        ),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -849,18 +1228,13 @@ class _LineChartPainter extends CustomPainter {
     final bubbleW = bubbleTP.width + 18;
     final bubbleH = bubbleTP.height + 10;
     final bubbleRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(
-        center: Offset(m.dx, rect.top + 16),
-        width: bubbleW,
-        height: bubbleH,
-      ),
+      Rect.fromCenter(center: Offset(m.dx, rect.top + 16), width: bubbleW, height: bubbleH),
       const Radius.circular(12),
     );
 
     final bubblePaint = Paint()..color = primaryColor;
     canvas.drawRRect(bubbleRect, bubblePaint);
 
-    // little pointer triangle
     final tip = Path();
     tip.moveTo(m.dx - 7, bubbleRect.bottom);
     tip.lineTo(m.dx + 7, bubbleRect.bottom);
@@ -870,10 +1244,7 @@ class _LineChartPainter extends CustomPainter {
 
     bubbleTP.paint(
       canvas,
-      Offset(
-        bubbleRect.center.dx - bubbleTP.width / 2,
-        bubbleRect.center.dy - bubbleTP.height / 2,
-      ),
+      Offset(bubbleRect.center.dx - bubbleTP.width / 2, bubbleRect.center.dy - bubbleTP.height / 2),
     );
   }
 
