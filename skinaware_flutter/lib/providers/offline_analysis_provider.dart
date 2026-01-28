@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/tflite_inference_service.dart';
 import '../services/disease_guidance.dart';
-import '../services/ai/ollama_service.dart';
+import '../services/ai/gemini_service.dart';
 
 /// Provider for the TFLite inference service
 final tfliteServiceProvider = Provider<TfliteInferenceService>((ref) {

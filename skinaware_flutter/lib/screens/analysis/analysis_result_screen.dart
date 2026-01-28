@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../services/ai/ollama_service.dart';
+import '../../services/ai/gemini_service.dart';
 import '../../routes/route_constants.dart';
 
 class AnalysisResultScreen extends ConsumerWidget {

@@ -13,7 +13,7 @@ import 'package:skinaware_flutter/screens/skin_camera_screen.dart';
 import 'package:skinaware_flutter/screens/chat/chat_screen.dart';
 import 'package:skinaware_flutter/screens/analysis/analysis_result_screen.dart';
 import 'package:skinaware_flutter/screens/analysis/offline_analysis_result_screen.dart';
-import 'package:skinaware_flutter/services/ai/ollama_service.dart';
+import 'package:skinaware_flutter/services/ai/gemini_service.dart';
 import 'package:skinaware_flutter/services/tflite_inference_service.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
