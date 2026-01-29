@@ -11,30 +11,271 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import '../endpoints/profile_endpoint.dart' as _i2;
-import '../endpoints/user_endpoint.dart' as _i3;
-import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i4;
-import 'package:skinaware_server/src/generated/enums/gender.dart' as _i5;
-import 'package:skinaware_server/src/generated/enums/role.dart' as _i6;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i7;
+import '../endpoints/gemini_endpoint.dart' as _i2;
+import '../endpoints/profile_endpoint.dart' as _i3;
+import '../endpoints/user_endpoint.dart' as _i4;
+import 'package:skinaware_server/src/generated/enums/skin_type.dart' as _i5;
+import 'package:skinaware_server/src/generated/enums/gender.dart' as _i6;
+import 'package:skinaware_server/src/generated/enums/role.dart' as _i7;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i8;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
   void initializeEndpoints(_i1.Server server) {
     var endpoints = <String, _i1.Endpoint>{
-      'profile': _i2.ProfileEndpoint()
+      'gemini': _i2.GeminiEndpoint()
+        ..initialize(
+          server,
+          'gemini',
+          null,
+        ),
+      'profile': _i3.ProfileEndpoint()
         ..initialize(
           server,
           'profile',
           null,
         ),
-      'user': _i3.UserEndpoint()
+      'user': _i4.UserEndpoint()
         ..initialize(
           server,
           'user',
           null,
         ),
     };
+    connectors['gemini'] = _i1.EndpointConnector(
+      name: 'gemini',
+      endpoint: endpoints['gemini']!,
+      methodConnectors: {
+        'ping': _i1.MethodConnector(
+          name: 'ping',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['gemini'] as _i2.GeminiEndpoint).ping(session),
+        ),
+        'sendMessage': _i1.MethodConnector(
+          name: 'sendMessage',
+          params: {
+            'message': _i1.ParameterDescription(
+              name: 'message',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'historyJson': _i1.ParameterDescription(
+              name: 'historyJson',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'userProfileContext': _i1.ParameterDescription(
+              name: 'userProfileContext',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['gemini'] as _i2.GeminiEndpoint).sendMessage(
+                    session,
+                    message: params['message'],
+                    historyJson: params['historyJson'],
+                    userProfileContext: params['userProfileContext'],
+                  ),
+        ),
+        'validateImageBase64': _i1.MethodConnector(
+          name: 'validateImageBase64',
+          params: {
+            'imageBase64': _i1.ParameterDescription(
+              name: 'imageBase64',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'userProfileContext': _i1.ParameterDescription(
+              name: 'userProfileContext',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['gemini'] as _i2.GeminiEndpoint)
+                  .validateImageBase64(
+                    session,
+                    imageBase64: params['imageBase64'],
+                    userProfileContext: params['userProfileContext'],
+                  ),
+        ),
+        'analyzeImageBase64': _i1.MethodConnector(
+          name: 'analyzeImageBase64',
+          params: {
+            'imageBase64': _i1.ParameterDescription(
+              name: 'imageBase64',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'prompt': _i1.ParameterDescription(
+              name: 'prompt',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'skipValidation': _i1.ParameterDescription(
+              name: 'skipValidation',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'userProfileContext': _i1.ParameterDescription(
+              name: 'userProfileContext',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['gemini'] as _i2.GeminiEndpoint)
+                  .analyzeImageBase64(
+                    session,
+                    imageBase64: params['imageBase64'],
+                    prompt: params['prompt'],
+                    skipValidation: params['skipValidation'],
+                    userProfileContext: params['userProfileContext'],
+                  ),
+        ),
+        'sendMessageWithImageBase64': _i1.MethodConnector(
+          name: 'sendMessageWithImageBase64',
+          params: {
+            'message': _i1.ParameterDescription(
+              name: 'message',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'imageBase64': _i1.ParameterDescription(
+              name: 'imageBase64',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'isVietnamese': _i1.ParameterDescription(
+              name: 'isVietnamese',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'historyJson': _i1.ParameterDescription(
+              name: 'historyJson',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'userProfileContext': _i1.ParameterDescription(
+              name: 'userProfileContext',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['gemini'] as _i2.GeminiEndpoint)
+                  .sendMessageWithImageBase64(
+                    session,
+                    message: params['message'],
+                    imageBase64: params['imageBase64'],
+                    isVietnamese: params['isVietnamese'],
+                    historyJson: params['historyJson'],
+                    userProfileContext: params['userProfileContext'],
+                  ),
+        ),
+        'performFullAnalysisBase64': _i1.MethodConnector(
+          name: 'performFullAnalysisBase64',
+          params: {
+            'imageBase64': _i1.ParameterDescription(
+              name: 'imageBase64',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'symptoms': _i1.ParameterDescription(
+              name: 'symptoms',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'duration': _i1.ParameterDescription(
+              name: 'duration',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'previousTreatments': _i1.ParameterDescription(
+              name: 'previousTreatments',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'isVietnamese': _i1.ParameterDescription(
+              name: 'isVietnamese',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'userProfileContext': _i1.ParameterDescription(
+              name: 'userProfileContext',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['gemini'] as _i2.GeminiEndpoint)
+                  .performFullAnalysisBase64(
+                    session,
+                    imageBase64: params['imageBase64'],
+                    symptoms: params['symptoms'],
+                    duration: params['duration'],
+                    previousTreatments: params['previousTreatments'],
+                    isVietnamese: params['isVietnamese'],
+                    userProfileContext: params['userProfileContext'],
+                  ),
+        ),
+        'streamMessage': _i1.MethodStreamConnector(
+          name: 'streamMessage',
+          params: {
+            'message': _i1.ParameterDescription(
+              name: 'message',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'historyJson': _i1.ParameterDescription(
+              name: 'historyJson',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'userProfileContext': _i1.ParameterDescription(
+              name: 'userProfileContext',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _i1.MethodStreamReturnType.streamType,
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['gemini'] as _i2.GeminiEndpoint).streamMessage(
+                session,
+                message: params['message'],
+                historyJson: params['historyJson'],
+                userProfileContext: params['userProfileContext'],
+              ),
+        ),
+      },
+    );
     connectors['profile'] = _i1.EndpointConnector(
       name: 'profile',
       endpoint: endpoints['profile']!,
@@ -49,7 +290,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'skinType': _i1.ParameterDescription(
               name: 'skinType',
-              type: _i1.getType<_i4.SkinType>(),
+              type: _i1.getType<_i5.SkinType>(),
               nullable: false,
             ),
             'skinSensitivity': _i1.ParameterDescription(
@@ -133,7 +374,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['profile'] as _i2.ProfileEndpoint).saveProfile(
+                  (endpoints['profile'] as _i3.ProfileEndpoint).saveProfile(
                     session,
                     userId: params['userId'],
                     skinType: params['skinType'],
@@ -168,7 +409,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['profile'] as _i2.ProfileEndpoint).getByUserId(
+                  (endpoints['profile'] as _i3.ProfileEndpoint).getByUserId(
                     session,
                     userId: params['userId'],
                   ),
@@ -183,7 +424,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'skinType': _i1.ParameterDescription(
               name: 'skinType',
-              type: _i1.getType<_i4.SkinType?>(),
+              type: _i1.getType<_i5.SkinType?>(),
               nullable: true,
             ),
             'skinSensitivity': _i1.ParameterDescription(
@@ -267,7 +508,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['profile'] as _i2.ProfileEndpoint).updateProfile(
+                  (endpoints['profile'] as _i3.ProfileEndpoint).updateProfile(
                     session,
                     userId: params['userId'],
                     skinType: params['skinType'],
@@ -319,7 +560,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'gender': _i1.ParameterDescription(
               name: 'gender',
-              type: _i1.getType<_i5.Gender>(),
+              type: _i1.getType<_i6.Gender>(),
               nullable: false,
             ),
             'name': _i1.ParameterDescription(
@@ -329,12 +570,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'role': _i1.ParameterDescription(
               name: 'role',
-              type: _i1.getType<_i6.Role>(),
+              type: _i1.getType<_i7.Role>(),
               nullable: false,
             ),
             'skinType': _i1.ParameterDescription(
               name: 'skinType',
-              type: _i1.getType<_i4.SkinType>(),
+              type: _i1.getType<_i5.SkinType>(),
               nullable: false,
             ),
             'profilePhoto': _i1.ParameterDescription(
@@ -347,7 +588,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i3.UserEndpoint).register(
+              ) async => (endpoints['user'] as _i4.UserEndpoint).register(
                 session,
                 email: params['email'],
                 password: params['password'],
@@ -378,7 +619,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i3.UserEndpoint).login(
+              ) async => (endpoints['user'] as _i4.UserEndpoint).login(
                 session,
                 email: params['email'],
                 password: params['password'],
@@ -414,7 +655,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'gender': _i1.ParameterDescription(
               name: 'gender',
-              type: _i1.getType<_i5.Gender?>(),
+              type: _i1.getType<_i6.Gender?>(),
               nullable: true,
             ),
             'name': _i1.ParameterDescription(
@@ -424,12 +665,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'role': _i1.ParameterDescription(
               name: 'role',
-              type: _i1.getType<_i6.Role?>(),
+              type: _i1.getType<_i7.Role?>(),
               nullable: true,
             ),
             'skinType': _i1.ParameterDescription(
               name: 'skinType',
-              type: _i1.getType<_i4.SkinType?>(),
+              type: _i1.getType<_i5.SkinType?>(),
               nullable: true,
             ),
             'profilePhoto': _i1.ParameterDescription(
@@ -442,7 +683,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i3.UserEndpoint).updateUser(
+              ) async => (endpoints['user'] as _i4.UserEndpoint).updateUser(
                 session,
                 userId: params['userId'],
                 email: params['email'],
@@ -469,7 +710,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i3.UserEndpoint).getById(
+              ) async => (endpoints['user'] as _i4.UserEndpoint).getById(
                 session,
                 userId: params['userId'],
               ),
@@ -499,17 +740,17 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'gender': _i1.ParameterDescription(
               name: 'gender',
-              type: _i1.getType<_i5.Gender?>(),
+              type: _i1.getType<_i6.Gender?>(),
               nullable: true,
             ),
             'role': _i1.ParameterDescription(
               name: 'role',
-              type: _i1.getType<_i6.Role?>(),
+              type: _i1.getType<_i7.Role?>(),
               nullable: true,
             ),
             'skinType': _i1.ParameterDescription(
               name: 'skinType',
-              type: _i1.getType<_i4.SkinType?>(),
+              type: _i1.getType<_i5.SkinType?>(),
               nullable: true,
             ),
             'profilePhoto': _i1.ParameterDescription(
@@ -522,7 +763,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i3.UserEndpoint).updateProfile(
+              ) async => (endpoints['user'] as _i4.UserEndpoint).updateProfile(
                 session,
                 userId: params['userId'],
                 name: params['name'],
@@ -536,6 +777,6 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth'] = _i7.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i8.Endpoints()..initializeEndpoints(server);
   }
 }

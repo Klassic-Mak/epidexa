@@ -1,3 +1,11 @@
+gemini:
+  - ping:
+  - sendMessage:
+  - streamMessage:
+  - validateImageBase64:
+  - analyzeImageBase64:
+  - sendMessageWithImageBase64:
+  - performFullAnalysisBase64:
 profile:
   - saveProfile:
   - getByUserId:

@@ -12,6 +12,7 @@ dependencies:
   crypt: ^4.3.1
   bcrypt: ^1.2.0
   serverpod_auth_server: ^3.2.3
+  dotenv: ^4.2.0
   
 
 

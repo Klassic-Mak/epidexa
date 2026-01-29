@@ -126,6 +126,8 @@ void withServerpod(
 }
 
 class TestEndpoints {
+  late final _GeminiEndpoint gemini;
+
   late final _ProfileEndpoint profile;
 
   late final _UserEndpoint user;
@@ -138,6 +140,10 @@ class _InternalTestEndpoints extends TestEndpoints
     _i2.SerializationManager serializationManager,
     _i2.EndpointDispatch endpoints,
   ) {
+    gemini = _GeminiEndpoint(
+      endpoints,
+      serializationManager,
+    );
     profile = _ProfileEndpoint(
       endpoints,
       serializationManager,
@@ -146,6 +152,278 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
+  }
+}
+
+class _GeminiEndpoint {
+  _GeminiEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<bool> ping(_i1.TestSessionBuilder sessionBuilder) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'ping',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'ping',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<String> sendMessage(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String message,
+    String? historyJson,
+    required String userProfileContext,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'sendMessage',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'sendMessage',
+          parameters: _i1.testObjectToJson({
+            'message': message,
+            'historyJson': historyJson,
+            'userProfileContext': userProfileContext,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Stream<String> streamMessage(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String message,
+    String? historyJson,
+    required String userProfileContext,
+  }) {
+    var _localTestStreamManager = _i1.TestStreamManager<String>();
+    _i1.callStreamFunctionAndHandleExceptions(
+      () async {
+        var _localUniqueSession =
+            (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+              endpoint: 'gemini',
+              method: 'streamMessage',
+            );
+        var _localCallContext = await _endpointDispatch
+            .getMethodStreamCallContext(
+              createSessionCallback: (_) => _localUniqueSession,
+              endpointPath: 'gemini',
+              methodName: 'streamMessage',
+              arguments: {
+                'message': message,
+                'historyJson': historyJson,
+                'userProfileContext': userProfileContext,
+              },
+              requestedInputStreams: [],
+              serializationManager: _serializationManager,
+            );
+        await _localTestStreamManager.callStreamMethod(
+          _localCallContext,
+          _localUniqueSession,
+          {},
+        );
+      },
+      _localTestStreamManager.outputStreamController,
+    );
+    return _localTestStreamManager.outputStreamController.stream;
+  }
+
+  _i3.Future<String> validateImageBase64(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String imageBase64,
+    required String userProfileContext,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'validateImageBase64',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'validateImageBase64',
+          parameters: _i1.testObjectToJson({
+            'imageBase64': imageBase64,
+            'userProfileContext': userProfileContext,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<String> analyzeImageBase64(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String imageBase64,
+    String? prompt,
+    required bool skipValidation,
+    required String userProfileContext,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'analyzeImageBase64',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'analyzeImageBase64',
+          parameters: _i1.testObjectToJson({
+            'imageBase64': imageBase64,
+            'prompt': prompt,
+            'skipValidation': skipValidation,
+            'userProfileContext': userProfileContext,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<String> sendMessageWithImageBase64(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String message,
+    required String imageBase64,
+    required bool isVietnamese,
+    String? historyJson,
+    required String userProfileContext,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'sendMessageWithImageBase64',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'sendMessageWithImageBase64',
+          parameters: _i1.testObjectToJson({
+            'message': message,
+            'imageBase64': imageBase64,
+            'isVietnamese': isVietnamese,
+            'historyJson': historyJson,
+            'userProfileContext': userProfileContext,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<String> performFullAnalysisBase64(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String imageBase64,
+    String? symptoms,
+    String? duration,
+    String? previousTreatments,
+    required bool isVietnamese,
+    required String userProfileContext,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'performFullAnalysisBase64',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'performFullAnalysisBase64',
+          parameters: _i1.testObjectToJson({
+            'imageBase64': imageBase64,
+            'symptoms': symptoms,
+            'duration': duration,
+            'previousTreatments': previousTreatments,
+            'isVietnamese': isVietnamese,
+            'userProfileContext': userProfileContext,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
   }
 }
 
