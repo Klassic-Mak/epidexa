@@ -23,6 +23,7 @@ abstract class UserProfile
     this.oiliness,
     this.skinConcerns,
     this.primaryConcern,
+    this.recommneddation,
     this.knownAllergies,
     this.currentMedications,
     this.skinConditionHistory,
@@ -46,6 +47,7 @@ abstract class UserProfile
     String? oiliness,
     String? skinConcerns,
     String? primaryConcern,
+    String? recommneddation,
     String? knownAllergies,
     String? currentMedications,
     String? skinConditionHistory,
@@ -74,6 +76,7 @@ abstract class UserProfile
       oiliness: jsonSerialization['oiliness'] as String?,
       skinConcerns: jsonSerialization['skinConcerns'] as String?,
       primaryConcern: jsonSerialization['primaryConcern'] as String?,
+      recommneddation: jsonSerialization['recommneddation'] as String?,
       knownAllergies: jsonSerialization['knownAllergies'] as String?,
       currentMedications: jsonSerialization['currentMedications'] as String?,
       skinConditionHistory:
@@ -113,6 +116,8 @@ abstract class UserProfile
   String? skinConcerns;
 
   String? primaryConcern;
+
+  String? recommneddation;
 
   String? knownAllergies;
 
@@ -154,6 +159,7 @@ abstract class UserProfile
     String? oiliness,
     String? skinConcerns,
     String? primaryConcern,
+    String? recommneddation,
     String? knownAllergies,
     String? currentMedications,
     String? skinConditionHistory,
@@ -179,6 +185,7 @@ abstract class UserProfile
       if (oiliness != null) 'oiliness': oiliness,
       if (skinConcerns != null) 'skinConcerns': skinConcerns,
       if (primaryConcern != null) 'primaryConcern': primaryConcern,
+      if (recommneddation != null) 'recommneddation': recommneddation,
       if (knownAllergies != null) 'knownAllergies': knownAllergies,
       if (currentMedications != null) 'currentMedications': currentMedications,
       if (skinConditionHistory != null)
@@ -207,6 +214,7 @@ abstract class UserProfile
       if (oiliness != null) 'oiliness': oiliness,
       if (skinConcerns != null) 'skinConcerns': skinConcerns,
       if (primaryConcern != null) 'primaryConcern': primaryConcern,
+      if (recommneddation != null) 'recommneddation': recommneddation,
       if (knownAllergies != null) 'knownAllergies': knownAllergies,
       if (currentMedications != null) 'currentMedications': currentMedications,
       if (skinConditionHistory != null)
@@ -265,6 +273,7 @@ class _UserProfileImpl extends UserProfile {
     String? oiliness,
     String? skinConcerns,
     String? primaryConcern,
+    String? recommneddation,
     String? knownAllergies,
     String? currentMedications,
     String? skinConditionHistory,
@@ -286,6 +295,7 @@ class _UserProfileImpl extends UserProfile {
          oiliness: oiliness,
          skinConcerns: skinConcerns,
          primaryConcern: primaryConcern,
+         recommneddation: recommneddation,
          knownAllergies: knownAllergies,
          currentMedications: currentMedications,
          skinConditionHistory: skinConditionHistory,
@@ -313,6 +323,7 @@ class _UserProfileImpl extends UserProfile {
     Object? oiliness = _Undefined,
     Object? skinConcerns = _Undefined,
     Object? primaryConcern = _Undefined,
+    Object? recommneddation = _Undefined,
     Object? knownAllergies = _Undefined,
     Object? currentMedications = _Undefined,
     Object? skinConditionHistory = _Undefined,
@@ -339,6 +350,9 @@ class _UserProfileImpl extends UserProfile {
       primaryConcern: primaryConcern is String?
           ? primaryConcern
           : this.primaryConcern,
+      recommneddation: recommneddation is String?
+          ? recommneddation
+          : this.recommneddation,
       knownAllergies: knownAllergies is String?
           ? knownAllergies
           : this.knownAllergies,
@@ -403,6 +417,12 @@ class UserProfileUpdateTable extends _i1.UpdateTable<UserProfileTable> {
   _i1.ColumnValue<String, String> primaryConcern(String? value) =>
       _i1.ColumnValue(
         table.primaryConcern,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> recommneddation(String? value) =>
+      _i1.ColumnValue(
+        table.recommneddation,
         value,
       );
 
@@ -509,6 +529,10 @@ class UserProfileTable extends _i1.Table<_i1.UuidValue?> {
       'primaryConcern',
       this,
     );
+    recommneddation = _i1.ColumnString(
+      'recommneddation',
+      this,
+    );
     knownAllergies = _i1.ColumnString(
       'knownAllergies',
       this,
@@ -577,6 +601,8 @@ class UserProfileTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnString primaryConcern;
 
+  late final _i1.ColumnString recommneddation;
+
   late final _i1.ColumnString knownAllergies;
 
   late final _i1.ColumnString currentMedications;
@@ -612,6 +638,7 @@ class UserProfileTable extends _i1.Table<_i1.UuidValue?> {
     oiliness,
     skinConcerns,
     primaryConcern,
+    recommneddation,
     knownAllergies,
     currentMedications,
     skinConditionHistory,

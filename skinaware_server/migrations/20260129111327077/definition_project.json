@@ -15,7 +15,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -134,7 +134,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -233,7 +233,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -325,7 +325,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -459,7 +459,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -579,7 +579,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -692,7 +692,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -798,7 +798,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -918,7 +918,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -1010,7 +1010,7 @@
           "columnType": 7,
           "isNullable": false,
           "columnDefault": "gen_random_uuid_v7()",
-          "dartType": "UuidValue"
+          "dartType": "UuidValue?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -1109,6 +1109,181 @@
         }
       ],
       "managed": true
+    },
+    {
+      "__className__": "serverpod.TableDefinition",
+      "name": "user_profile",
+      "dartName": "UserProfile",
+      "module": "skinaware",
+      "schema": "public",
+      "columns": [
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "id",
+          "columnType": 7,
+          "isNullable": false,
+          "columnDefault": "gen_random_uuid_v7()",
+          "dartType": "UuidValue?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "userId",
+          "columnType": 7,
+          "isNullable": false,
+          "dartType": "UuidValue"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "skinType",
+          "columnType": 0,
+          "isNullable": false,
+          "dartType": "protocol:SkinType"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "skinSensitivity",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "oiliness",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "skinConcerns",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "primaryConcern",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "recommneddation",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "knownAllergies",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "currentMedications",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "skinConditionHistory",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "sunExposure",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "waterIntake",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "sleepQuality",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "stressLevel",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "skinGoals",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "preferredLanguage",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "productBudget",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "routineComplexity",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "createdAt",
+          "columnType": 4,
+          "isNullable": false,
+          "dartType": "DateTime"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "updatedAt",
+          "columnType": 4,
+          "isNullable": false,
+          "dartType": "DateTime"
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "__className__": "serverpod.IndexDefinition",
+          "indexName": "user_profile_pkey",
+          "elements": [
+            {
+              "__className__": "serverpod.IndexElementDefinition",
+              "type": 0,
+              "definition": "id"
+            }
+          ],
+          "type": "btree",
+          "isUnique": true,
+          "isPrimary": true
+        }
+      ],
+      "managed": true
     }
   ],
   "installedModules": [
@@ -1119,13 +1294,8 @@
     },
     {
       "__className__": "serverpod.DatabaseMigrationVersion",
-      "module": "serverpod_auth_idp",
-      "version": "20251208110420531-v3-0-0"
-    },
-    {
-      "__className__": "serverpod.DatabaseMigrationVersion",
-      "module": "serverpod_auth_core",
-      "version": "20251208110412389-v3-0-0"
+      "module": "serverpod_auth",
+      "version": "20250825102351908-v3-0-0"
     }
   ],
   "migrationApiVersion": 1

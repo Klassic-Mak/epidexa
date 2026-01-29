@@ -11,6 +11,7 @@ fields:
   # Skin Concerns (stored as comma-separated values)
   skinConcerns: String?  # acne, wrinkles, dark_spots, redness, etc.
   primaryConcern: String?
+  recommneddation: String?
   # Medical History
   knownAllergies: String?  # comma-separated
   currentMedications: String?  # comma-separated

@@ -179,6 +179,33 @@ CREATE TABLE "symptom_check" (
 );
 
 --
+-- Class UserProfile as table user_profile
+--
+CREATE TABLE "user_profile" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
+    "userId" uuid NOT NULL,
+    "skinType" text NOT NULL,
+    "skinSensitivity" text,
+    "oiliness" text,
+    "skinConcerns" text,
+    "primaryConcern" text,
+    "recommneddation" text,
+    "knownAllergies" text,
+    "currentMedications" text,
+    "skinConditionHistory" text,
+    "sunExposure" text,
+    "waterIntake" text,
+    "sleepQuality" text,
+    "stressLevel" text,
+    "skinGoals" text,
+    "preferredLanguage" text,
+    "productBudget" text,
+    "routineComplexity" text,
+    "createdAt" timestamp without time zone NOT NULL,
+    "updatedAt" timestamp without time zone NOT NULL
+);
+
+--
 -- Class CloudStorageEntry as table serverpod_cloud_storage
 --
 CREATE TABLE "serverpod_cloud_storage" (
@@ -386,202 +413,116 @@ CREATE INDEX "serverpod_session_log_touched_idx" ON "serverpod_session_log" USIN
 CREATE INDEX "serverpod_session_log_isopen_idx" ON "serverpod_session_log" USING btree ("isOpen");
 
 --
--- Class AppleAccount as table serverpod_auth_idp_apple_account
+-- Class AuthKey as table serverpod_auth_key
 --
-CREATE TABLE "serverpod_auth_idp_apple_account" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "userIdentifier" text NOT NULL,
-    "refreshToken" text NOT NULL,
-    "refreshTokenRequestedWithBundleIdentifier" boolean NOT NULL,
-    "lastRefreshedAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "authUserId" uuid NOT NULL,
-    "createdAt" timestamp without time zone NOT NULL,
-    "email" text,
-    "isEmailVerified" boolean,
-    "isPrivateEmail" boolean,
-    "firstName" text,
-    "lastName" text
-);
-
--- Indexes
-CREATE UNIQUE INDEX "serverpod_auth_apple_account_identifier" ON "serverpod_auth_idp_apple_account" USING btree ("userIdentifier");
-
---
--- Class EmailAccount as table serverpod_auth_idp_email_account
---
-CREATE TABLE "serverpod_auth_idp_email_account" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "authUserId" uuid NOT NULL,
-    "createdAt" timestamp without time zone NOT NULL,
-    "email" text NOT NULL,
-    "passwordHash" text NOT NULL
-);
-
--- Indexes
-CREATE UNIQUE INDEX "serverpod_auth_idp_email_account_email" ON "serverpod_auth_idp_email_account" USING btree ("email");
-
---
--- Class EmailAccountPasswordResetRequest as table serverpod_auth_idp_email_account_password_reset_request
---
-CREATE TABLE "serverpod_auth_idp_email_account_password_reset_request" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "emailAccountId" uuid NOT NULL,
-    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "challengeId" uuid NOT NULL,
-    "setPasswordChallengeId" uuid
-);
-
---
--- Class EmailAccountRequest as table serverpod_auth_idp_email_account_request
---
-CREATE TABLE "serverpod_auth_idp_email_account_request" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "email" text NOT NULL,
-    "challengeId" uuid NOT NULL,
-    "createAccountChallengeId" uuid
-);
-
--- Indexes
-CREATE UNIQUE INDEX "serverpod_auth_idp_email_account_request_email" ON "serverpod_auth_idp_email_account_request" USING btree ("email");
-
---
--- Class GoogleAccount as table serverpod_auth_idp_google_account
---
-CREATE TABLE "serverpod_auth_idp_google_account" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "authUserId" uuid NOT NULL,
-    "created" timestamp without time zone NOT NULL,
-    "email" text NOT NULL,
-    "userIdentifier" text NOT NULL
-);
-
--- Indexes
-CREATE UNIQUE INDEX "serverpod_auth_google_account_user_identifier" ON "serverpod_auth_idp_google_account" USING btree ("userIdentifier");
-
---
--- Class PasskeyAccount as table serverpod_auth_idp_passkey_account
---
-CREATE TABLE "serverpod_auth_idp_passkey_account" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "authUserId" uuid NOT NULL,
-    "createdAt" timestamp without time zone NOT NULL,
-    "keyId" bytea NOT NULL,
-    "keyIdBase64" text NOT NULL,
-    "clientDataJSON" bytea NOT NULL,
-    "attestationObject" bytea NOT NULL,
-    "originalChallenge" bytea NOT NULL
-);
-
--- Indexes
-CREATE UNIQUE INDEX "serverpod_auth_idp_passkey_account_key_id_base64" ON "serverpod_auth_idp_passkey_account" USING btree ("keyIdBase64");
-
---
--- Class PasskeyChallenge as table serverpod_auth_idp_passkey_challenge
---
-CREATE TABLE "serverpod_auth_idp_passkey_challenge" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "createdAt" timestamp without time zone NOT NULL,
-    "challenge" bytea NOT NULL
-);
-
---
--- Class RateLimitedRequestAttempt as table serverpod_auth_idp_rate_limited_request_attempt
---
-CREATE TABLE "serverpod_auth_idp_rate_limited_request_attempt" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "domain" text NOT NULL,
-    "source" text NOT NULL,
-    "nonce" text NOT NULL,
-    "ipAddress" text,
-    "attemptedAt" timestamp without time zone NOT NULL,
-    "extraData" json
-);
-
--- Indexes
-CREATE INDEX "serverpod_auth_idp_rate_limited_request_attempt_domain" ON "serverpod_auth_idp_rate_limited_request_attempt" USING btree ("domain");
-CREATE INDEX "serverpod_auth_idp_rate_limited_request_attempt_source" ON "serverpod_auth_idp_rate_limited_request_attempt" USING btree ("source");
-CREATE INDEX "serverpod_auth_idp_rate_limited_request_attempt_nonce" ON "serverpod_auth_idp_rate_limited_request_attempt" USING btree ("nonce");
-
---
--- Class SecretChallenge as table serverpod_auth_idp_secret_challenge
---
-CREATE TABLE "serverpod_auth_idp_secret_challenge" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "challengeCodeHash" text NOT NULL
-);
-
---
--- Class RefreshToken as table serverpod_auth_core_jwt_refresh_token
---
-CREATE TABLE "serverpod_auth_core_jwt_refresh_token" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "authUserId" uuid NOT NULL,
+CREATE TABLE "serverpod_auth_key" (
+    "id" bigserial PRIMARY KEY,
+    "userId" bigint NOT NULL,
+    "hash" text NOT NULL,
     "scopeNames" json NOT NULL,
-    "extraClaims" text,
-    "method" text NOT NULL,
-    "fixedSecret" bytea NOT NULL,
-    "rotatingSecretHash" text NOT NULL,
-    "lastUpdatedAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- Indexes
-CREATE INDEX "serverpod_auth_core_jwt_refresh_token_last_updated_at" ON "serverpod_auth_core_jwt_refresh_token" USING btree ("lastUpdatedAt");
-
---
--- Class UserProfile as table serverpod_auth_core_profile
---
-CREATE TABLE "serverpod_auth_core_profile" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "authUserId" uuid NOT NULL,
-    "userName" text,
-    "fullName" text,
-    "email" text,
-    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "imageId" uuid
-);
-
--- Indexes
-CREATE UNIQUE INDEX "serverpod_auth_profile_user_profile_email_auth_user_id" ON "serverpod_auth_core_profile" USING btree ("authUserId");
-
---
--- Class UserProfileImage as table serverpod_auth_core_profile_image
---
-CREATE TABLE "serverpod_auth_core_profile_image" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "userProfileId" uuid NOT NULL,
-    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "storageId" text NOT NULL,
-    "path" text NOT NULL,
-    "url" text NOT NULL
-);
-
---
--- Class ServerSideSession as table serverpod_auth_core_session
---
-CREATE TABLE "serverpod_auth_core_session" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "authUserId" uuid NOT NULL,
-    "scopeNames" json NOT NULL,
-    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "lastUsedAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "expiresAt" timestamp without time zone,
-    "expireAfterUnusedFor" bigint,
-    "sessionKeyHash" bytea NOT NULL,
-    "sessionKeySalt" bytea NOT NULL,
     "method" text NOT NULL
 );
 
+-- Indexes
+CREATE INDEX "serverpod_auth_key_userId_idx" ON "serverpod_auth_key" USING btree ("userId");
+
 --
--- Class AuthUser as table serverpod_auth_core_user
+-- Class EmailAuth as table serverpod_email_auth
 --
-CREATE TABLE "serverpod_auth_core_user" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
-    "createdAt" timestamp without time zone NOT NULL,
+CREATE TABLE "serverpod_email_auth" (
+    "id" bigserial PRIMARY KEY,
+    "userId" bigint NOT NULL,
+    "email" text NOT NULL,
+    "hash" text NOT NULL
+);
+
+-- Indexes
+CREATE UNIQUE INDEX "serverpod_email_auth_email" ON "serverpod_email_auth" USING btree ("email");
+
+--
+-- Class EmailCreateAccountRequest as table serverpod_email_create_request
+--
+CREATE TABLE "serverpod_email_create_request" (
+    "id" bigserial PRIMARY KEY,
+    "userName" text NOT NULL,
+    "email" text NOT NULL,
+    "hash" text NOT NULL,
+    "verificationCode" text NOT NULL
+);
+
+-- Indexes
+CREATE UNIQUE INDEX "serverpod_email_auth_create_account_request_idx" ON "serverpod_email_create_request" USING btree ("email");
+
+--
+-- Class EmailFailedSignIn as table serverpod_email_failed_sign_in
+--
+CREATE TABLE "serverpod_email_failed_sign_in" (
+    "id" bigserial PRIMARY KEY,
+    "email" text NOT NULL,
+    "time" timestamp without time zone NOT NULL,
+    "ipAddress" text NOT NULL
+);
+
+-- Indexes
+CREATE INDEX "serverpod_email_failed_sign_in_email_idx" ON "serverpod_email_failed_sign_in" USING btree ("email");
+CREATE INDEX "serverpod_email_failed_sign_in_time_idx" ON "serverpod_email_failed_sign_in" USING btree ("time");
+
+--
+-- Class EmailReset as table serverpod_email_reset
+--
+CREATE TABLE "serverpod_email_reset" (
+    "id" bigserial PRIMARY KEY,
+    "userId" bigint NOT NULL,
+    "verificationCode" text NOT NULL,
+    "expiration" timestamp without time zone NOT NULL
+);
+
+-- Indexes
+CREATE UNIQUE INDEX "serverpod_email_reset_verification_idx" ON "serverpod_email_reset" USING btree ("verificationCode");
+
+--
+-- Class GoogleRefreshToken as table serverpod_google_refresh_token
+--
+CREATE TABLE "serverpod_google_refresh_token" (
+    "id" bigserial PRIMARY KEY,
+    "userId" bigint NOT NULL,
+    "refreshToken" text NOT NULL
+);
+
+-- Indexes
+CREATE UNIQUE INDEX "serverpod_google_refresh_token_userId_idx" ON "serverpod_google_refresh_token" USING btree ("userId");
+
+--
+-- Class UserImage as table serverpod_user_image
+--
+CREATE TABLE "serverpod_user_image" (
+    "id" bigserial PRIMARY KEY,
+    "userId" bigint NOT NULL,
+    "version" bigint NOT NULL,
+    "url" text NOT NULL
+);
+
+-- Indexes
+CREATE INDEX "serverpod_user_image_user_id" ON "serverpod_user_image" USING btree ("userId", "version");
+
+--
+-- Class UserInfo as table serverpod_user_info
+--
+CREATE TABLE "serverpod_user_info" (
+    "id" bigserial PRIMARY KEY,
+    "userIdentifier" text NOT NULL,
+    "userName" text,
+    "fullName" text,
+    "email" text,
+    "created" timestamp without time zone NOT NULL,
+    "imageUrl" text,
     "scopeNames" json NOT NULL,
     "blocked" boolean NOT NULL
 );
+
+-- Indexes
+CREATE UNIQUE INDEX "serverpod_user_info_user_identifier" ON "serverpod_user_info" USING btree ("userIdentifier");
+CREATE INDEX "serverpod_user_info_email" ON "serverpod_user_info" USING btree ("email");
 
 --
 -- Foreign relations for "audit_log" table
@@ -733,138 +674,14 @@ ALTER TABLE ONLY "serverpod_query_log"
     ON DELETE CASCADE
     ON UPDATE NO ACTION;
 
---
--- Foreign relations for "serverpod_auth_idp_apple_account" table
---
-ALTER TABLE ONLY "serverpod_auth_idp_apple_account"
-    ADD CONSTRAINT "serverpod_auth_idp_apple_account_fk_0"
-    FOREIGN KEY("authUserId")
-    REFERENCES "serverpod_auth_core_user"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_idp_email_account" table
---
-ALTER TABLE ONLY "serverpod_auth_idp_email_account"
-    ADD CONSTRAINT "serverpod_auth_idp_email_account_fk_0"
-    FOREIGN KEY("authUserId")
-    REFERENCES "serverpod_auth_core_user"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_idp_email_account_password_reset_request" table
---
-ALTER TABLE ONLY "serverpod_auth_idp_email_account_password_reset_request"
-    ADD CONSTRAINT "serverpod_auth_idp_email_account_password_reset_request_fk_0"
-    FOREIGN KEY("emailAccountId")
-    REFERENCES "serverpod_auth_idp_email_account"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-ALTER TABLE ONLY "serverpod_auth_idp_email_account_password_reset_request"
-    ADD CONSTRAINT "serverpod_auth_idp_email_account_password_reset_request_fk_1"
-    FOREIGN KEY("challengeId")
-    REFERENCES "serverpod_auth_idp_secret_challenge"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-ALTER TABLE ONLY "serverpod_auth_idp_email_account_password_reset_request"
-    ADD CONSTRAINT "serverpod_auth_idp_email_account_password_reset_request_fk_2"
-    FOREIGN KEY("setPasswordChallengeId")
-    REFERENCES "serverpod_auth_idp_secret_challenge"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_idp_email_account_request" table
---
-ALTER TABLE ONLY "serverpod_auth_idp_email_account_request"
-    ADD CONSTRAINT "serverpod_auth_idp_email_account_request_fk_0"
-    FOREIGN KEY("challengeId")
-    REFERENCES "serverpod_auth_idp_secret_challenge"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-ALTER TABLE ONLY "serverpod_auth_idp_email_account_request"
-    ADD CONSTRAINT "serverpod_auth_idp_email_account_request_fk_1"
-    FOREIGN KEY("createAccountChallengeId")
-    REFERENCES "serverpod_auth_idp_secret_challenge"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_idp_google_account" table
---
-ALTER TABLE ONLY "serverpod_auth_idp_google_account"
-    ADD CONSTRAINT "serverpod_auth_idp_google_account_fk_0"
-    FOREIGN KEY("authUserId")
-    REFERENCES "serverpod_auth_core_user"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_idp_passkey_account" table
---
-ALTER TABLE ONLY "serverpod_auth_idp_passkey_account"
-    ADD CONSTRAINT "serverpod_auth_idp_passkey_account_fk_0"
-    FOREIGN KEY("authUserId")
-    REFERENCES "serverpod_auth_core_user"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_core_jwt_refresh_token" table
---
-ALTER TABLE ONLY "serverpod_auth_core_jwt_refresh_token"
-    ADD CONSTRAINT "serverpod_auth_core_jwt_refresh_token_fk_0"
-    FOREIGN KEY("authUserId")
-    REFERENCES "serverpod_auth_core_user"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_core_profile" table
---
-ALTER TABLE ONLY "serverpod_auth_core_profile"
-    ADD CONSTRAINT "serverpod_auth_core_profile_fk_0"
-    FOREIGN KEY("authUserId")
-    REFERENCES "serverpod_auth_core_user"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-ALTER TABLE ONLY "serverpod_auth_core_profile"
-    ADD CONSTRAINT "serverpod_auth_core_profile_fk_1"
-    FOREIGN KEY("imageId")
-    REFERENCES "serverpod_auth_core_profile_image"("id")
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_core_profile_image" table
---
-ALTER TABLE ONLY "serverpod_auth_core_profile_image"
-    ADD CONSTRAINT "serverpod_auth_core_profile_image_fk_0"
-    FOREIGN KEY("userProfileId")
-    REFERENCES "serverpod_auth_core_profile"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
---
--- Foreign relations for "serverpod_auth_core_session" table
---
-ALTER TABLE ONLY "serverpod_auth_core_session"
-    ADD CONSTRAINT "serverpod_auth_core_session_fk_0"
-    FOREIGN KEY("authUserId")
-    REFERENCES "serverpod_auth_core_user"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-
 
 --
 -- MIGRATION VERSION FOR skinaware
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('skinaware', '20260117135520909', now())
+    VALUES ('skinaware', '20260129111327077', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20260117135520909', "timestamp" = now();
+    DO UPDATE SET "version" = '20260129111327077', "timestamp" = now();
 
 --
 -- MIGRATION VERSION FOR serverpod
@@ -875,20 +692,12 @@ INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
     DO UPDATE SET "version" = '20251208110333922-v3-0-0', "timestamp" = now();
 
 --
--- MIGRATION VERSION FOR serverpod_auth_idp
+-- MIGRATION VERSION FOR serverpod_auth
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('serverpod_auth_idp', '20251208110420531-v3-0-0', now())
+    VALUES ('serverpod_auth', '20250825102351908-v3-0-0', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20251208110420531-v3-0-0', "timestamp" = now();
-
---
--- MIGRATION VERSION FOR serverpod_auth_core
---
-INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('serverpod_auth_core', '20251208110412389-v3-0-0', now())
-    ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20251208110412389-v3-0-0', "timestamp" = now();
+    DO UPDATE SET "version" = '20250825102351908-v3-0-0', "timestamp" = now();
 
 
 COMMIT;
