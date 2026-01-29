@@ -1,75 +1,74 @@
-# skinAware
+# Epidexa – AI-Based Skin Detection App
 
-This repository contains the skinAware project, organized as a multi-package workspace that includes a Server (Dart/Serverpod), a Flutter app, and a Dart client package.
+Epidexa is an AI-powered skin analysis platform designed to help users identify common skin conditions and receive basic skin-care guidance through a secure and easy-to-use mobile application.
 
-Below is a concise map of the important top-level folders and what they contain.
+The system consists of a Dart backend server, a shared client package, and a Flutter mobile application.
 
-## Top-level folders
+---
 
-- `skinAware_server/`
-  - Dart server implementation (Serverpod). Contains `bin/`, `lib/`, `config/` and server-side source.
-  - Important files:
-    - `bin/main.dart` — server entrypoint
-    - `pubspec.yaml` — server dependencies
-    - `config/*.yaml` — environment/config files (development, staging, production, test)
-  - Quick run (from this folder):
-    ```
-    dart pub get
-    dart run bin/main.dart
-    ```
+## 📁 Project Configuration
 
-- `skinAware_client/`
-  - A Dart package that provides client-side code (API clients, protocol classes) used by the Flutter app and other clients.
-  - Contains `lib/` and `pubspec.yaml`. Run `dart pub get` to fetch dependencies.
+Before running the project, download and configure the required environment files:
 
-- `skinAware_flutter/`
-  - Flutter application project. Contains `pubspec.yaml`, `android/`, `ios/`, and platform-specific code.
-  - Use the usual Flutter workflow to run or build it.
-  - Quick run (from this folder):
-    ```
-    flutter pub get
-    flutter run -d <device-id>
-    ```
+- 🔐 **Password Configuration**  
+  [Download password.yaml](https://drive.google.com/file/d/1oLVmdVW-oAC_JeDRsNCC7zie_Rsd8Rzg/view?usp=sharing)
 
-- `lib/`, `android/`, `ios/`, `web/`, `windows/`, `macos/`, `linux/`
-  - These folders are platform and app-level code for the Flutter app(s) in this workspace. `lib/` contains the app source (widgets, pages, main.dart).
-  - If you have multiple Flutter projects, check each `pubspec.yaml` to determine which app uses which platform folders.
 
-- `assets/`, `images/`, `fonts/`, `icons/`, `illustrations/`, `animations/`
-  - Media and resource files used by the Flutter app(s). Fonts are under `fonts/` and images under `images/`.
 
-- `build/`
-  - Generated build artifacts. Safe to ignore in source control and usually added to `.gitignore`.
+> Place these files in their respective configuration directories before starting the server.
 
-- `test/`
-  - Unit and widget tests. Run tests with `dart test` or `flutter test` in the relevant package.
+---
 
-- `migrations/`
-  - Database migration scripts (if present). Keep track of migration history here.
+## 📂 Project Structure
 
-## How the pieces relate
+The repository is organized into three main components:
 
-- The server (`skinAware_server`) exposes APIs that the client package (`skinAware_client`) can call. The Flutter app (`skinAware_flutter` and/or root `lib/`) consumes the client package and UI code.
-- Configuration for the server lives in `skinAware_server/config/*.yaml`.
+### skinAware_server/
+Backend service built with Serverpod (Dart).
 
-## Common tasks
+**Contains:**
+- `bin/main.dart` – Server entry point
+- `lib/` – Backend source code
+- `config/` – Environment configuration files
+- `pubspec.yaml` – Server dependencies
 
-- Run the server:
-  ```
-  cd skinAware_server
-  dart pub get
-  dart run bin/main.dart
-  ```
+---
 
-- Run the Flutter app (make sure Flutter SDK is installed):
-  ```
-  cd skinAware_flutter
-  flutter pub get
-  flutter run -d <device>
-  ```
+### skinAware_client/
+Shared Dart package providing API clients and protocol models.
 
-- Work with the client package:
-  ```
-  cd skinAware_client
-  dart pub get
-  ```
+**Contains:**
+- `lib/` – Client logic and models
+- `pubspec.yaml` – Package dependencies
+
+---
+
+### skinAware_flutter/
+Flutter mobile application for Android and iOS.
+
+**Contains:**
+- `android/` / `ios/` – Platform-specific files
+- `lib/` – Application source code
+- `pubspec.yaml` – App dependencies
+
+---
+
+## ⚙️ Installation & Setup
+
+### Prerequisites
+
+Ensure the following tools are installed:
+
+- Dart SDK
+- Flutter SDK
+- ServerPod Framework
+- Android Studio or Xcode
+- Git
+
+---
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/Klassic-Mak/epidexa.git
+cd epidexa

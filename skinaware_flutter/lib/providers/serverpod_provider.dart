@@ -18,6 +18,7 @@ String _computeDefaultServerUrl() {
   }
 
   try {
+    // please change this aspect to your IP Address if you're on a real device, for emulators, use 10.0.2.2:{PORT}
     if (Platform.isAndroid) {
       return 'http://192.168.43.152:$port/';
     }
@@ -36,8 +37,6 @@ final serverpodClientProvider = Provider<Client>((ref) {
   final serverUrl = _dartDefineServerUrl.isNotEmpty
       ? _dartDefineServerUrl
       : _computeDefaultServerUrl();
-
-  print('Serverpod URL: $serverUrl');
 
   final client = Client(serverUrl);
 

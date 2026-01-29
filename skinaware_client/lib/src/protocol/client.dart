@@ -21,6 +21,142 @@ import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i8;
 import 'protocol.dart' as _i9;
 
 /// {@category Endpoint}
+class EndpointGemini extends _i1.EndpointRef {
+  EndpointGemini(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'gemini';
+
+  /// ------------------------------------------------------------
+  /// 1) Initialize: just a health/test call
+  /// ------------------------------------------------------------
+  _i2.Future<bool> ping() => caller.callServerEndpoint<bool>(
+    'gemini',
+    'ping',
+    {},
+  );
+
+  /// ------------------------------------------------------------
+  /// 2) sendMessage (non-stream)
+  /// - historyJson is optional: JSON list of {role, content}
+  /// ------------------------------------------------------------
+  _i2.Future<String> sendMessage({
+    required String message,
+    String? historyJson,
+    required String userProfileContext,
+  }) => caller.callServerEndpoint<String>(
+    'gemini',
+    'sendMessage',
+    {
+      'message': message,
+      'historyJson': historyJson,
+      'userProfileContext': userProfileContext,
+    },
+  );
+
+  /// ------------------------------------------------------------
+  /// 3) streamMessage
+  /// ------------------------------------------------------------
+  _i2.Stream<String> streamMessage({
+    required String message,
+    String? historyJson,
+    required String userProfileContext,
+  }) => caller.callStreamingServerEndpoint<_i2.Stream<String>, String>(
+    'gemini',
+    'streamMessage',
+    {
+      'message': message,
+      'historyJson': historyJson,
+      'userProfileContext': userProfileContext,
+    },
+    {},
+  );
+
+  /// ------------------------------------------------------------
+  /// 4) validateImageBase64
+  /// Returns: String starting with "VALID: ..." or "INVALID: ..."
+  /// ------------------------------------------------------------
+  _i2.Future<String> validateImageBase64({
+    required String imageBase64,
+    required String userProfileContext,
+  }) => caller.callServerEndpoint<String>(
+    'gemini',
+    'validateImageBase64',
+    {
+      'imageBase64': imageBase64,
+      'userProfileContext': userProfileContext,
+    },
+  );
+
+  /// ------------------------------------------------------------
+  /// 5) analyzeImageBase64
+  /// ------------------------------------------------------------
+  _i2.Future<String> analyzeImageBase64({
+    required String imageBase64,
+    String? prompt,
+    required bool skipValidation,
+    required String userProfileContext,
+  }) => caller.callServerEndpoint<String>(
+    'gemini',
+    'analyzeImageBase64',
+    {
+      'imageBase64': imageBase64,
+      'prompt': prompt,
+      'skipValidation': skipValidation,
+      'userProfileContext': userProfileContext,
+    },
+  );
+
+  /// ------------------------------------------------------------
+  /// 6) sendMessageWithImageBase64
+  /// - validates image
+  /// - runs vision analysis
+  /// - combines with message
+  /// ------------------------------------------------------------
+  _i2.Future<String> sendMessageWithImageBase64({
+    required String message,
+    required String imageBase64,
+    required bool isVietnamese,
+    String? historyJson,
+    required String userProfileContext,
+  }) => caller.callServerEndpoint<String>(
+    'gemini',
+    'sendMessageWithImageBase64',
+    {
+      'message': message,
+      'imageBase64': imageBase64,
+      'isVietnamese': isVietnamese,
+      'historyJson': historyJson,
+      'userProfileContext': userProfileContext,
+    },
+  );
+
+  /// ------------------------------------------------------------
+  /// 7) performFullAnalysisBase64 -> returns JSON string
+  /// (so you can parse into your AnalysisResult on Flutter)
+  /// ------------------------------------------------------------
+  _i2.Future<String> performFullAnalysisBase64({
+    required String imageBase64,
+    String? symptoms,
+    String? duration,
+    String? previousTreatments,
+    required bool isVietnamese,
+    required String userProfileContext,
+  }) => caller.callServerEndpoint<String>(
+    'gemini',
+    'performFullAnalysisBase64',
+    {
+      'imageBase64': imageBase64,
+      'symptoms': symptoms,
+      'duration': duration,
+      'previousTreatments': previousTreatments,
+      'isVietnamese': isVietnamese,
+      'userProfileContext': userProfileContext,
+    },
+  );
+}
+
+/// {@category Endpoint}
 class EndpointProfile extends _i1.EndpointRef {
   EndpointProfile(_i1.EndpointCaller caller) : super(caller);
 
@@ -265,10 +401,13 @@ class Client extends _i1.ServerpodClientShared {
          disconnectStreamsOnLostInternetConnection:
              disconnectStreamsOnLostInternetConnection,
        ) {
+    gemini = EndpointGemini(this);
     profile = EndpointProfile(this);
     user = EndpointUser(this);
     modules = Modules(this);
   }
+
+  late final EndpointGemini gemini;
 
   late final EndpointProfile profile;
 
@@ -278,6 +417,7 @@ class Client extends _i1.ServerpodClientShared {
 
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
+    'gemini': gemini,
     'profile': profile,
     'user': user,
   };

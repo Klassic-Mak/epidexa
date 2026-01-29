@@ -22,6 +22,7 @@ abstract class UserProfile implements _i1.SerializableModel {
     this.oiliness,
     this.skinConcerns,
     this.primaryConcern,
+    this.recommneddation,
     this.knownAllergies,
     this.currentMedications,
     this.skinConditionHistory,
@@ -45,6 +46,7 @@ abstract class UserProfile implements _i1.SerializableModel {
     String? oiliness,
     String? skinConcerns,
     String? primaryConcern,
+    String? recommneddation,
     String? knownAllergies,
     String? currentMedications,
     String? skinConditionHistory,
@@ -73,6 +75,7 @@ abstract class UserProfile implements _i1.SerializableModel {
       oiliness: jsonSerialization['oiliness'] as String?,
       skinConcerns: jsonSerialization['skinConcerns'] as String?,
       primaryConcern: jsonSerialization['primaryConcern'] as String?,
+      recommneddation: jsonSerialization['recommneddation'] as String?,
       knownAllergies: jsonSerialization['knownAllergies'] as String?,
       currentMedications: jsonSerialization['currentMedications'] as String?,
       skinConditionHistory:
@@ -111,6 +114,8 @@ abstract class UserProfile implements _i1.SerializableModel {
 
   String? primaryConcern;
 
+  String? recommneddation;
+
   String? knownAllergies;
 
   String? currentMedications;
@@ -148,6 +153,7 @@ abstract class UserProfile implements _i1.SerializableModel {
     String? oiliness,
     String? skinConcerns,
     String? primaryConcern,
+    String? recommneddation,
     String? knownAllergies,
     String? currentMedications,
     String? skinConditionHistory,
@@ -173,6 +179,7 @@ abstract class UserProfile implements _i1.SerializableModel {
       if (oiliness != null) 'oiliness': oiliness,
       if (skinConcerns != null) 'skinConcerns': skinConcerns,
       if (primaryConcern != null) 'primaryConcern': primaryConcern,
+      if (recommneddation != null) 'recommneddation': recommneddation,
       if (knownAllergies != null) 'knownAllergies': knownAllergies,
       if (currentMedications != null) 'currentMedications': currentMedications,
       if (skinConditionHistory != null)
@@ -207,6 +214,7 @@ class _UserProfileImpl extends UserProfile {
     String? oiliness,
     String? skinConcerns,
     String? primaryConcern,
+    String? recommneddation,
     String? knownAllergies,
     String? currentMedications,
     String? skinConditionHistory,
@@ -228,6 +236,7 @@ class _UserProfileImpl extends UserProfile {
          oiliness: oiliness,
          skinConcerns: skinConcerns,
          primaryConcern: primaryConcern,
+         recommneddation: recommneddation,
          knownAllergies: knownAllergies,
          currentMedications: currentMedications,
          skinConditionHistory: skinConditionHistory,
@@ -255,6 +264,7 @@ class _UserProfileImpl extends UserProfile {
     Object? oiliness = _Undefined,
     Object? skinConcerns = _Undefined,
     Object? primaryConcern = _Undefined,
+    Object? recommneddation = _Undefined,
     Object? knownAllergies = _Undefined,
     Object? currentMedications = _Undefined,
     Object? skinConditionHistory = _Undefined,
@@ -281,6 +291,9 @@ class _UserProfileImpl extends UserProfile {
       primaryConcern: primaryConcern is String?
           ? primaryConcern
           : this.primaryConcern,
+      recommneddation: recommneddation is String?
+          ? recommneddation
+          : this.recommneddation,
       knownAllergies: knownAllergies is String?
           ? knownAllergies
           : this.knownAllergies,

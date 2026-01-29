@@ -1,14 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skinaware_client/skinaware_client.dart'
+    as sp; // ✅ CHANGE to your generated client package
+import 'package:skinaware_flutter/providers/serverpod_provider.dart';
+
 import '../services/ai/gemini_service.dart';
 import 'onboarding_data_provider.dart';
 
-// Gemini service provider (via AIML API)
+/// ------------------------------
+/// 2) Gemini service provider (Serverpod-backed)
+/// ------------------------------
 final geminiServiceProvider = Provider<GeminiService>((ref) {
-  final service = GeminiService(
-    // API key is loaded from .env file
-    baseUrl: 'https://api.aimlapi.com/v1/chat/completions',
-    model: 'google/gemini-2.5-flash',
-  );
+  final client = ref.watch(serverpodClientProvider);
+
+  final service = GeminiService(client: client);
 
   // Load user profile for personalization
   final onboardingData = ref.watch(onboardingDataProvider);
@@ -23,44 +27,11 @@ final geminiServiceProvider = Provider<GeminiService>((ref) {
 // Legacy alias for backwards compatibility
 final ollamaServiceProvider = geminiServiceProvider;
 
-// TODO: Uncomment when app localization is implemented
-// Supported languages enum
-// enum AppLanguage {
-//   english,
-//   vietnamese,
-// }
-
-// Language provider - can be updated based on app locale
-// final appLanguageProvider = StateProvider<AppLanguage>((ref) {
-//   // Default to English, will be updated by app based on locale
-//   return AppLanguage.english;
-// });
-
-// Helper extension
-// extension AppLanguageExtension on AppLanguage {
-//   bool get isVietnamese => this == AppLanguage.vietnamese;
-//
-//   String get code {
-//     switch (this) {
-//       case AppLanguage.vietnamese:
-//         return 'vi';
-//       case AppLanguage.english:
-//         return 'en';
-//     }
-//   }
-//
-//   static AppLanguage fromLocale(String localeCode) {
-//     if (localeCode.startsWith('vi')) {
-//       return AppLanguage.vietnamese;
-//     }
-//     return AppLanguage.english;
-//   }
-// }
-
-// Default language setting (change to true for Vietnamese)
 const bool _defaultIsVietnamese = false;
 
-// Chat state
+/// ------------------------------
+/// Chat state
+/// ------------------------------
 class ChatState {
   final List<ChatMessage> messages;
   final bool isLoading;
@@ -93,7 +64,9 @@ class ChatState {
   }
 }
 
-// Chat notifier for managing chat state (Riverpod 3.x style)
+/// ------------------------------
+/// Chat notifier (unchanged logic)
+/// ------------------------------
 class ChatNotifier extends Notifier<ChatState> {
   late GeminiService _geminiService;
 
@@ -103,7 +76,6 @@ class ChatNotifier extends Notifier<ChatState> {
     return const ChatState();
   }
 
-  // Get current language setting
   bool get _isVietnamese => _defaultIsVietnamese;
 
   Future<void> initialize() async {
@@ -145,16 +117,13 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<void> sendMessage(String message) async {
     if (message.trim().isEmpty) return;
+
     if (!state.isInitialized) {
       await initialize();
       if (!state.isInitialized) return;
     }
 
-    // Add user message immediately
-    final userMessage = ChatMessage(
-      role: 'user',
-      content: message,
-    );
+    final userMessage = ChatMessage(role: 'user', content: message);
 
     state = state.copyWith(
       messages: [...state.messages, userMessage],
@@ -166,16 +135,13 @@ class ChatNotifier extends Notifier<ChatState> {
       String response;
 
       if (state.currentImagePath != null) {
-        // Send with image (with language preference)
         response = await _geminiService.sendMessageWithImage(
           message,
           state.currentImagePath!,
           isVietnamese: _isVietnamese,
         );
-        // Clear image after sending
         state = state.copyWith(currentImagePath: null);
       } else {
-        // Text only
         response = await _geminiService.sendMessage(message);
       }
 
@@ -223,10 +189,10 @@ class ChatNotifier extends Notifier<ChatState> {
         isVietnamese: _isVietnamese,
       );
 
-      // Add analysis to chat history
       final userMessage = ChatMessage(
         role: 'user',
-        content: symptoms ??
+        content:
+            symptoms ??
             (_isVietnamese ? 'Phân tích ảnh da' : 'Analyze skin image'),
         imageBase64: imagePath,
       );
@@ -269,12 +235,13 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 }
 
-// Chat provider
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(() {
   return ChatNotifier();
 });
 
-// Analysis state for scan screen
+/// ------------------------------
+/// Analysis state (unchanged logic)
+/// ------------------------------
 class AnalysisState {
   final bool isAnalyzing;
   final AnalysisResult? result;
@@ -312,7 +279,6 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     return const AnalysisState();
   }
 
-  // Get current language setting
   bool get _isVietnamese => _defaultIsVietnamese;
 
   void addImage(String imagePath) {
@@ -347,12 +313,10 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     state = state.copyWith(isAnalyzing: true, error: null);
 
     try {
-      // Initialize service if needed
       if (!_geminiService.isInitialized) {
         await _geminiService.initialize();
       }
 
-      // Analyze first image (can be extended for multiple images)
       final result = await _geminiService.performFullAnalysis(
         imagePath: state.selectedImages.first,
         symptoms: symptoms,
@@ -380,7 +344,6 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
   }
 }
 
-// Analysis provider for scan screen
 final analysisProvider = NotifierProvider<AnalysisNotifier, AnalysisState>(() {
   return AnalysisNotifier();
 });

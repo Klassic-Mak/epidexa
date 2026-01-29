@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, dead_code_on_catch_subtype
 
 import 'dart:async';
 import 'dart:io';
@@ -34,19 +34,17 @@ class AuthServices {
       final client = ref.read(serverpodClientProvider);
 
       // ✅ Now returns AuthResponse (typed)
-      final AuthResponse res = await client.user
-          .register(
-            email: email,
-            password: password,
-            phone: phone,
-            age: age,
-            gender: gender,
-            name: fullName,
-            role: role,
-            skinType: skinType,
-            profilePhoto: profilePhoto,
-          )
-          .timeout(const Duration(seconds: 25));
+      final AuthResponse res = await client.user.register(
+        email: email,
+        password: password,
+        phone: phone,
+        age: age,
+        gender: gender,
+        name: fullName,
+        role: role,
+        skinType: skinType,
+        profilePhoto: profilePhoto,
+      );
 
       _closeLoaderSafely(context);
 
@@ -144,10 +142,28 @@ class AuthServices {
     } on http.ClientException catch (e) {
       _closeLoaderSafely(context);
       showTopToast(context, "Network error: ${e.message}", isSuccess: false);
+    } on ServerpodClientException catch (e) {
+      _closeLoaderSafely(context);
+      showTopToast(
+        context,
+        "Server Error. Make sure your connected",
+        isSuccess: false,
+      );
+    } on ServerpodClientException catch (e) {
+      _closeLoaderSafely(context);
+      showTopToast(
+        context,
+        "Server Error. Make sure your connected",
+        isSuccess: false,
+      );
+    } on ServerpodClientBadRequest catch (e) {
+      _closeLoaderSafely(context);
+      showTopToast(
+        context,
+        "Bad Request. Make sure your request is valid",
+        isSuccess: false,
+      );
     } catch (e, st) {
-      print('user login error: ${e.runtimeType}');
-      print('exception: $e');
-      print('stacktrace: $st');
       _closeLoaderSafely(context);
       showTopToast(context, "Unexpected error: $e", isSuccess: false);
     }

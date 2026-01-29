@@ -6,9 +6,8 @@ import 'package:http/http.dart' as http;
 import '../cloudinary_service.dart';
 import 'dermatology_prompts.dart';
 
-/// Message model for chat history
 class ChatMessage {
-  final String role; // 'user', 'assistant', 'system'
+  final String role;
   final String content;
   final String? imageBase64;
   final DateTime timestamp;
