@@ -5,7 +5,7 @@ import 'onboarding_data_provider.dart';
 // Gemini service provider (via AIML API)
 final geminiServiceProvider = Provider<GeminiService>((ref) {
   final service = GeminiService(
-    apiKey: '34bc1a39049b47c7a5f88692895ef25d',
+    // API key is loaded from .env file
     baseUrl: 'https://api.aimlapi.com/v1/chat/completions',
     model: 'google/gemini-2.5-flash',
   );

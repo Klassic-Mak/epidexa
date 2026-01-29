@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dermatology_prompts.dart';
 
@@ -190,11 +191,11 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
 ''';
 
   GeminiService({
-    this.apiKey = '34bc1a39049b47c7a5f88692895ef25d',
+    String? apiKey,
     this.baseUrl = 'https://api.aimlapi.com/v1/chat/completions',
     this.model = 'google/gemini-2.5-flash',
     this.timeout = const Duration(seconds: 120),
-  });
+  }) : apiKey = apiKey ?? dotenv.env['AIML_API_KEY'] ?? '';
 
   /// Initialize the service
   Future<bool> initialize() async {

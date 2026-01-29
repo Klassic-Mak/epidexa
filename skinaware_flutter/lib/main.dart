@@ -2,6 +2,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skinaware_client/skinaware_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/routes/router.dart';
 import 'package:skinaware_flutter/theme/theme.dart';
@@ -18,6 +19,9 @@ late String serverUrl;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
 
   // const serverUrlFromEnv = String.fromEnvironment('SERVER_URL');
 
