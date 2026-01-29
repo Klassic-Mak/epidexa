@@ -29,6 +29,16 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Required for TFLite - don't compress model files
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
+    }
+
+    // Prevent compression of TFLite model files
+    androidResources {
+        noCompress += listOf("tflite")
     }
 
     buildTypes {

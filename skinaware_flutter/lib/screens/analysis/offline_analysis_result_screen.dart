@@ -1,26 +1,24 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
-import '../../services/ai/gemini_service.dart';
+import '../../services/tflite_inference_service.dart';
 import '../../routes/route_constants.dart';
 
-class AnalysisResultScreen extends ConsumerWidget {
+/// Screen to display offline analysis results with detailed disease guidance
+class OfflineAnalysisResultScreen extends ConsumerWidget {
   static const primaryColor = Color(0xFF0284C7);
 
   final String imagePath;
-  final AnalysisResult? result;
+  final OfflineAnalysisResult result;
 
-  const AnalysisResultScreen({
+  const OfflineAnalysisResultScreen({
     super.key,
     required this.imagePath,
-    this.result,
+    required this.result,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasResult = result != null;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -36,7 +34,7 @@ class AnalysisResultScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Result',
+          'Offline Analysis Result',
           style: TextStyle(
             color: Color(0xFF0F172A),
             fontSize: 16,
@@ -44,15 +42,30 @@ class AnalysisResultScreen extends ConsumerWidget {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined, color: Color(0xFF0F172A)),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Share feature coming soon')),
-              );
-            },
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFFDE68A)),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.offline_bolt, size: 16, color: Color(0xFFD97706)),
+                SizedBox(width: 4),
+                Text(
+                  'Offline',
+                  style: TextStyle(
+                    color: Color(0xFFD97706),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 6),
         ],
       ),
       body: SingleChildScrollView(
@@ -62,22 +75,31 @@ class AnalysisResultScreen extends ConsumerWidget {
           children: [
             _ImageHero(path: imagePath),
             const SizedBox(height: 14),
-            if (!hasResult) ...[
-              const _LoadingCard(),
+            _DiagnosisCard(
+              diagnosis: result.disease,
+              confidence: result.confidence,
+            ),
+            const SizedBox(height: 14),
+            _DescriptionCard(description: result.guidance.description),
+            const SizedBox(height: 14),
+            _CausesCard(causes: result.guidance.causes),
+            const SizedBox(height: 14),
+            _SymptomsCard(symptoms: result.guidance.symptoms),
+            const SizedBox(height: 14),
+            _RecommendationsCard(text: result.guidance.recommendations),
+            const SizedBox(height: 14),
+            _HomeRemediesCard(remedies: result.guidance.homeRemedies),
+            const SizedBox(height: 14),
+            _WhenToSeeDoctorCard(text: result.guidance.whenToSeeDoctor),
+            const SizedBox(height: 14),
+            if (result.guidance.requiresUrgentCare) ...[
+              _UrgentCard(),
               const SizedBox(height: 14),
-            ] else ...[
-              _DiagnosisCard(
-                diagnosis: result!.diagnosis,
-                confidence: result!.confidence,
-              ),
-              const SizedBox(height: 14),
-              _RecommendationsCard(text: result!.recommendations),
-              const SizedBox(height: 14),
-              if (result!.requiresUrgentCare) _UrgentCard(),
-              if (result!.requiresUrgentCare) const SizedBox(height: 14),
             ],
+            _TopPredictionsCard(predictions: result.allPredictions),
+            const SizedBox(height: 14),
             _Actions(
-              onAskMore: () => Navigator.pushNamed(context, chatRoute),
+              onChat: () => Navigator.pushNamed(context, chatRoute),
               onNewScan: () => Navigator.pop(context),
             ),
             const SizedBox(height: 10),
@@ -99,7 +121,7 @@ class _ImageHero extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: Container(
-        height: 280,
+        height: 240,
         decoration: BoxDecoration(
           color: const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(22),
@@ -137,7 +159,7 @@ class _ImageHero extends StatelessWidget {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Captured image',
+                          'Analyzed image',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -152,44 +174,6 @@ class _ImageHero extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _LoadingCard extends StatelessWidget {
-  const _LoadingCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: const Row(
-        children: [
-          SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.2,
-              color: AnalysisResultScreen.primaryColor,
-            ),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Dr. Epi is analyzing…',
-              style: TextStyle(
-                color: Color(0xFF0F172A),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -233,15 +217,15 @@ class _DiagnosisCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AnalysisResultScreen.primaryColor.withOpacity(0.10),
+                  color: OfflineAnalysisResultScreen.primaryColor.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: AnalysisResultScreen.primaryColor.withOpacity(0.18),
+                    color: OfflineAnalysisResultScreen.primaryColor.withOpacity(0.18),
                   ),
                 ),
                 child: const Icon(
                   Icons.analytics_rounded,
-                  color: AnalysisResultScreen.primaryColor,
+                  color: OfflineAnalysisResultScreen.primaryColor,
                   size: 20,
                 ),
               ),
@@ -269,7 +253,7 @@ class _DiagnosisCard extends StatelessWidget {
             diagnosis,
             style: const TextStyle(
               color: Color(0xFF0F172A),
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
               height: 1.25,
             ),
@@ -387,6 +371,103 @@ class _Pill extends StatelessWidget {
   }
 }
 
+class _DescriptionCard extends StatelessWidget {
+  final String description;
+
+  const _DescriptionCard({required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    return _InfoCard(
+      icon: Icons.info_outline_rounded,
+      title: 'About this condition',
+      child: Text(
+        description,
+        style: const TextStyle(
+          color: Color(0xFF0F172A),
+          fontSize: 14.6,
+          height: 1.55,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _CausesCard extends StatelessWidget {
+  final List<String> causes;
+
+  const _CausesCard({required this.causes});
+
+  @override
+  Widget build(BuildContext context) {
+    return _InfoCard(
+      icon: Icons.science_outlined,
+      title: 'Common causes',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: causes.map((cause) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('•  ', style: TextStyle(color: Color(0xFF0284C7), fontWeight: FontWeight.w900)),
+              Expanded(
+                child: Text(
+                  cause,
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 14,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )).toList(),
+      ),
+    );
+  }
+}
+
+class _SymptomsCard extends StatelessWidget {
+  final List<String> symptoms;
+
+  const _SymptomsCard({required this.symptoms});
+
+  @override
+  Widget build(BuildContext context) {
+    return _InfoCard(
+      icon: Icons.healing_outlined,
+      title: 'Typical symptoms',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: symptoms.map((symptom) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('•  ', style: TextStyle(color: Color(0xFF0284C7), fontWeight: FontWeight.w900)),
+              Expanded(
+                child: Text(
+                  symptom,
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 14,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )).toList(),
+      ),
+    );
+  }
+}
+
 class _RecommendationsCard extends StatelessWidget {
   final String text;
 
@@ -394,6 +475,102 @@ class _RecommendationsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _InfoCard(
+      icon: Icons.lightbulb_rounded,
+      title: 'Recommendations',
+      child: SelectableText(
+        text,
+        style: const TextStyle(
+          color: Color(0xFF0F172A),
+          fontSize: 14.6,
+          height: 1.55,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeRemediesCard extends StatelessWidget {
+  final List<String> remedies;
+
+  const _HomeRemediesCard({required this.remedies});
+
+  @override
+  Widget build(BuildContext context) {
+    return _InfoCard(
+      icon: Icons.home_outlined,
+      title: 'Home remedies',
+      iconColor: const Color(0xFF16A34A),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: remedies.map((remedy) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.check_circle, size: 18, color: Color(0xFF16A34A)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  remedy,
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 14,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )).toList(),
+      ),
+    );
+  }
+}
+
+class _WhenToSeeDoctorCard extends StatelessWidget {
+  final String text;
+
+  const _WhenToSeeDoctorCard({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return _InfoCard(
+      icon: Icons.medical_services_outlined,
+      title: 'When to see a doctor',
+      iconColor: const Color(0xFFDC2626),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFF0F172A),
+          fontSize: 14.6,
+          height: 1.55,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final Widget child;
+  final Color? iconColor;
+
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.child,
+    this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = iconColor ?? OfflineAnalysisResultScreen.primaryColor;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -417,23 +594,17 @@ class _RecommendationsCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AnalysisResultScreen.primaryColor.withOpacity(0.10),
+                  color: color.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: AnalysisResultScreen.primaryColor.withOpacity(0.18),
-                  ),
+                  border: Border.all(color: color.withOpacity(0.18)),
                 ),
-                child: const Icon(
-                  Icons.lightbulb_rounded,
-                  color: AnalysisResultScreen.primaryColor,
-                  size: 20,
-                ),
+                child: Icon(icon, color: color, size: 20),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Recommendations',
-                  style: TextStyle(
+                  title,
+                  style: const TextStyle(
                     color: Color(0xFF0F172A),
                     fontWeight: FontWeight.w900,
                     fontSize: 15.5,
@@ -443,75 +614,72 @@ class _RecommendationsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          MarkdownBody(
-            data: text,
-            selectable: true,
-            styleSheet: MarkdownStyleSheet(
-              p: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 14.6,
-                height: 1.55,
-                fontWeight: FontWeight.w500,
-              ),
-              strong: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 14.6,
-                height: 1.55,
-                fontWeight: FontWeight.w700,
-              ),
-              em: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 14.6,
-                height: 1.55,
-                fontWeight: FontWeight.w500,
-                fontStyle: FontStyle.italic,
-              ),
-              h1: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-              ),
-              h2: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-              h3: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-              listBullet: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 14.6,
-                fontWeight: FontWeight.w600,
-              ),
-              code: TextStyle(
-                color: const Color(0xFF0F172A),
-                backgroundColor: const Color(0xFFE2E8F0),
-                fontSize: 13,
-                fontFamily: 'monospace',
-              ),
-              codeblockDecoration: BoxDecoration(
-                color: const Color(0xFFE2E8F0),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              blockquote: const TextStyle(
-                color: Color(0xFF64748B),
-                fontSize: 14.6,
-                fontStyle: FontStyle.italic,
-              ),
-              blockquoteDecoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    color: AnalysisResultScreen.primaryColor,
-                    width: 3,
-                  ),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _TopPredictionsCard extends StatelessWidget {
+  final List<PredictionEntry> predictions;
+
+  const _TopPredictionsCard({required this.predictions});
+
+  @override
+  Widget build(BuildContext context) {
+    if (predictions.length <= 1) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.list_alt_rounded, color: Color(0xFF64748B), size: 20),
+              SizedBox(width: 10),
+              Text(
+                'Other possibilities',
+                style: TextStyle(
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
                 ),
               ),
-              blockquotePadding: const EdgeInsets.only(left: 12),
-            ),
+            ],
           ),
+          const SizedBox(height: 12),
+          ...predictions.skip(1).map((p) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    p.disease,
+                    style: const TextStyle(
+                      color: Color(0xFF475569),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${(p.confidence * 100).toStringAsFixed(1)}%',
+                  style: const TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          )),
         ],
       ),
     );
@@ -559,7 +727,7 @@ class _UrgentCard extends StatelessWidget {
                 ),
                 SizedBox(height: 6),
                 Text(
-                  'This result suggests you should see a dermatologist as soon as possible.',
+                  'This condition may require urgent medical attention. Please consult a dermatologist as soon as possible.',
                   style: TextStyle(
                     color: Color(0xFF991B1B),
                     fontWeight: FontWeight.w600,
@@ -576,11 +744,11 @@ class _UrgentCard extends StatelessWidget {
 }
 
 class _Actions extends StatelessWidget {
-  final VoidCallback onAskMore;
+  final VoidCallback onChat;
   final VoidCallback onNewScan;
 
   const _Actions({
-    required this.onAskMore,
+    required this.onChat,
     required this.onNewScan,
   });
 
@@ -591,9 +759,9 @@ class _Actions extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: onAskMore,
+            onPressed: onChat,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AnalysisResultScreen.primaryColor,
+              backgroundColor: OfflineAnalysisResultScreen.primaryColor,
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -607,7 +775,7 @@ class _Actions extends StatelessWidget {
                 Icon(Icons.chat_bubble_outline_rounded, size: 20),
                 SizedBox(width: 10),
                 Text(
-                  'Ask Dr. Epi more',
+                  'Ask Dr. Epi for more details',
                   style: TextStyle(
                     fontSize: 15.5,
                     fontWeight: FontWeight.w900,
@@ -659,20 +827,20 @@ class _FooterNote extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: const Color(0xFFFEF3C7),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: const Color(0xFFFDE68A)),
       ),
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline_rounded, color: Color(0xFF64748B), size: 18),
+          Icon(Icons.offline_bolt, color: Color(0xFFD97706), size: 18),
           SizedBox(width: 10),
           Expanded(
             child: Text(
-              'This is an AI-assisted suggestion and not a medical diagnosis. If symptoms worsen or you feel unwell, please seek professional care.',
+              'This is an offline AI analysis. For more accurate results and detailed advice, use online mode when connected. This is not a medical diagnosis.',
               style: TextStyle(
-                color: Color(0xFF475569),
+                color: Color(0xFF92400E),
                 fontWeight: FontWeight.w600,
                 height: 1.35,
                 fontSize: 12.8,

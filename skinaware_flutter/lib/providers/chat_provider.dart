@@ -1,14 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/ai/ollama_service.dart';
+import '../services/ai/gemini_service.dart';
+import 'onboarding_data_provider.dart';
 
-// Ollama service provider
-final ollamaServiceProvider = Provider<OllamaService>((ref) {
-  return OllamaService(
-    baseUrl: 'http://118.70.222.145:11434',
-    visionModel: 'rohithbojja/llava-med-v1.6:latest',
-    textModel: 'charlestang06/openbiollm:latest',
+// Gemini service provider (via AIML API)
+final geminiServiceProvider = Provider<GeminiService>((ref) {
+  final service = GeminiService(
+    // API key is loaded from .env file
+    baseUrl: 'https://api.aimlapi.com/v1/chat/completions',
+    model: 'google/gemini-2.5-flash',
   );
+
+  // Load user profile for personalization
+  final onboardingData = ref.watch(onboardingDataProvider);
+  final profilePrompt = onboardingData.toPersonalizationPrompt();
+  if (profilePrompt.isNotEmpty) {
+    service.setUserProfile(profilePrompt);
+  }
+
+  return service;
 });
+
+// Legacy alias for backwards compatibility
+final ollamaServiceProvider = geminiServiceProvider;
 
 // TODO: Uncomment when app localization is implemented
 // Supported languages enum
@@ -82,11 +95,11 @@ class ChatState {
 
 // Chat notifier for managing chat state (Riverpod 3.x style)
 class ChatNotifier extends Notifier<ChatState> {
-  late OllamaService _ollamaService;
+  late GeminiService _geminiService;
 
   @override
   ChatState build() {
-    _ollamaService = ref.watch(ollamaServiceProvider);
+    _geminiService = ref.watch(geminiServiceProvider);
     return const ChatState();
   }
 
@@ -99,7 +112,15 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final success = await _ollamaService.initialize();
+      // Load user profile for personalization
+      await ref.read(onboardingDataProvider.notifier).loadFromPrefs();
+      final onboardingData = ref.read(onboardingDataProvider);
+      final profilePrompt = onboardingData.toPersonalizationPrompt();
+      if (profilePrompt.isNotEmpty) {
+        _geminiService.setUserProfile(profilePrompt);
+      }
+
+      final success = await _geminiService.initialize();
       if (success) {
         state = state.copyWith(
           isInitialized: true,
@@ -146,7 +167,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
       if (state.currentImagePath != null) {
         // Send with image (with language preference)
-        response = await _ollamaService.sendMessageWithImage(
+        response = await _geminiService.sendMessageWithImage(
           message,
           state.currentImagePath!,
           isVietnamese: _isVietnamese,
@@ -155,7 +176,7 @@ class ChatNotifier extends Notifier<ChatState> {
         state = state.copyWith(currentImagePath: null);
       } else {
         // Text only
-        response = await _ollamaService.sendMessage(message);
+        response = await _geminiService.sendMessage(message);
       }
 
       final assistantMessage = ChatMessage(
@@ -194,7 +215,7 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final result = await _ollamaService.performFullAnalysis(
+      final result = await _geminiService.performFullAnalysis(
         imagePath: imagePath,
         symptoms: symptoms,
         duration: duration,
@@ -235,7 +256,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   void clearChat() {
-    _ollamaService.clearHistory();
+    _geminiService.clearHistory();
     state = state.copyWith(
       messages: [],
       currentImagePath: null,
@@ -283,11 +304,11 @@ class AnalysisState {
 }
 
 class AnalysisNotifier extends Notifier<AnalysisState> {
-  late OllamaService _ollamaService;
+  late GeminiService _geminiService;
 
   @override
   AnalysisState build() {
-    _ollamaService = ref.watch(ollamaServiceProvider);
+    _geminiService = ref.watch(geminiServiceProvider);
     return const AnalysisState();
   }
 
@@ -327,12 +348,12 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
 
     try {
       // Initialize service if needed
-      if (!_ollamaService.isInitialized) {
-        await _ollamaService.initialize();
+      if (!_geminiService.isInitialized) {
+        await _geminiService.initialize();
       }
 
       // Analyze first image (can be extended for multiple images)
-      final result = await _ollamaService.performFullAnalysis(
+      final result = await _geminiService.performFullAnalysis(
         imagePath: state.selectedImages.first,
         symptoms: symptoms,
         duration: duration,

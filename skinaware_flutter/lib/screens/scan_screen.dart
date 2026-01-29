@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/chat_provider.dart';
+import '../providers/offline_analysis_provider.dart';
 import '../routes/route_constants.dart';
 
 class ScanScreen extends ConsumerStatefulWidget {
@@ -19,6 +20,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   final List<String> selectedImages = [];
 
   bool _isAnalyzing = false;
+  bool _useOfflineMode = false;
 
   Future<void> _takePhoto() async {
     final XFile? image = await _imagePicker.pickImage(
@@ -50,6 +52,14 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
 
     setState(() => _isAnalyzing = true);
 
+    if (_useOfflineMode) {
+      await _analyzeOffline();
+    } else {
+      await _analyzeOnline();
+    }
+  }
+
+  Future<void> _analyzeOnline() async {
     try {
       final result = await ref
           .read(analysisProvider.notifier)
@@ -81,6 +91,47 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     }
   }
 
+  Future<void> _analyzeOffline() async {
+    try {
+      // Add images to offline provider
+      ref.read(offlineAnalysisProvider.notifier).clearImages();
+      for (final path in selectedImages) {
+        ref.read(offlineAnalysisProvider.notifier).addImage(path);
+      }
+
+      // Run offline analysis
+      final result = await ref
+          .read(offlineAnalysisProvider.notifier)
+          .analyzeImageOffline();
+
+      if (!mounted) return;
+
+      setState(() => _isAnalyzing = false);
+
+      if (result != null) {
+        Navigator.pushNamed(
+          context,
+          offlineAnalysisResultRoute,
+          arguments: {
+            'imagePath': selectedImages.first,
+            'result': result,
+          },
+        );
+      } else {
+        final error = ref.read(offlineAnalysisProvider).error;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error ?? 'Offline analysis failed')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isAnalyzing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Offline analysis error: $e')),
+      );
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -95,7 +146,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   @override
   Widget build(BuildContext context) {
     final analysisState = ref.watch(analysisProvider);
-    final overlay = _isAnalyzing || analysisState.isAnalyzing;
+    final offlineState = ref.watch(offlineAnalysisProvider);
+    final overlay = _isAnalyzing || analysisState.isAnalyzing || offlineState.isAnalyzing;
 
     return Scaffold(
       body: Stack(
@@ -109,6 +161,12 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 _HeroCard(
                   primaryColor: primaryColor,
                   onLearnTipsTap: () => _scrollToTips(context),
+                ),
+                const SizedBox(height: 14),
+                _OfflineModeCard(
+                  isOffline: _useOfflineMode,
+                  primaryColor: primaryColor,
+                  onToggle: (value) => setState(() => _useOfflineMode = value),
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -156,6 +214,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                     count: selectedImages.length,
                     primaryColor: primaryColor,
                     enabled: !overlay,
+                    isOffline: _useOfflineMode,
                     onTap: () {
                       ref.read(analysisProvider.notifier).clearImages();
                       for (final p in selectedImages) {
@@ -179,7 +238,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
               ],
             ),
           ),
-          if (overlay) const _AnalyzingOverlay(),
+          if (overlay) _AnalyzingOverlay(isOffline: _useOfflineMode),
         ],
       ),
     );
@@ -189,6 +248,296 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Tip: Keep the area centered and well-lit.'),
+      ),
+    );
+  }
+}
+
+class _OfflineModeCard extends StatelessWidget {
+  final bool isOffline;
+  final Color primaryColor;
+  final ValueChanged<bool> onToggle;
+
+  const _OfflineModeCard({
+    required this.isOffline,
+    required this.primaryColor,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Title
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.settings_rounded, size: 18, color: Color(0xFF64748B)),
+              SizedBox(width: 8),
+              Text(
+                'Analysis Mode',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Segmented Control
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                // Online option (left)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onToggle(false),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: !isOffline ? primaryColor : Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: !isOffline
+                            ? [
+                                BoxShadow(
+                                  color: primaryColor.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.cloud,
+                            size: 18,
+                            color: !isOffline ? Colors.white : const Color(0xFF64748B),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Online',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: !isOffline ? Colors.white : const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Offline option (right)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onToggle(true),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isOffline ? const Color(0xFFD97706) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: isOffline
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFFD97706).withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.offline_bolt,
+                            size: 18,
+                            color: isOffline ? Colors.white : const Color(0xFF64748B),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Offline',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: isOffline ? Colors.white : const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Current mode description
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isOffline
+                  ? const Color(0xFFFEF3C7)
+                  : primaryColor.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isOffline
+                    ? const Color(0xFFFDE68A)
+                    : primaryColor.withOpacity(0.2),
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: isOffline
+                            ? const Color(0xFFD97706).withOpacity(0.15)
+                            : primaryColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        isOffline ? Icons.offline_bolt : Icons.cloud,
+                        size: 18,
+                        color: isOffline ? const Color(0xFFD97706) : primaryColor,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isOffline ? 'Offline Mode Active' : 'Online Mode Active',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: isOffline
+                                  ? const Color(0xFF92400E)
+                                  : const Color(0xFF0F172A),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isOffline
+                                ? 'Fast, on-device analysis'
+                                : 'Detailed AI analysis with Dr. Epi',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: isOffline
+                                  ? const Color(0xFFB45309)
+                                  : const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Features list
+                Row(
+                  children: [
+                    _ModeFeature(
+                      icon: Icons.speed,
+                      label: isOffline ? 'Instant' : '~5 sec',
+                      isActive: true,
+                      activeColor: isOffline ? const Color(0xFFD97706) : primaryColor,
+                    ),
+                    const SizedBox(width: 8),
+                    _ModeFeature(
+                      icon: isOffline ? Icons.wifi_off : Icons.wifi,
+                      label: isOffline ? 'No internet' : 'Internet',
+                      isActive: true,
+                      activeColor: isOffline ? const Color(0xFFD97706) : primaryColor,
+                    ),
+                    const SizedBox(width: 8),
+                    _ModeFeature(
+                      icon: isOffline ? Icons.medical_information : Icons.chat,
+                      label: isOffline ? 'Guidance' : 'Chat',
+                      isActive: true,
+                      activeColor: isOffline ? const Color(0xFFD97706) : primaryColor,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModeFeature extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final Color activeColor;
+
+  const _ModeFeature({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.activeColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        decoration: BoxDecoration(
+          color: activeColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 14, color: activeColor),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: activeColor,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -511,6 +860,7 @@ class _AnalyzeBar extends StatelessWidget {
   final int count;
   final Color primaryColor;
   final bool enabled;
+  final bool isOffline;
   final VoidCallback onTap;
 
   const _AnalyzeBar({
@@ -518,18 +868,21 @@ class _AnalyzeBar extends StatelessWidget {
     required this.primaryColor,
     required this.enabled,
     required this.onTap,
+    this.isOffline = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = isOffline ? const Color(0xFFD97706) : primaryColor;
+
     return SizedBox(
       width: double.infinity,
       height: 54,
       child: ElevatedButton(
         onPressed: enabled ? onTap : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          disabledBackgroundColor: primaryColor.withOpacity(0.40),
+          backgroundColor: bgColor,
+          disabledBackgroundColor: bgColor.withOpacity(0.40),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -538,10 +891,16 @@ class _AnalyzeBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.analytics_rounded, color: Colors.white, size: 20),
+            Icon(
+              isOffline ? Icons.offline_bolt : Icons.analytics_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Text(
-              'Analyze $count ${count == 1 ? 'photo' : 'photos'}',
+              isOffline
+                  ? 'Analyze offline ($count ${count == 1 ? 'photo' : 'photos'})'
+                  : 'Analyze $count ${count == 1 ? 'photo' : 'photos'}',
               style: const TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w900,
@@ -593,7 +952,7 @@ class _TipsCard extends StatelessWidget {
           _TipRow(
             icon: Icons.straighten_rounded,
             title: 'Proper distance',
-            desc: 'Keep about 15–30 cm from the skin.',
+            desc: 'Keep about 15-30 cm from the skin.',
           ),
           SizedBox(height: 12),
           _TipRow(
@@ -757,10 +1116,14 @@ class _ConsultCard extends StatelessWidget {
 }
 
 class _AnalyzingOverlay extends StatelessWidget {
-  const _AnalyzingOverlay();
+  final bool isOffline;
+
+  const _AnalyzingOverlay({this.isOffline = false});
 
   @override
   Widget build(BuildContext context) {
+    final color = isOffline ? const Color(0xFFD97706) : _ScanScreenState.primaryColor;
+
     return Container(
       color: Colors.black.withOpacity(0.45),
       child: Center(
@@ -778,31 +1141,33 @@ class _AnalyzingOverlay extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: _ScanScreenState.primaryColor.withOpacity(0.10),
+                  color: color.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
-                    color: _ScanScreenState.primaryColor,
+                    color: color,
                   ),
                 ),
               ),
               const SizedBox(height: 14),
-              const Text(
-                'Analyzing…',
-                style: TextStyle(
+              Text(
+                isOffline ? 'Analyzing offline...' : 'Analyzing...',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Dr. Epi is reviewing your photo. This may take a moment.',
+              Text(
+                isOffline
+                    ? 'Using on-device AI model. This is quick and works without internet.'
+                    : 'Dr. Epi is reviewing your photo. This may take a moment.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF64748B),

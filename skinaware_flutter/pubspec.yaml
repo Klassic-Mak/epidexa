@@ -29,13 +29,17 @@ dependencies:
   wave_blob: ^1.0.5
   shared_preferences: ^2.5.4
   google_sign_in: ^7.2.0
-  # pytorch_lite: ^1.0.0  # Commented out - using Ollama AI instead
+  # TFLite for offline skin disease detection
+  tflite_flutter: ^0.11.0
+  path_provider: ^2.1.2
   image_picker: ^1.2.1
   image: ^4.0.17
   permission_handler: ^12.0.1
   camera: ^0.11.0+2
   cloudinary_sdk: ^5.0.0+1
   serverpod_auth_client: ^3.2.3
+  flutter_markdown: ^0.7.4+3
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'
@@ -49,9 +53,9 @@ flutter:
 
 
   assets:
+    - .env
     - assets/images/
     - assets/animations/
-    - assets/illustrations/
     - assets/icons/
     - assets/models/
 

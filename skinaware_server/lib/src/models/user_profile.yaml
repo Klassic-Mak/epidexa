@@ -1,0 +1,31 @@
+class: UserProfile
+table: user_profile
+
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue
+  # Skin Assessment
+  skinType: SkinType
+  skinSensitivity: String?  # low, medium, high
+  oiliness: String?  # none, t-zone only, all over
+  # Skin Concerns (stored as comma-separated values)
+  skinConcerns: String?  # acne, wrinkles, dark_spots, redness, etc.
+  primaryConcern: String?
+  # Medical History
+  knownAllergies: String?  # comma-separated
+  currentMedications: String?  # comma-separated
+  skinConditionHistory: String?  # eczema, psoriasis, rosacea, etc.
+  # Lifestyle
+  sunExposure: String?  # minimal, moderate, high
+  waterIntake: String?  # low, moderate, high
+  sleepQuality: String?  # poor, fair, good, excellent
+  stressLevel: String?  # low, moderate, high
+  # Goals
+  skinGoals: String?  # comma-separated: clear_skin, anti_aging, hydration, etc.
+  # Preferences
+  preferredLanguage: String?  # en, vi
+  productBudget: String?  # budget, mid-range, premium
+  routineComplexity: String?  # minimal, moderate, comprehensive
+  # Timestamps
+  createdAt: DateTime
+  updatedAt: DateTime

@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:skinaware_flutter/services/ai/ollama_service.dart';
+import 'package:skinaware_flutter/services/ai/gemini_service.dart';
 import '../../providers/chat_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -607,15 +608,94 @@ class _Bubble extends StatelessWidget {
                         ),
                       ),
                     ),
-                  SelectableText(
-                    message.content,
-                    style: TextStyle(
-                      color: isUser ? Colors.white : const Color(0xFF0F172A),
-                      fontSize: 14.8,
-                      height: 1.45,
-                      fontWeight: FontWeight.w600,
+                  if (isUser)
+                    SelectableText(
+                      message.content,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.8,
+                        height: 1.45,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                  else
+                    MarkdownBody(
+                      data: message.content,
+                      selectable: true,
+                      styleSheet: MarkdownStyleSheet(
+                        p: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 14.8,
+                          height: 1.45,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        strong: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 14.8,
+                          height: 1.45,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        em: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 14.8,
+                          height: 1.45,
+                          fontWeight: FontWeight.w500,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        h1: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        h2: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        h3: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        listBullet: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 14.8,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        code: TextStyle(
+                          color: const Color(0xFF0F172A),
+                          backgroundColor: const Color(0xFFE2E8F0),
+                          fontSize: 13,
+                          fontFamily: 'monospace',
+                        ),
+                        codeblockDecoration: BoxDecoration(
+                          color: const Color(0xFFE2E8F0),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        blockquote: const TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 14.8,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        blockquoteDecoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              color: _ChatScreenState.primaryColor,
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                        blockquotePadding: const EdgeInsets.only(left: 12),
+                        horizontalRuleDecoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: const Color(0xFFE2E8F0),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

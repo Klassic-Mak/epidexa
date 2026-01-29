@@ -5,6 +5,7 @@ import 'package:skinaware_flutter/screens/auths/login_screen.dart';
 import 'package:skinaware_flutter/screens/auths/signup_screen.dart';
 import 'package:skinaware_flutter/screens/check_symtopms_screen/check_sys_screen.dart';
 import 'package:skinaware_flutter/screens/onboarding_screen.dart';
+import 'package:skinaware_flutter/screens/onboarding/profile_onboarding_screen.dart';
 import 'package:skinaware_flutter/screens/profileScreen/profile_screen.dart';
 import 'package:skinaware_flutter/screens/scan_screen.dart' show ScanScreen;
 import 'package:skinaware_flutter/screens/settings_screen.dart';
@@ -12,7 +13,9 @@ import 'package:skinaware_flutter/screens/settings_screen.dart';
 import 'package:skinaware_flutter/screens/skin_camera_screen.dart';
 import 'package:skinaware_flutter/screens/chat/chat_screen.dart';
 import 'package:skinaware_flutter/screens/analysis/analysis_result_screen.dart';
-import 'package:skinaware_flutter/services/ai/ollama_service.dart';
+import 'package:skinaware_flutter/screens/analysis/offline_analysis_result_screen.dart';
+import 'package:skinaware_flutter/services/ai/gemini_service.dart';
+import 'package:skinaware_flutter/services/tflite_inference_service.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
@@ -33,7 +36,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case onBoarding1Route:
       return _RightSlide(
-        OnboardingScreen(),
+        const OnboardingScreen(),
+      );
+
+    case profileOnboardingRoute:
+      return _RightSlide(
+        const ProfileOnboardingScreen(),
       );
     case profileRoute:
       return _RightSlide(ProfileScreen());
@@ -55,6 +63,15 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         AnalysisResultScreen(
           imagePath: args['imagePath'] as String,
           result: args['result'] as AnalysisResult?,
+        ),
+      );
+
+    case offlineAnalysisResultRoute:
+      final args = settings.arguments as Map<String, dynamic>;
+      return _RightSlide(
+        OfflineAnalysisResultScreen(
+          imagePath: args['imagePath'] as String,
+          result: args['result'] as OfflineAnalysisResult,
         ),
       );
 

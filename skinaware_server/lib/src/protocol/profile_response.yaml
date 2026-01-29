@@ -1,0 +1,6 @@
+class: ProfileResponse
+fields:
+  success: bool
+  message: String?
+  error: String?
+  profile: UserProfile?
