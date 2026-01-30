@@ -84,7 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ),
                                 Text(
-                                  " Fill your credentials or continue with social media",
+                                  " Fill your credentials to continue to Epidexa",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 12,

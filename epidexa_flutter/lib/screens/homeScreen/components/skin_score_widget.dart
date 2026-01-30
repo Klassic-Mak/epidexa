@@ -57,11 +57,6 @@ class SkinScoreWidget extends StatelessWidget {
 
           const SizedBox(height: 4),
 
-          Text(
-            "Yesterday, 12 Jun 2023",
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
-          ),
-
           const SizedBox(height: 14),
 
           /// GRID

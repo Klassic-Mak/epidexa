@@ -104,7 +104,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               ),
                             ),
                             Text(
-                              "Fill your details or continue with social media",
+                              " Register your account to continue to Epidexa",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 12,
