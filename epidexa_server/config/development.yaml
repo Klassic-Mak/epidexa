@@ -1,23 +1,9 @@
 
 apiServer:
   port: 8080
-  publicHost: 0.0.0.0
+  publicHost: https://epidexa-498245313775.us-central1.run.app
   publicPort: 8080
-  publicScheme: http
-
-
-insightsServer:
-  port: 8081
-  publicHost: localhost
-  publicPort: 8081
-  publicScheme: http
-
-
-webServer:
-  port: 8082
-  publicHost: localhost
-  publicPort: 8082
-  publicScheme: http
+  publicScheme: https
 
 
 database:
