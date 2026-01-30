@@ -35,4 +35,5 @@ EXPOSE 8080
 
 
 # Define the entrypoint command
-ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role
+ENTRYPOINT ["/bin/sh", "-c", "./server --mode=${SERVERPOD_RUNMODE:-development} --server-id=${SERVERPOD_SERVER_ID:-default} --logging=${SERVERPOD_LOGGING:-normal} --role=${SERVERPOD_ROLE:-monolith}"]
+
