@@ -13,7 +13,9 @@ Before running the project, download and configure the required environment file
 - 🔐 **Password Configuration**  
   [Download password.yaml](https://drive.google.com/file/d/1oLVmdVW-oAC_JeDRsNCC7zie_Rsd8Rzg/view?usp=sharing)
 
-
+- **API Congiguration**
+  - epidexa_flutter/lib/providers/serverpod_provider.dart
+  - For Android, start server, use 10.0.2.2 and others
 
 > Place these files in their respective configuration directories before starting the server.
 
