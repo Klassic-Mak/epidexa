@@ -23,8 +23,9 @@ Before running the project, download and configure the required environment file
 
 The repository is organized into three main components:
 
-### skinAware_server/
+### epidexa_server/
 Backend service built with Serverpod (Dart).
+Hosted Postgres DB
 
 **Contains:**
 - `bin/main.dart` – Server entry point
@@ -34,7 +35,7 @@ Backend service built with Serverpod (Dart).
 
 ---
 
-### skinAware_client/
+### epidexa_client/
 Shared Dart package providing API clients and protocol models.
 
 **Contains:**
@@ -43,7 +44,7 @@ Shared Dart package providing API clients and protocol models.
 
 ---
 
-### skinAware_flutter/
+### epidexa_flutter/
 Flutter mobile application for Android and iOS.
 
 **Contains:**
