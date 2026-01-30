@@ -11,7 +11,6 @@ web/app
 # Directory created by dartdoc
 doc/api/
 
-# Passwords file
-config/passwords.yaml
+
 
 .env
