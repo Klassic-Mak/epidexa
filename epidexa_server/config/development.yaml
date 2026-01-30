@@ -19,5 +19,5 @@ database:
 sessionLogs:
   persistentEnabled: true
   consoleEnabled: true
-  consoleLogFormat: text # Defaults to "json", options are "text" or "json"
+  consoleLogFormat: text 
 
