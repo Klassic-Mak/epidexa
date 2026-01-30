@@ -470,6 +470,90 @@ You are **Dr. Epi**, an expert AI dermatology consultant for the **Epidexa** pla
   }
 
   // ---------------------------
+  // GENERATE SUGGESTED QUESTIONS
+  // ---------------------------
+  Future<List<String>> generateSuggestedQuestions() async {
+    await _ensureInitialized();
+
+    print('📋 [GeminiService] User profile context check:');
+    if (_userProfileContext.isNotEmpty) {
+      print('✅ [GeminiService] User profile context available (${_userProfileContext.length} chars)');
+      print('📝 [GeminiService] User profile content:\n$_userProfileContext');
+    } else {
+      print('⚠️ [GeminiService] No user profile context available');
+    }
+
+    final userInfo = _userProfileContext.isNotEmpty ? _userProfileContext : 'No specific user information available.';
+    
+    final prompt = '''Based on the following user information, generate 4 short suggested questions (each under 60 characters) about skincare that the user might be interested in asking.
+
+$userInfo
+
+Requirements:
+- Each question should relate to the user's skin type, skin concerns, or skincare goals
+- Questions should be practical, helpful, and easy to understand
+- Return EXACTLY 4 questions, one per line
+- NO numbering, bullet points, or special characters
+- NO explanations or additional text''';
+
+    print('🔄 [GeminiService] Sending prompt to Gemini API...');
+    print('📝 [GeminiService] Full prompt being sent:\n$prompt');
+    
+    try {
+      final response = await client.gemini.sendMessage(
+        message: prompt,
+        historyJson: '[]',
+        userProfileContext: '',
+      );
+
+      print('✅ [GeminiService] Received response from Gemini API');
+      print('📝 [GeminiService] Raw response:\n$response');
+
+      final lines = response
+          .split('\n')
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
+          .where((line) => !line.startsWith('#'))
+          .where((line) => !line.startsWith('-'))
+          .where((line) => !RegExp(r'^\d+\.').hasMatch(line))
+          .map((line) {
+            // Remove leading numbers and dots
+            return line.replaceFirst(RegExp(r'^\d+\.\s*'), '');
+          })
+          .where((line) => line.length > 10)
+          .take(4)
+          .toList();
+
+      print('✅ [GeminiService] Parsed ${lines.length} questions from response');
+      for (var i = 0; i < lines.length; i++) {
+        print('   ${i + 1}. ${lines[i]}');
+      }
+
+      if (lines.length < 4) {
+        print('⚠️ [GeminiService] Only got ${lines.length} questions, returning defaults');
+        return getDefaultQuestions();
+      }
+
+      print('✅ [GeminiService] Returning ${lines.length} questions');
+      return lines;
+    } catch (e, stackTrace) {
+      print('❌ [GeminiService] Error: $e');
+      print('❌ [GeminiService] Stack trace: $stackTrace');
+      print('⚠️ [GeminiService] Returning default questions');
+      return getDefaultQuestions();
+    }
+  }
+
+  List<String> getDefaultQuestions() {
+    return [
+      'Help me build a simple skincare routine.',
+      'What should I use for acne-prone oily skin?',
+      'How can I safely fade dark spots?',
+      'What are early warning signs to watch for?',
+    ];
+  }
+
+  // ---------------------------
   // Dispose
   // ---------------------------
   void dispose() {

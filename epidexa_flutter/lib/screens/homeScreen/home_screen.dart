@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skinaware_flutter/constants.dart';
 import 'package:skinaware_flutter/providers/onboarding_data_provider.dart';
+import 'package:skinaware_flutter/providers/streak_provider.dart';
 import 'package:skinaware_flutter/providers/userProvider.dart';
 import 'package:skinaware_flutter/routes/route_constants.dart';
 import 'package:skinaware_flutter/screens/homeScreen/components/skin_score_widget.dart';
@@ -112,7 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 16),
-                    const WeeklyStreakCard(streakDays: 4),
+                    const WeeklyStreakCard(),
                     const SizedBox(height: 16),
 
                     // User's skin goals from profile
@@ -788,13 +789,14 @@ class TitleWithNavText extends StatelessWidget {
   }
 }
 
-class WeeklyStreakCard extends StatelessWidget {
-  const WeeklyStreakCard({super.key, required this.streakDays});
-
-  final int streakDays;
+class WeeklyStreakCard extends ConsumerWidget {
+  const WeeklyStreakCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final streakState = ref.watch(streakProvider);
+    final streakDays = streakState.currentStreak;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -845,14 +847,21 @@ class WeeklyStreakCard extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: streakState.hasCheckedInToday
+                ? null
+                : () async {
+                    await ref.read(streakProvider.notifier).checkIn();
+                  },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.white.withOpacity(0.12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
-            child: const Text('View', style: TextStyle(fontWeight: FontWeight.w800)),
+            child: Text(
+              streakState.hasCheckedInToday ? 'Done ✓' : 'Check In',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
           ),
         ],
       ),

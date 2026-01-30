@@ -233,6 +233,32 @@ class ChatNotifier extends Notifier<ChatState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
+
+  Future<List<String>> generateSuggestedQuestions() async {
+    print('🔄 [ChatProvider] generateSuggestedQuestions called');
+    print('🔄 [ChatProvider] isInitialized: ${state.isInitialized}');
+    
+    if (!state.isInitialized) {
+      print('⚠️ [ChatProvider] Not initialized, initializing...');
+      await initialize();
+      if (!state.isInitialized) {
+        print('❌ [ChatProvider] Initialization failed, returning default questions');
+        return _geminiService.getDefaultQuestions();
+      }
+      print('✅ [ChatProvider] Initialization successful');
+    }
+
+    try {
+      print('🔄 [ChatProvider] Calling geminiService.generateSuggestedQuestions...');
+      final questions = await _geminiService.generateSuggestedQuestions();
+      print('✅ [ChatProvider] Got ${questions.length} questions from service');
+      return questions;
+    } catch (e, stackTrace) {
+      print('❌ [ChatProvider] Error: $e');
+      print('❌ [ChatProvider] Stack trace: $stackTrace');
+      return _geminiService.getDefaultQuestions();
+    }
+  }
 }
 
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(() {

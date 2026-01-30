@@ -249,14 +249,69 @@ class _Banner extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
+class _EmptyState extends ConsumerStatefulWidget {
   final void Function(String) onTap;
 
   const _EmptyState({required this.onTap});
 
   @override
+  ConsumerState<_EmptyState> createState() => _EmptyStateState();
+}
+
+class _EmptyStateState extends ConsumerState<_EmptyState> {
+  List<String>? _suggestedQuestions;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Delay loading to avoid modifying provider during widget build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSuggestedQuestions();
+    });
+  }
+
+  Future<void> _loadSuggestedQuestions() async {
+    print('🔄 [SuggestedQuestions] Starting to load suggested questions...');
+    try {
+      print('🔄 [SuggestedQuestions] Calling generateSuggestedQuestions...');
+      final questions = await ref.read(chatProvider.notifier).generateSuggestedQuestions();
+      print('✅ [SuggestedQuestions] Received ${questions.length} questions:');
+      for (var i = 0; i < questions.length; i++) {
+        print('   ${i + 1}. ${questions[i]}');
+      }
+      
+      if (mounted) {
+        setState(() {
+          _suggestedQuestions = questions;
+          _isLoading = false;
+        });
+        print('✅ [SuggestedQuestions] State updated successfully');
+      } else {
+        print('⚠️ [SuggestedQuestions] Widget not mounted, skipping state update');
+      }
+    } catch (e, stackTrace) {
+      print('❌ [SuggestedQuestions] Error loading questions: $e');
+      print('❌ [SuggestedQuestions] Stack trace: $stackTrace');
+      
+      if (mounted) {
+        setState(() {
+          _suggestedQuestions = [
+            'Help me build a simple skincare routine.',
+            'What should I use for acne-prone oily skin?',
+            'How can I safely fade dark spots?',
+            'What are early warning signs to watch for?',
+          ];
+          _isLoading = false;
+        });
+        print('✅ [SuggestedQuestions] Fallback to default questions');
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final items = [
+    final items = _suggestedQuestions ?? [
       'Help me build a simple skincare routine.',
       'What should I use for acne-prone oily skin?',
       'How can I safely fade dark spots?',
@@ -286,36 +341,47 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: items
-                .map(
-                  (t) => InkWell(
-                    onTap: () => onTap(t),
-                    borderRadius: BorderRadius.circular(18),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: Text(
-                        t,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+          if (_isLoading)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: CircularProgressIndicator(
+                  color: _ChatScreenState.primaryColor,
+                  strokeWidth: 2,
+                ),
+              ),
+            )
+          else
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: items
+                  .map(
+                    (t) => InkWell(
+                      onTap: () => widget.onTap(t),
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Text(
+                          t,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0F172A),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                )
-                .toList(),
-          ),
+                  )
+                  .toList(),
+            ),
         ],
       ),
     );
