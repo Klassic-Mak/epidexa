@@ -7,11 +7,11 @@ apiServer:
 
 
 database:
-  host: skinaware-klassicmak-1668.h.aivencloud.com
-  port: 23192
-  name: defaultdb
-  password: AVNS_yufajU5z0j0F0LVsTQT
-  user: avnadmin
+  host: ep-snowy-sun-ahssim1d-pooler.c-3.us-east-1.aws.neon.tech
+  port: 5432
+  name: neondb
+  password: npg_ixTzNGg3qXJ0
+  user: neondb_owner
   requireSsl: true
   maxConnectionCount: 10
 

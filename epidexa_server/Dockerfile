@@ -32,8 +32,7 @@ COPY --from=build /app/lib/src/generated/protocol.yaml lib/src/generated/protoco
 
 # Expose ports
 EXPOSE 8080
-EXPOSE 8081
-EXPOSE 8082
+
 
 # Define the entrypoint command
 ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role
