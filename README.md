@@ -1,8 +1,12 @@
+
 # Epidexa – AI-Based Skin Detection App
 
 Epidexa is an AI-powered skin analysis platform designed to help users identify common skin conditions and receive basic skin-care guidance through a secure and easy-to-use mobile application.
 
 The system consists of a Dart backend server, a shared client package, and a Flutter mobile application.
+<img width="1621" height="978" alt="original" src="https://github.com/user-attachments/assets/6a65f1c7-cb18-4369-97d6-2533c82d00b3" />
+<img width="1748" height="984" alt="original (1)" src="https://github.com/user-attachments/assets/07fa7270-24dd-4317-b34f-62109be8ef7f" />
+
 
 ---
 
